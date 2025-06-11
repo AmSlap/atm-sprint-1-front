@@ -1,0 +1,59 @@
+<div class="info-container">
+  <h2>ATM Information</h2>
+
+  <div class="info-card">
+    <h3>Basic Information</h3>
+    <div class="info-grid">
+      <div class="info-item">
+        <span class="label">ATM ID:</span>
+        <span class="value">{{ registryInfo.atmId }}</span>
+      </div>
+      <div class="info-item">
+        <span class="label">Serial Number:</span>
+        <span class="value">{{ registryInfo.serialNumber }}</span>
+      </div>
+      <div class="info-item">
+        <span class="label">Brand:</span>
+        <span class="value">{{ registryInfo.brand }}</span>
+      </div>
+      <div class="info-item">
+        <span class="label">Model:</span>
+        <span class="value">{{ registryInfo.model }}</span>
+      </div>
+      <div class="info-item">
+        <span class="label">Label:</span>
+        <span class="value">{{ registryInfo.label || '-' }}</span>
+      </div>
+      <div class="info-item">
+        <span class="label">IP Address:</span>
+        <span class="value">{{ registryInfo.ipAddress || '-' }}</span>
+      </div>
+      <div class="info-item">
+        <span class="label">Region:</span>
+        <span class="value">{{ registryInfo.region || '-' }}</span>
+      </div>
+      <div class="info-item">
+        <span class="label">Agency:</span>
+        <span class="value">{{ registryInfo.agencyName || registryInfo.agencyCode }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="info-card">
+    <h3>Location</h3>
+    <div class="info-item">
+      <span class="label">Address:</span>
+      <span class="value">{{ registryInfo.locationAddress || '-' }}</span>
+    </div>
+    <div class="info-item">
+      <span class="label">Coordinates:</span>
+      <span class="value">{{ registryInfo.locationLatitude || '-' }}, {{ registryInfo.locationLongitude || '-' }}</span>
+    </div>
+
+    <div class="map-container" *ngIf="registryInfo.locationLatitude && registryInfo.locationLongitude">
+      <google-map [options]="mapOptions" [center]="markerPosition" width="100%" height="300px">
+        <map-marker [position]="markerPosition" [title]="registryInfo.label || registryInfo.atmId"></map-marker>
+      </google-map>
+    </div>
+  </div>
+</div>

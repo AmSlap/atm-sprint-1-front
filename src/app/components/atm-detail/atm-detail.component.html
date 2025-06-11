@@ -1,0 +1,91 @@
+<div class="atm-detail-container">
+  <div class="atm-detail-header">
+    <button class="back-button" routerLink="/">← Back to Dashboard</button>
+    <h1>ATM Details: {{ atmId }}</h1>
+  </div>
+
+  <div *ngIf="loading" class="loading">
+    <span>Loading ATM details...</span>
+  </div>
+
+  <div *ngIf="error" class="error-message">
+    <p>Failed to load ATM details. Please try again later.</p>
+    <button (click)="loadAtmDetails()">Retry</button>
+  </div>
+
+  <div class="atm-detail-content" *ngIf="!loading && !error && atmDetails">
+    <div class="atm-overview">
+      <div class="atm-status-card">
+        <div class="status-header">
+          <div class="status-indicator" [style.background-color]="getStatusColor()"></div>
+          <h2>Status: {{ atmDetails.status.operationalState }}</h2>
+        </div>
+        <div class="status-details">
+          <p>Maintenance Mode: {{ atmDetails.status.maintenanceMode ? 'Yes' : 'No' }}</p>
+          <p>Last Connection: {{ atmDetails.status.lastSuccessfulConnection | date:'medium' }}</p>
+          <p>Last Transaction: {{ atmDetails.status.lastSuccessfulTransaction | date:'medium' }}</p>
+          <p>Health: {{ atmDetails.configuration.overallHealth }}</p>
+          <p *ngIf="atmDetails.counters.lowCashFlag" class="low-cash-warning">Low Cash Warning!</p>
+        </div>
+      </div>
+
+      <div class="view-selector">
+        <button
+          class="view-button"
+          [class.active]="activeView === 'overview'"
+          (click)="setActiveView('overview')">
+          Overview
+        </button>
+        <button
+          class="view-button"
+          [class.active]="activeView === 'configuration'"
+          (click)="setActiveView('configuration')">
+          Configuration
+        </button>
+        <button
+          class="view-button"
+          [class.active]="activeView === 'counters'"
+          (click)="setActiveView('counters')">
+          Counters
+        </button>
+        <button
+          class="view-button"
+          [class.active]="activeView === 'info'"
+          (click)="setActiveView('info')">
+          Info
+        </button>
+      </div>
+
+      <div [ngSwitch]="activeView">
+        <div *ngSwitchCase="'overview'" class="overview-section">
+          <div class="overview-card">
+            <h3>ATM Summary</h3>
+            <p>ID: {{ atmDetails.atmId }}</p>
+            <p *ngIf="atmDetails.registryInfo">Label: {{ atmDetails.registryInfo.label || 'N/A' }}</p>
+            <p *ngIf="atmDetails.registryInfo">Brand/Model: {{ atmDetails.registryInfo.brand }} {{ atmDetails.registryInfo.model }}</p>
+            <p>Operational State: {{ atmDetails.status.operationalState }}</p>
+            <p>Overall Health: {{ atmDetails.configuration.overallHealth }}</p>
+            <p>Total Cash Available: {{ atmDetails.counters.totalCashAvailable | currency }}</p>
+            <p>Reject Bin: {{ atmDetails.counters.rejectBinPercentageFull }}% full</p>
+            <p>Last Update: {{ atmDetails.status.lastUpdateTimestamp | date:'medium' }}</p>
+          </div>
+        </div>
+
+        <div *ngSwitchCase="'configuration'">
+          <app-atm-configuration [configuration]="atmDetails.configuration"></app-atm-configuration>
+        </div>
+
+        <div *ngSwitchCase="'counters'">
+          <app-atm-counters [counters]="atmDetails.counters"></app-atm-counters>
+        </div>
+
+        <div *ngSwitchCase="'info'">
+          <app-atm-info *ngIf="atmDetails.registryInfo" [registryInfo]="atmDetails.registryInfo"></app-atm-info>
+          <div *ngIf="!atmDetails.registryInfo" class="no-data-message">
+            <p>Registry information not available for this ATM.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

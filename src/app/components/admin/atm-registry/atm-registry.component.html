@@ -1,0 +1,155 @@
+<div class="admin-container">
+  <div class="admin-header">
+    <h1>ATM Registry Management</h1>
+    <button class="back-button" routerLink="/">← Back to Dashboard</button>
+  </div>
+
+  <div *ngIf="successMessage" class="alert success">
+    {{ successMessage }}
+  </div>
+
+  <div *ngIf="errorMessage" class="alert error">
+    {{ errorMessage }}
+  </div>
+
+  <div class="admin-content">
+    <div class="form-panel">
+      <h2>{{ editMode ? 'Edit ATM' : 'Add New ATM' }}</h2>
+
+      <form [formGroup]="atmForm" (ngSubmit)="onSubmit()">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="atmId">ATM ID *</label>
+            <input id="atmId" type="text" formControlName="atmId" [class.error]="atmForm.get('atmId')?.invalid && atmForm.get('atmId')?.touched">
+            <div class="error-message" *ngIf="atmForm.get('atmId')?.invalid && atmForm.get('atmId')?.touched">
+              ATM ID is required
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="serialNumber">Serial Number *</label>
+            <input id="serialNumber" type="text" formControlName="serialNumber" [class.error]="atmForm.get('serialNumber')?.invalid && atmForm.get('serialNumber')?.touched">
+            <div class="error-message" *ngIf="atmForm.get('serialNumber')?.invalid && atmForm.get('serialNumber')?.touched">
+              Serial Number is required
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="brand">Brand *</label>
+            <input id="brand" type="text" formControlName="brand" [class.error]="atmForm.get('brand')?.invalid && atmForm.get('brand')?.touched">
+            <div class="error-message" *ngIf="atmForm.get('brand')?.invalid && atmForm.get('brand')?.touched">
+              Brand is required
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="model">Model *</label>
+            <input id="model" type="text" formControlName="model" [class.error]="atmForm.get('model')?.invalid && atmForm.get('model')?.touched">
+            <div class="error-message" *ngIf="atmForm.get('model')?.invalid && atmForm.get('model')?.touched">
+              Model is required
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="label">Label</label>
+            <input id="label" type="text" formControlName="label">
+          </div>
+
+          <div class="form-group">
+            <label for="ipAddress">IP Address</label>
+            <input id="ipAddress" type="text" formControlName="ipAddress" [class.error]="atmForm.get('ipAddress')?.invalid && atmForm.get('ipAddress')?.touched">
+            <div class="error-message" *ngIf="atmForm.get('ipAddress')?.invalid && atmForm.get('ipAddress')?.touched">
+              Invalid IP address format
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="region">Region</label>
+            <input id="region" type="text" formControlName="region">
+          </div>
+
+          <div class="form-group">
+            <label for="agencyCode">Agency *</label>
+            <select id="agencyCode" formControlName="agencyCode" [class.error]="atmForm.get('agencyCode')?.invalid && atmForm.get('agencyCode')?.touched">
+              <option value="">Select Agency</option>
+              <option *ngFor="let agency of agencies" [value]="agency.agencyCode">{{ agency.agencyName }}</option>
+            </select>
+            <div class="error-message" *ngIf="atmForm.get('agencyCode')?.invalid && atmForm.get('agencyCode')?.touched">
+              Agency is required
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group full-width">
+          <label for="locationAddress">Location Address</label>
+          <input id="locationAddress" type="text" formControlName="locationAddress">
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="locationLatitude">Latitude</label>
+            <input id="locationLatitude" type="number" step="0.000001" formControlName="locationLatitude" [class.error]="atmForm.get('locationLatitude')?.invalid && atmForm.get('locationLatitude')?.touched">
+            <div class="error-message" *ngIf="atmForm.get('locationLatitude')?.invalid && atmForm.get('locationLatitude')?.touched">
+              Latitude must be between -90 and 90
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="locationLongitude">Longitude</label>
+            <input id="locationLongitude" type="number" step="0.000001" formControlName="locationLongitude" [class.error]="atmForm.get('locationLongitude')?.invalid && atmForm.get('locationLongitude')?.touched">
+            <div class="error-message" *ngIf="atmForm.get('locationLongitude')?.invalid && atmForm.get('locationLongitude')?.touched">
+              Longitude must be between -180 and 180
+            </div>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="submit-button" [disabled]="atmForm.invalid">{{ editMode ? 'Update ATM' : 'Add ATM' }}</button>
+          <button type="button" class="cancel-button" (click)="resetForm()">Cancel</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="data-panel">
+      <h2>ATM List</h2>
+
+      <div *ngIf="loading" class="loading">
+        <span>Loading ATMs...</span>
+      </div>
+
+      <div *ngIf="error" class="error-message">
+        <p>Failed to load ATMs. Please try again later.</p>
+        <button (click)="loadAtms()">Retry</button>
+      </div>
+
+      <table *ngIf="!loading && !error" class="data-table">
+        <thead>
+        <tr>
+          <th>ATM ID</th>
+          <th>Label</th>
+          <th>Brand/Model</th>
+          <th>Region</th>
+          <th>Agency</th>
+          <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let atm of atms">
+          <td>{{ atm.atmId }}</td>
+          <td>{{ atm.label || '-' }}</td>
+          <td>{{ atm.brand }} {{ atm.model }}</td>
+          <td>{{ atm.region || '-' }}</td>
+          <td>{{ atm.agencyName || atm.agencyCode }}</td>
+          <td class="actions">
+            <button class="action-button edit" (click)="editAtm(atm)">Edit</button>
+            <button class="action-button delete" (click)="deleteAtm(atm.atmId)">Delete</button>
+          </td>
+        </tr>
+        <tr *ngIf="atms.length === 0">
+          <td colspan="6" class="no-data">No ATMs found</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

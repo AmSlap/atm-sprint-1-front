@@ -1,0 +1,94 @@
+<div class="atm-dashboard-container">
+  <div class="dashboard-header">
+    <h1>ATM Monitoring Dashboard</h1>
+
+    <!-- Add the admin link here -->
+    <div class="admin-link" *ngIf="!loading && !error">
+      <a routerLink="/admin/registry" class="admin-button">ATM Registry Management</a>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="loading">
+    <span>Loading ATMs...</span>
+  </div>
+
+  <div *ngIf="error" class="error-message">
+    <p>Failed to load ATMs. Please try again later.</p>
+    <button (click)="loadAtms()">Retry</button>
+  </div>
+
+  <div class="filter-panel" *ngIf="!loading && !error">
+    <div class="filter-row">
+      <div class="filter-group">
+        <label for="search">Search:</label>
+        <input type="text" id="search" [(ngModel)]="searchTerm" (input)="applyFilters()" placeholder="Search ATMs...">
+      </div>
+
+      <div class="filter-group">
+        <label for="status">Status:</label>
+        <select id="status" [(ngModel)]="selectedStatus" (change)="applyFilters()">
+          <option value="all">All Statuses</option>
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+          <option value="maintenance">Maintenance</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="health">Health:</label>
+        <select id="health" [(ngModel)]="selectedHealth" (change)="applyFilters()">
+          <option value="all">All Health</option>
+          <option value="ok">OK</option>
+          <option value="warning">Warning</option>
+          <option value="error">Error</option>
+        </select>
+      </div>
+
+      <div class="filter-group" *ngIf="regions.length > 0">
+        <label for="region">Region:</label>
+        <select id="region" [(ngModel)]="selectedRegion" (change)="applyFilters()">
+          <option value="all">All Regions</option>
+          <option *ngFor="let region of regions" [value]="region">{{ region }}</option>
+        </select>
+      </div>
+
+      <div class="filter-group" *ngIf="agencies.length > 0">
+        <label for="agency">Agency:</label>
+        <select id="agency" [(ngModel)]="selectedAgency" (change)="applyFilters()">
+          <option value="all">All Agencies</option>
+          <option *ngFor="let agency of agencies" [value]="agency.agencyCode">{{ agency.name }}</option>
+        </select>
+      </div>
+
+      <button class="reset-button" (click)="resetFilters()">Reset Filters</button>
+    </div>
+
+    <div class="filter-summary">
+      <span>Showing {{ filteredAtms.length }} of {{ atms.length }} ATMs</span>
+    </div>
+  </div>
+
+  <div class="atm-grid" *ngIf="!loading && !error">
+    <div class="atm-card" *ngFor="let atm of filteredAtms" [routerLink]="['/atm', atm.atmId]">
+      <div class="atm-status-indicator" [style.background-color]="getStatusColor(atm)"></div>
+      <div class="atm-info">
+        <div class="atm-header">
+          <h3>{{ atm.atmId }}</h3>
+          <span class="atm-label" *ngIf="atm.label">{{ atm.label }}</span>
+        </div>
+
+        <div class="atm-status">
+          <p>Status: {{ atm.operationalState }}</p>
+          <p *ngIf="atm.lowCashFlag" class="low-cash-warning">Low Cash!</p>
+        </div>
+
+        <div class="atm-details" *ngIf="atm.brand || atm.model || atm.region">
+          <p *ngIf="atm.brand && atm.model">{{ atm.brand }} {{ atm.model }}</p>
+          <p *ngIf="atm.region">Region: {{ atm.region }}</p>
+        </div>
+
+        <p class="last-updated">Last update: {{ atm.lastUpdateTimestamp | date:'medium' }}</p>
+      </div>
+    </div>
+  </div>
+</div>

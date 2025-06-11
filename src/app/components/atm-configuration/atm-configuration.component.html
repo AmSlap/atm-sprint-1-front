@@ -1,0 +1,31 @@
+<div class="configuration-container">
+  <h2>ATM Configuration</h2>
+
+  <div class="configuration-card">
+    <h3>Basic Information</h3>
+    <div class="info-item">
+      <span class="label">ATM ID:</span>
+      <span class="value">{{ configuration.atmId }}</span>
+    </div>
+    <div class="info-item">
+      <span class="label">Overall Health:</span>
+      <span class="value">{{ configuration.overallHealth }}</span>
+    </div>
+    <div class="info-item">
+      <span class="label">Last Update:</span>
+      <span class="value">{{ configuration.lastUpdateTimestamp | date:'medium' }}</span>
+    </div>
+  </div>
+
+  <div class="configuration-card">
+    <h3>Peripherals</h3>
+    <div *ngIf="getPeripheralKeys().length === 0" class="no-peripherals">
+      No peripheral information available
+    </div>
+
+    <div *ngFor="let key of getPeripheralKeys()" class="peripheral-item">
+      <h4>{{ key }}</h4>
+      <pre class="peripheral-value">{{ getPeripheralValue(key) }}</pre>
+    </div>
+  </div>
+</div>
