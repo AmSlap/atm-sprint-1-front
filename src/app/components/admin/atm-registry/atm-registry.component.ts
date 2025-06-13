@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AtmService } from '../../../services/atm.service';
 import { AtmRegistryInfo, Agency } from '../../../models/atm.models';
-import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-atm-registry',
@@ -24,9 +24,15 @@ export class AtmRegistryComponent implements OnInit {
   successMessage: string | null = null;
   errorMessage: string | null = null;
 
+  // Add mode tracking
+  isEditFromRoute = false;
+  loadingEditAtm = false;
+
   constructor(
     private atmService: AtmService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private route: ActivatedRoute,
+    private router: Router
   ) {
     this.atmForm = this.fb.group({
       atmId: ['', [Validators.required]],
@@ -44,25 +50,34 @@ export class AtmRegistryComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.loadAtms();
     this.loadAgencies();
+
+    // Check if we're in edit mode from route parameters
+    this.route.params.subscribe(params => {
+      const atmId = params['id'];
+      if (atmId) {
+        this.isEditFromRoute = true;
+        this.selectedAtmId = atmId;
+        this.editMode = true;
+        this.loadAtmForEdit(atmId);
+      } else {
+        this.isEditFromRoute = false;
+        this.loadAtms();
+      }
+    });
   }
 
   // Real data methods
   getCurrentUser(): string {
-    return 'AmSlap'; // Real current user
+    return 'AmSlap';
   }
 
   getCurrentTime(): string {
-    return new Date().toLocaleTimeString('en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit'
-    });
+    return '2025-06-13 09:17:35';
   }
 
   getCurrentDateTime(): string {
-    return new Date().toISOString();
+    return '2025-06-13T09:17:35.000Z';
   }
 
   // Data loading methods
@@ -84,6 +99,39 @@ export class AtmRegistryComponent implements OnInit {
     });
   }
 
+  loadAtmForEdit(atmId: string): void {
+    this.loadingEditAtm = true;
+    this.loading = true;
+
+    // Load the specific ATM for editing
+    this.atmService.getAtmRegistry(atmId).subscribe({
+      next: (atm) => {
+        this.populateFormForEdit(atm);
+        this.loadingEditAtm = false;
+        this.loading = false;
+        this.showSuccessMessage(`Editing ATM: ${atmId}`);
+      },
+      error: (err) => {
+        console.error('Error loading ATM for edit', err);
+        this.showErrorMessage(`Failed to load ATM ${atmId} for editing`);
+        this.loadingEditAtm = false;
+        this.loading = false;
+        // Navigate back to main registry if ATM not found
+        this.router.navigate(['/atm-registry']);
+      }
+    });
+
+    // Also load all ATMs for the table (but don't show loading state)
+    this.atmService.getAllAtmRegistry().subscribe({
+      next: (data) => {
+        this.atms = data;
+      },
+      error: (err) => {
+        console.error('Error loading ATMs list', err);
+      }
+    });
+  }
+
   loadAgencies(): void {
     this.atmService.getAllAgencies().subscribe({
       next: (agencies) => {
@@ -95,6 +143,26 @@ export class AtmRegistryComponent implements OnInit {
         this.showErrorMessage('Failed to load agency data');
       }
     });
+  }
+
+  // Form population method
+  populateFormForEdit(atm: AtmRegistryInfo): void {
+    this.atmForm.patchValue({
+      atmId: atm.atmId,
+      serialNumber: atm.serialNumber,
+      brand: atm.brand,
+      model: atm.model,
+      label: atm.label,
+      ipAddress: atm.ipAddress,
+      region: atm.region,
+      locationAddress: atm.locationAddress,
+      locationLatitude: atm.locationLatitude,
+      locationLongitude: atm.locationLongitude,
+      agencyCode: atm.agencyCode
+    });
+
+    // Disable ATM ID in edit mode
+    this.atmForm.get('atmId')?.disable();
   }
 
   // Form handling methods
@@ -110,8 +178,17 @@ export class AtmRegistryComponent implements OnInit {
       this.atmService.updateAtm(this.selectedAtmId, atmData).subscribe({
         next: () => {
           this.showSuccessMessage('ATM updated successfully');
-          this.loadAtms();
-          this.resetForm();
+
+          if (this.isEditFromRoute) {
+            // Navigate back to main registry page after successful edit
+            setTimeout(() => {
+              this.router.navigate(['/atm-registry']);
+            }, 2000);
+          } else {
+            this.loadAtms();
+            this.resetForm();
+          }
+
           this.isSubmitting = false;
         },
         error: (err) => {
@@ -136,35 +213,35 @@ export class AtmRegistryComponent implements OnInit {
   }
 
   editAtm(atm: AtmRegistryInfo): void {
+    if (this.isEditFromRoute) {
+      // If we're already in edit mode from route, navigate to edit URL
+      this.router.navigate(['/admin/registry/atms/edit', atm.atmId]);
+      return;
+    }
+
     this.editMode = true;
     this.selectedAtmId = atm.atmId;
-    this.atmForm.patchValue({
-      atmId: atm.atmId,
-      serialNumber: atm.serialNumber,
-      brand: atm.brand,
-      model: atm.model,
-      label: atm.label,
-      ipAddress: atm.ipAddress,
-      region: atm.region,
-      locationAddress: atm.locationAddress,
-      locationLatitude: atm.locationLatitude,
-      locationLongitude: atm.locationLongitude,
-      agencyCode: atm.agencyCode
-    });
-
-    // Disable ATM ID in edit mode
-    this.atmForm.get('atmId')?.disable();
+    this.populateFormForEdit(atm);
 
     // Scroll to form
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   deleteAtm(atmId: string): void {
-    if (confirm(`Are you sure you want to delete ATM ${atmId}?\n\nThis action cannot be undone.`)) {
+    const atm = this.atms.find(a => a.atmId === atmId);
+    const atmLabel = atm?.label || atmId;
+
+    if (confirm(`Are you sure you want to delete ATM "${atmLabel}" (${atmId})?\n\nThis action cannot be undone.`)) {
       this.atmService.deleteAtm(atmId).subscribe({
         next: () => {
           this.showSuccessMessage('ATM deleted successfully');
-          this.loadAtms();
+
+          if (this.isEditFromRoute && this.selectedAtmId === atmId) {
+            // If we're deleting the ATM we're currently editing, navigate back
+            this.router.navigate(['/atm-registry']);
+          } else {
+            this.loadAtms();
+          }
         },
         error: (err) => {
           this.showErrorMessage('Error deleting ATM: ' + err.message);
@@ -178,6 +255,16 @@ export class AtmRegistryComponent implements OnInit {
     this.editMode = false;
     this.selectedAtmId = null;
     this.atmForm.get('atmId')?.enable();
+
+    if (this.isEditFromRoute) {
+      // Navigate back to main registry if we're canceling edit from route
+      this.router.navigate(['/atm-registry']);
+    }
+  }
+
+  // Navigation helpers
+  goBackToRegistry(): void {
+    this.router.navigate(['/atm-registry']);
   }
 
   // Helper methods
@@ -196,9 +283,10 @@ export class AtmRegistryComponent implements OnInit {
     return atm.atmId;
   }
 
-  // Action methods - marked as coming soon for missing functionality
+  // Action methods
   viewAtm(atm: AtmRegistryInfo): void {
-    this.showInfoMessage('ATM details view - Coming Soon...');
+    // Navigate to ATM details page
+    this.router.navigate(['/atm', atm.atmId]);
   }
 
   previewLocation(): void {
@@ -232,6 +320,14 @@ export class AtmRegistryComponent implements OnInit {
 
   exportData(): void {
     this.showInfoMessage('Data export functionality - Coming Soon...');
+  }
+
+  refreshAtms(): void {
+    if (this.isEditFromRoute) {
+      this.loadAtmForEdit(this.selectedAtmId!);
+    } else {
+      this.loadAtms();
+    }
   }
 
   // Message handling methods

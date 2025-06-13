@@ -21,7 +21,7 @@
         ATM Details: {{ atmId }}
       </h1>
       <div class="header-subtitle" *ngIf="atmDetails && atmDetails.registryInfo">
-        <span>{{ atmDetails.registryInfo?.label || 'No Label' }}</span>
+        <span>{{ atmDetails.registryInfo.label || 'No Label' }}</span>
         <span class="separator">•</span>
         <span>{{ atmDetails.registryInfo.agencyName || 'No Agency' }}</span>
       </div>

@@ -240,13 +240,13 @@ export class AtmDashboardComponent implements OnInit, OnDestroy {
   filterByHealthStatus(status: 'healthy' | 'warning' | 'error'): void {
     switch (status) {
       case 'healthy':
-        this.selectedHealth = 'ok';
+        this.selectedHealth = 'green';
         break;
       case 'warning':
-        this.selectedHealth = 'warning';
+        this.selectedHealth = 'orange';
         break;
       case 'error':
-        this.selectedHealth = 'error';
+        this.selectedHealth = 'red';
         break;
     }
     this.applyFilters();

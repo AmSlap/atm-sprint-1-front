@@ -1,11 +1,11 @@
-<div class="admin-container">
+<div class="atm-registry-container">
   <!-- Enhanced Header Section -->
-  <div class="admin-header">
+  <div class="registry-header">
     <div class="header-content">
       <div class="header-icon">🏛️</div>
       <div class="header-text">
         <h1>ATM Registry Management</h1>
-        <p class="header-subtitle">Manage ATM registrations, locations, and configurations</p>
+        <p class="header-subtitle">Register and manage ATM devices and configurations</p>
       </div>
     </div>
     <div class="header-actions">
@@ -14,9 +14,9 @@
         <div class="update-time">{{ getCurrentTime() }}</div>
         <div class="update-user">by {{ getCurrentUser() }}</div>
       </div>
-      <button class="btn btn-outline" routerLink="/">
-        <span class="btn-icon">⬅️</span>
-        Back to Dashboard
+      <button class="btn btn-outline" (click)="refreshAtms()" [disabled]="loading">
+        <span class="btn-icon" [ngClass]="{'spinning': loading}">🔄</span>
+        Refresh
       </button>
     </div>
   </div>
@@ -36,7 +36,7 @@
     </div>
   </div>
 
-  <div class="admin-content">
+  <div class="registry-content">
     <!-- Enhanced Form Panel -->
     <div class="form-panel">
       <div class="panel-header">
@@ -52,11 +52,36 @@
         </div>
       </div>
 
-      <form [formGroup]="atmForm" (ngSubmit)="onSubmit()" class="enhanced-form">
+      <!-- Edit Mode Indicator -->
+      <div class="edit-mode-indicator" *ngIf="isEditFromRoute">
+        <div class="edit-banner">
+          <div class="edit-info">
+            <span class="edit-icon">✏️</span>
+            <div class="edit-text">
+              <div class="edit-title">Editing ATM: {{ selectedAtmId }}</div>
+              <div class="edit-subtitle">Make your changes and click "Update ATM" to save</div>
+            </div>
+          </div>
+          <button class="btn btn-outline btn-sm" (click)="goBackToRegistry()">
+            <span class="btn-icon">🔙</span>
+            Back to Registry
+          </button>
+        </div>
+      </div>
+
+      <!-- Loading state for edit mode -->
+      <div *ngIf="loadingEditAtm" class="loading-edit">
+        <div class="loading-content">
+          <div class="loading-spinner"></div>
+          <div class="loading-text">Loading ATM data for editing...</div>
+        </div>
+      </div>
+
+      <form [formGroup]="atmForm" (ngSubmit)="onSubmit()" class="enhanced-form" *ngIf="!loadingEditAtm">
         <!-- Basic Information Section -->
         <div class="form-section">
           <div class="section-header">
-            <span class="section-icon">🆔</span>
+            <span class="section-icon">🏛️</span>
             <h3>Basic Information</h3>
           </div>
 
@@ -81,31 +106,12 @@
                 type="text"
                 formControlName="serialNumber"
                 [class.error]="atmForm.get('serialNumber')?.invalid && atmForm.get('serialNumber')?.touched"
-                placeholder="Enter device serial number">
+                placeholder="Enter serial number">
               <div class="error-message" *ngIf="atmForm.get('serialNumber')?.invalid && atmForm.get('serialNumber')?.touched">
                 Serial Number is required
               </div>
             </div>
 
-            <div class="form-group">
-              <label for="label">Display Label</label>
-              <input
-                id="label"
-                type="text"
-                formControlName="label"
-                placeholder="Optional display name">
-            </div>
-          </div>
-        </div>
-
-        <!-- Device Information Section -->
-        <div class="form-section">
-          <div class="section-header">
-            <span class="section-icon">🏭</span>
-            <h3>Device Information</h3>
-          </div>
-
-          <div class="form-grid">
             <div class="form-group">
               <label for="brand">Brand *</label>
               <input
@@ -113,7 +119,7 @@
                 type="text"
                 formControlName="brand"
                 [class.error]="atmForm.get('brand')?.invalid && atmForm.get('brand')?.touched"
-                placeholder="e.g., NCR, Diebold, Wincor">
+                placeholder="e.g., NCR, Diebold">
               <div class="error-message" *ngIf="atmForm.get('brand')?.invalid && atmForm.get('brand')?.touched">
                 Brand is required
               </div>
@@ -126,12 +132,47 @@
                 type="text"
                 formControlName="model"
                 [class.error]="atmForm.get('model')?.invalid && atmForm.get('model')?.touched"
-                placeholder="Device model number">
+                placeholder="e.g., SelfServ 88">
               <div class="error-message" *ngIf="atmForm.get('model')?.invalid && atmForm.get('model')?.touched">
                 Model is required
               </div>
             </div>
 
+            <div class="form-group">
+              <label for="label">Display Label</label>
+              <input
+                id="label"
+                type="text"
+                formControlName="label"
+                placeholder="Optional friendly name">
+            </div>
+
+            <div class="form-group">
+              <label for="agencyCode">Agency *</label>
+              <select
+                id="agencyCode"
+                formControlName="agencyCode"
+                [class.error]="atmForm.get('agencyCode')?.invalid && atmForm.get('agencyCode')?.touched">
+                <option value="">Select an agency</option>
+                <option *ngFor="let agency of agencies" [value]="agency.agencyCode">
+                  {{ agency.agencyName }} ({{ agency.agencyCode }})
+                </option>
+              </select>
+              <div class="error-message" *ngIf="atmForm.get('agencyCode')?.invalid && atmForm.get('agencyCode')?.touched">
+                Agency selection is required
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Network & System Section -->
+        <div class="form-section">
+          <div class="section-header">
+            <span class="section-icon">🌐</span>
+            <h3>Network & System</h3>
+          </div>
+
+          <div class="form-grid">
             <div class="form-group">
               <label for="ipAddress">IP Address</label>
               <input
@@ -141,33 +182,7 @@
                 [class.error]="atmForm.get('ipAddress')?.invalid && atmForm.get('ipAddress')?.touched"
                 placeholder="192.168.1.100">
               <div class="error-message" *ngIf="atmForm.get('ipAddress')?.invalid && atmForm.get('ipAddress')?.touched">
-                Invalid IP address format
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Organization Section -->
-        <div class="form-section">
-          <div class="section-header">
-            <span class="section-icon">🏢</span>
-            <h3>Organization</h3>
-          </div>
-
-          <div class="form-grid">
-            <div class="form-group">
-              <label for="agencyCode">Agency *</label>
-              <select
-                id="agencyCode"
-                formControlName="agencyCode"
-                [class.error]="atmForm.get('agencyCode')?.invalid && atmForm.get('agencyCode')?.touched">
-                <option value="">Select Agency</option>
-                <option *ngFor="let agency of agencies" [value]="agency.agencyCode">
-                  {{ agency.agencyName }} ({{ agency.agencyCode }})
-                </option>
-              </select>
-              <div class="error-message" *ngIf="atmForm.get('agencyCode')?.invalid && atmForm.get('agencyCode')?.touched">
-                Agency is required
+                Please enter a valid IP address
               </div>
             </div>
 
@@ -177,7 +192,7 @@
                 id="region"
                 type="text"
                 formControlName="region"
-                placeholder="Geographic region">
+                placeholder="e.g., North America, Europe">
             </div>
           </div>
         </div>
@@ -189,25 +204,25 @@
             <h3>Location Information</h3>
           </div>
 
-          <div class="form-group full-width">
-            <label for="locationAddress">Physical Address</label>
-            <input
-              id="locationAddress"
-              type="text"
-              formControlName="locationAddress"
-              placeholder="Street address, city, state/province">
-          </div>
-
           <div class="form-grid">
+            <div class="form-group full-width">
+              <label for="locationAddress">Address</label>
+              <input
+                id="locationAddress"
+                type="text"
+                formControlName="locationAddress"
+                placeholder="Street address, city, state/province">
+            </div>
+
             <div class="form-group">
               <label for="locationLatitude">Latitude</label>
               <input
                 id="locationLatitude"
                 type="number"
-                step="0.000001"
+                step="any"
                 formControlName="locationLatitude"
                 [class.error]="atmForm.get('locationLatitude')?.invalid && atmForm.get('locationLatitude')?.touched"
-                placeholder="e.g., 40.7128">
+                placeholder="40.7128">
               <div class="error-message" *ngIf="atmForm.get('locationLatitude')?.invalid && atmForm.get('locationLatitude')?.touched">
                 Latitude must be between -90 and 90
               </div>
@@ -218,20 +233,21 @@
               <input
                 id="locationLongitude"
                 type="number"
-                step="0.000001"
+                step="any"
                 formControlName="locationLongitude"
                 [class.error]="atmForm.get('locationLongitude')?.invalid && atmForm.get('locationLongitude')?.touched"
-                placeholder="e.g., -74.0060">
+                placeholder="-74.0060">
               <div class="error-message" *ngIf="atmForm.get('locationLongitude')?.invalid && atmForm.get('locationLongitude')?.touched">
                 Longitude must be between -180 and 180
               </div>
             </div>
           </div>
 
-          <div class="location-actions" *ngIf="hasCoordinates()">
-            <button type="button" class="btn btn-sm btn-outline" (click)="previewLocation()">
+          <!-- Location Helper Actions -->
+          <div class="location-actions" *ngIf="hasCoordinates() || atmForm.get('locationLatitude')?.value || atmForm.get('locationLongitude')?.value">
+            <button type="button" class="btn btn-sm btn-outline" (click)="previewLocation()" *ngIf="hasCoordinates()">
               <span class="btn-icon">🗺️</span>
-              Preview Location
+              Preview on Map
             </button>
             <button type="button" class="btn btn-sm btn-outline" (click)="getCurrentLocation()">
               <span class="btn-icon">📍</span>
@@ -256,8 +272,8 @@
             class="btn btn-secondary"
             (click)="resetForm()"
             [disabled]="isSubmitting">
-            <span class="btn-icon">🔄</span>
-            {{ editMode ? 'Cancel Edit' : 'Reset Form' }}
+            <span class="btn-icon">{{ isEditFromRoute ? '🔙' : '🔄' }}</span>
+            {{ isEditFromRoute ? 'Cancel & Go Back' : (editMode ? 'Cancel Edit' : 'Reset Form') }}
           </button>
         </div>
       </form>
@@ -272,7 +288,7 @@
           <span class="record-count">({{ atms.length }} ATMs)</span>
         </div>
         <div class="panel-controls">
-          <button class="btn btn-sm btn-outline" (click)="loadAtms()" [disabled]="loading">
+          <button class="btn btn-sm btn-outline" (click)="refreshAtms()" [disabled]="loading">
             <span class="btn-icon" [ngClass]="{'spinning': loading}">🔄</span>
             Refresh
           </button>
@@ -284,7 +300,7 @@
       </div>
 
       <!-- Loading State -->
-      <div *ngIf="loading" class="loading-state">
+      <div *ngIf="loading && !isEditFromRoute" class="loading-state">
         <div class="loading-content">
           <div class="loading-spinner"></div>
           <div class="loading-text">Loading ATM registry data...</div>
@@ -295,9 +311,9 @@
       <div *ngIf="error && !loading" class="error-state">
         <div class="error-content">
           <div class="error-icon">❌</div>
-          <h3>Failed to Load ATMs</h3>
-          <p>Unable to retrieve ATM registry data. Please check your connection and try again.</p>
-          <button class="btn btn-primary" (click)="loadAtms()">
+          <h3>Failed to Load ATM Registry</h3>
+          <p>Unable to retrieve ATM data. Please check your connection and try again.</p>
+          <button class="btn btn-primary" (click)="refreshAtms()">
             <span class="btn-icon">🔄</span>
             Retry
           </button>
@@ -311,32 +327,26 @@
           <tr>
             <th>
               <div class="th-content">
-                <span class="th-icon">🆔</span>
+                <span class="th-icon">🏛️</span>
                 ATM ID
               </div>
             </th>
             <th>
               <div class="th-content">
                 <span class="th-icon">🏷️</span>
-                Label
-              </div>
-            </th>
-            <th>
-              <div class="th-content">
-                <span class="th-icon">🏭</span>
-                Brand/Model
-              </div>
-            </th>
-            <th>
-              <div class="th-content">
-                <span class="th-icon">🌍</span>
-                Region
+                Label / Brand
               </div>
             </th>
             <th>
               <div class="th-content">
                 <span class="th-icon">🏢</span>
                 Agency
+              </div>
+            </th>
+            <th>
+              <div class="th-content">
+                <span class="th-icon">📍</span>
+                Location
               </div>
             </th>
             <th>
@@ -352,26 +362,17 @@
               [class.editing]="selectedAtmId === atm.atmId">
             <td>
               <div class="cell-content primary">
-                <span class="cell-icon">🏧</span>
+                <span class="cell-icon">🏛️</span>
                 <span class="cell-text">{{ atm.atmId }}</span>
               </div>
             </td>
             <td>
               <div class="cell-content">
-                <span class="cell-text">{{ atm.label || '-' }}</span>
-              </div>
-            </td>
-            <td>
-              <div class="cell-content">
-                <div class="device-info">
-                  <div class="device-brand">{{ atm.brand }}</div>
-                  <div class="device-model">{{ atm.model }}</div>
+                <div class="atm-info">
+                  <div class="atm-label">{{ atm.label || atm.atmId }}</div>
+                  <div class="atm-brand">{{ atm.brand }} {{ atm.model }}</div>
+                  <div class="atm-serial" *ngIf="atm.serialNumber">S/N: {{ atm.serialNumber }}</div>
                 </div>
-              </div>
-            </td>
-            <td>
-              <div class="cell-content">
-                <span class="cell-text">{{ atm.region || '-' }}</span>
               </div>
             </td>
             <td>
@@ -379,6 +380,24 @@
                 <div class="agency-info">
                   <div class="agency-name">{{ getAgencyName(atm.agencyCode) }}</div>
                   <div class="agency-code">{{ atm.agencyCode }}</div>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="cell-content">
+                <div class="location-info">
+                  <div class="location-address" *ngIf="atm.locationAddress">
+                    <span class="location-icon">📍</span>
+                    {{ atm.locationAddress }}
+                  </div>
+                  <div class="location-region" *ngIf="atm.region">
+                    <span class="location-icon">🌍</span>
+                    {{ atm.region }}
+                  </div>
+                  <div class="location-ip" *ngIf="atm.ipAddress">
+                    <span class="location-icon">🌐</span>
+                    {{ atm.ipAddress }}
+                  </div>
                 </div>
               </div>
             </td>
@@ -406,7 +425,7 @@
             </td>
           </tr>
           <tr *ngIf="atms.length === 0" class="no-data-row">
-            <td colspan="6">
+            <td colspan="5">
               <div class="no-data">
                 <div class="no-data-icon">📭</div>
                 <div class="no-data-text">No ATMs registered yet</div>

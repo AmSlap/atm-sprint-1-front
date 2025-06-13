@@ -185,9 +185,8 @@
           <label for="status">Operational Status</label>
           <select id="status" [(ngModel)]="selectedStatus" (change)="applyFilters()" class="filter-select">
             <option value="all">All Statuses</option>
-            <option value="active">Active</option>
-            <option value="online">Online</option>
-            <option value="offline">Offline</option>
+            <option value="WORKING">Working</option>
+            <option value="OUTOFSERVICE">Out of service</option>
             <option value="maintenance">Maintenance</option>
           </select>
         </div>
@@ -196,11 +195,8 @@
           <label for="health">Health Status</label>
           <select id="health" [(ngModel)]="selectedHealth" (change)="applyFilters()" class="filter-select">
             <option value="all">All Health Levels</option>
-            <option value="ok">Healthy (OK)</option>
             <option value="green">Healthy (Green)</option>
-            <option value="warning">Warning</option>
             <option value="orange">Warning (Orange)</option>
-            <option value="error">Critical</option>
             <option value="red">Critical (Red)</option>
           </select>
         </div>

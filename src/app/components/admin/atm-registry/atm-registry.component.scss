@@ -1,20 +1,17 @@
-// ATM Registry Management Component Styles
-.admin-container {
+// ATM Registry Component Styles
+.atm-registry-container {
   min-height: 100vh;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   padding: 0;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 
   // Enhanced Header Section
-  .admin-header {
+  .registry-header {
     background: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(20px);
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     padding: 2rem;
     color: white;
-    position: sticky;
-    top: 0;
-    z-index: 100;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
 
     display: flex;
@@ -186,7 +183,7 @@
   }
 
   // Main Content
-  .admin-content {
+  .registry-content {
     padding: 2rem;
     max-width: 1400px;
     margin: 0 auto;
@@ -244,6 +241,86 @@
               background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
               color: #856404;
             }
+          }
+        }
+      }
+
+      // Edit Mode Indicator
+      .edit-mode-indicator {
+        margin: 1.5rem 2rem 0;
+
+        .edit-banner {
+          background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+          border: 1px solid #ffc107;
+          border-radius: 12px;
+          padding: 1rem 1.5rem;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          box-shadow: 0 2px 8px rgba(255, 193, 7, 0.2);
+
+          .edit-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+
+            .edit-icon {
+              font-size: 1.5rem;
+            }
+
+            .edit-text {
+              .edit-title {
+                font-weight: 600;
+                color: #856404;
+                font-size: 1rem;
+                margin-bottom: 0.25rem;
+              }
+
+              .edit-subtitle {
+                font-size: 0.85rem;
+                color: #856404;
+                opacity: 0.8;
+              }
+            }
+          }
+
+          .btn {
+            background: rgba(255, 255, 255, 0.8);
+            border-color: #856404;
+            color: #856404;
+
+            &:hover {
+              background: white;
+              transform: translateY(-1px);
+            }
+          }
+        }
+      }
+
+      // Loading state for edit mode
+      .loading-edit {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 200px;
+        padding: 2rem;
+
+        .loading-content {
+          text-align: center;
+
+          .loading-spinner {
+            width: 30px;
+            height: 30px;
+            border: 3px solid #e9ecef;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+          }
+
+          .loading-text {
+            color: #666;
+            font-weight: 500;
           }
         }
       }
@@ -353,14 +430,6 @@
               }
             }
 
-            select {
-              cursor: pointer;
-
-              option {
-                padding: 0.5rem;
-              }
-            }
-
             .error-message {
               color: #dc3545;
               font-size: 0.8rem;
@@ -368,19 +437,19 @@
               font-weight: 500;
             }
           }
-        }
 
-        .location-actions {
-          display: flex;
-          gap: 1rem;
-          margin-top: 1rem;
-          padding: 0 1.5rem 1.5rem;
+          .location-actions {
+            padding: 0 1.5rem 1.5rem;
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
 
-          .btn {
-            &.btn-sm {
-              padding: 0.5rem 1rem;
-              font-size: 0.85rem;
-              border-radius: 20px;
+            .btn {
+              &.btn-sm {
+                padding: 0.5rem 1rem;
+                font-size: 0.85rem;
+                border-radius: 20px;
+              }
             }
           }
         }
@@ -665,22 +734,28 @@
                     text-overflow: ellipsis;
                   }
 
-                  .device-info {
-                    .device-brand {
+                  .atm-info {
+                    .atm-label {
                       font-weight: 600;
                       color: #333;
                       margin-bottom: 0.25rem;
                     }
 
-                    .device-model {
+                    .atm-brand {
                       font-size: 0.85rem;
                       color: #666;
+                      margin-bottom: 0.25rem;
+                    }
+
+                    .atm-serial {
+                      font-size: 0.75rem;
+                      color: #999;
                     }
                   }
 
                   .agency-info {
                     .agency-name {
-                      font-weight: 500;
+                      font-weight: 600;
                       color: #333;
                       margin-bottom: 0.25rem;
                     }
@@ -688,10 +763,33 @@
                     .agency-code {
                       font-size: 0.85rem;
                       color: #666;
-                      background: #e9ecef;
-                      padding: 0.15rem 0.5rem;
-                      border-radius: 8px;
-                      display: inline-block;
+                      background: rgba(102, 126, 234, 0.1);
+                      padding: 0.2rem 0.5rem;
+                      border-radius: 10px;
+                      font-weight: 500;
+                    }
+                  }
+
+                  .location-info {
+                    .location-address,
+                    .location-region,
+                    .location-ip {
+                      display: flex;
+                      align-items: center;
+                      gap: 0.25rem;
+                      font-size: 0.85rem;
+                      color: #666;
+                      margin-bottom: 0.25rem;
+
+                      &:last-child {
+                        margin-bottom: 0;
+                      }
+
+                      .location-icon {
+                        font-size: 0.9rem;
+                        color: #999;
+                        min-width: 16px;
+                      }
                     }
                   }
                 }
@@ -886,7 +984,7 @@
 
 // Responsive Design
 @media (max-width: 1200px) {
-  .admin-container .admin-content {
+  .atm-registry-container .registry-content {
     grid-template-columns: 1fr;
     gap: 1.5rem;
 
@@ -897,8 +995,8 @@
 }
 
 @media (max-width: 768px) {
-  .admin-container {
-    .admin-header {
+  .atm-registry-container {
+    .registry-header {
       padding: 1rem;
       flex-direction: column;
       gap: 1rem;
@@ -927,7 +1025,7 @@
       }
     }
 
-    .admin-content {
+    .registry-content {
       padding: 1rem;
       gap: 1rem;
 
@@ -936,6 +1034,17 @@
           padding: 1rem;
           flex-direction: column;
           gap: 1rem;
+
+          .panel-title {
+            flex-direction: column;
+            text-align: center;
+            gap: 0.5rem;
+          }
+
+          .panel-controls {
+            width: 100%;
+            justify-content: center;
+          }
         }
 
         .enhanced-form {
@@ -950,6 +1059,37 @@
           .form-actions {
             flex-direction: column;
           }
+
+          .location-actions {
+            padding: 0 1rem 1rem;
+            flex-direction: column;
+
+            .btn {
+              width: 100%;
+              justify-content: center;
+            }
+          }
+        }
+
+        .edit-mode-indicator {
+          margin: 1rem;
+
+          .edit-banner {
+            flex-direction: column;
+            gap: 1rem;
+            text-align: center;
+
+            .edit-info {
+              flex-direction: column;
+              text-align: center;
+              gap: 0.5rem;
+            }
+
+            .btn {
+              width: 100%;
+              justify-content: center;
+            }
+          }
         }
       }
 
@@ -962,12 +1102,35 @@
           }
 
           .cell-content {
-            .device-info, .agency-info {
-              .device-brand, .agency-name {
+            .atm-info {
+              .atm-label {
                 font-size: 0.85rem;
               }
 
-              .device-model, .agency-code {
+              .atm-brand {
+                font-size: 0.75rem;
+              }
+
+              .atm-serial {
+                font-size: 0.7rem;
+              }
+            }
+
+            .agency-info {
+              .agency-name {
+                font-size: 0.85rem;
+              }
+
+              .agency-code {
+                font-size: 0.75rem;
+                padding: 0.15rem 0.4rem;
+              }
+            }
+
+            .location-info {
+              .location-address,
+              .location-region,
+              .location-ip {
                 font-size: 0.75rem;
               }
             }
@@ -998,8 +1161,8 @@
 }
 
 @media (max-width: 480px) {
-  .admin-container {
-    .admin-header {
+  .atm-registry-container {
+    .registry-header {
       .header-content .header-icon {
         font-size: 2rem;
       }
@@ -1007,17 +1170,56 @@
       .header-actions .last-updated {
         padding: 0.75rem;
         min-width: auto;
+
+        .update-time {
+          font-size: 0.9rem;
+        }
+
+        .update-user {
+          font-size: 0.7rem;
+        }
       }
     }
 
-    .admin-content {
-      .form-panel .enhanced-form {
-        .location-actions {
-          flex-direction: column;
-          padding: 0 1rem 1rem;
+    .registry-content {
+      .form-panel {
+        .enhanced-form {
+          .form-section {
+            .section-header {
+              padding: 0.75rem 1rem;
 
-          .btn {
-            width: 100%;
+              .section-icon {
+                font-size: 1.2rem;
+              }
+
+              h3 {
+                font-size: 1rem;
+              }
+            }
+
+            .form-grid {
+              padding: 1rem 0.75rem;
+            }
+
+            .form-group {
+              label {
+                font-size: 0.85rem;
+              }
+
+              input, select {
+                padding: 0.6rem;
+                font-size: 0.85rem;
+              }
+            }
+          }
+
+          .form-actions {
+            padding-top: 1.5rem;
+
+            .btn {
+              padding: 0.6rem 1rem;
+              font-size: 0.85rem;
+            }
           }
         }
       }
@@ -1032,7 +1234,349 @@
             height: 24px;
           }
         }
+
+        .no-data {
+          padding: 2rem 1rem;
+
+          .no-data-icon {
+            font-size: 3rem;
+          }
+
+          .no-data-text {
+            font-size: 1rem;
+          }
+        }
       }
     }
+
+    .processing-overlay .processing-content {
+      margin: 1rem;
+      padding: 1.5rem;
+
+      .processing-text {
+        font-size: 0.9rem;
+      }
+    }
+  }
+}
+
+// Additional utility classes
+.text-center {
+  text-align: center;
+}
+
+.text-muted {
+  color: #666;
+}
+
+.font-weight-bold {
+  font-weight: 600;
+}
+
+.mb-0 {
+  margin-bottom: 0;
+}
+
+.mb-1 {
+  margin-bottom: 0.25rem;
+}
+
+.mb-2 {
+  margin-bottom: 0.5rem;
+}
+
+.mt-1 {
+  margin-top: 0.25rem;
+}
+
+.mt-2 {
+  margin-top: 0.5rem;
+}
+
+// Focus states for accessibility
+.btn:focus,
+input:focus,
+select:focus {
+  outline: 2px solid #667eea;
+  outline-offset: 2px;
+}
+
+// High contrast mode support
+@media (prefers-contrast: more) {
+  .atm-registry-container {
+    .form-panel, .data-panel {
+      border: 2px solid #000;
+    }
+
+    .btn {
+      border: 2px solid currentColor;
+    }
+
+    .data-table {
+      border: 1px solid #000;
+
+      th, td {
+        border: 1px solid #000;
+      }
+    }
+  }
+}
+
+// Reduced motion support
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .btn-icon.spinning {
+    animation: none;
+  }
+
+  .loading-spinner,
+  .processing-spinner {
+    animation: none;
+    border-top-color: transparent;
+  }
+}
+
+// Print styles
+@media print {
+  .atm-registry-container {
+    background: white;
+    color: black;
+
+    .registry-header,
+    .message-container,
+    .processing-overlay {
+      display: none;
+    }
+
+    .form-panel {
+      display: none;
+    }
+
+    .data-panel {
+      background: white;
+      box-shadow: none;
+      border: 1px solid black;
+
+      .panel-header .panel-controls {
+        display: none;
+      }
+
+      .data-table {
+        .cell-actions {
+          display: none;
+        }
+      }
+    }
+
+    .btn {
+      display: none;
+    }
+  }
+}
+
+// Dark mode support (optional)
+@media (prefers-color-scheme: dark) {
+  .atm-registry-container {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+
+    .registry-header {
+      background: rgba(0, 0, 0, 0.3);
+    }
+
+    .form-panel, .data-panel {
+      background: rgba(30, 30, 30, 0.95);
+      color: #e0e0e0;
+
+      .panel-header {
+        background: linear-gradient(135deg, #2a2a2a 0%, #1e1e1e 100%);
+        color: #e0e0e0;
+      }
+
+      .data-table {
+        thead {
+          background: linear-gradient(135deg, #2a2a2a 0%, #1e1e1e 100%);
+        }
+
+        tbody tr:hover {
+          background: rgba(102, 126, 234, 0.2);
+        }
+      }
+
+      input, select {
+        background: #2a2a2a;
+        color: #e0e0e0;
+        border-color: #444;
+
+        &:focus {
+          border-color: #667eea;
+        }
+      }
+    }
+  }
+}
+
+// Animation delays for staggered loading
+.data-table tbody tr {
+  animation: fadeInUp 0.3s ease;
+  animation-fill-mode: both;
+
+  @for $i from 1 through 10 {
+    &:nth-child(#{$i}) {
+      animation-delay: #{$i * 0.05}s;
+    }
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Smooth scrolling
+html {
+  scroll-behavior: smooth;
+}
+
+// Selection styling
+::selection {
+  background: rgba(102, 126, 234, 0.3);
+  color: inherit;
+}
+
+::-moz-selection {
+  background: rgba(102, 126, 234, 0.3);
+  color: inherit;
+}
+
+// Custom scrollbar for webkit browsers
+.table-container::-webkit-scrollbar {
+  height: 8px;
+}
+
+.table-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+.table-container::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+// Enhanced focus indicators
+.action-btn:focus {
+  outline: 2px solid #667eea;
+  outline-offset: 2px;
+  z-index: 1;
+  position: relative;
+}
+
+// Form validation enhancement
+.form-group.has-error {
+  .error-message {
+    animation: shake 0.5s ease-in-out;
+  }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+// Loading skeleton effect (optional enhancement)
+.loading-skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+// Tooltip styling (if needed)
+.tooltip {
+  position: absolute;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  z-index: 1000;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+
+  &.show {
+    opacity: 1;
+  }
+}
+
+// Status indicators
+.status-indicator {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 0.5rem;
+
+  &.online {
+    background: #28a745;
+    box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.3);
+  }
+
+  &.offline {
+    background: #dc3545;
+    box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.3);
+  }
+
+  &.maintenance {
+    background: #ffc107;
+    box-shadow: 0 0 0 2px rgba(255, 193, 7, 0.3);
+  }
+}
+
+// Enhanced button states
+.btn {
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.3s ease, height 0.3s ease;
+  }
+
+  &:active::before {
+    width: 300px;
+    height: 300px;
   }
 }

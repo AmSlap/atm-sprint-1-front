@@ -1,6 +1,7 @@
-import { Component, Input, OnInit } from '@angular/core';
+import {Component, inject, Input, OnInit} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AtmRegistryInfo } from '../../models/atm.models';
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'app-atm-info',
@@ -20,6 +21,7 @@ export class AtmInfoComponent implements OnInit {
   showMessage = false;
   messageText = '';
   messageType: 'success' | 'error' | 'info' = 'info';
+  private router = inject(Router);
 
   ngOnInit() {
     this.checkNetworkStatus();
@@ -206,8 +208,7 @@ Generated: ${this.getCurrentDateTime()}`;
 
   // Action methods
   editAtmInfo() {
-    console.log('Edit ATM info:', this.registryInfo.atmId);
-    this.showInfoMessage('Edit functionality coming soon...');
+    this.router.navigate(['/admin/registry/atms/edit', this.registryInfo.atmId]);
   }
 
   addLocationData() {
