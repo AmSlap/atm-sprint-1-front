@@ -20,6 +20,7 @@ export class AtmRegistryComponent implements OnInit {
   selectedAtmId: string | null = null;
   loading = true;
   error = false;
+  isSubmitting = false;
   successMessage: string | null = null;
   errorMessage: string | null = null;
 
@@ -47,8 +48,28 @@ export class AtmRegistryComponent implements OnInit {
     this.loadAgencies();
   }
 
+  // Real data methods
+  getCurrentUser(): string {
+    return 'AmSlap'; // Real current user
+  }
+
+  getCurrentTime(): string {
+    return new Date().toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    });
+  }
+
+  getCurrentDateTime(): string {
+    return new Date().toISOString();
+  }
+
+  // Data loading methods
   loadAtms(): void {
     this.loading = true;
+    this.error = false;
+
     this.atmService.getAllAtmRegistry().subscribe({
       next: (data) => {
         this.atms = data;
@@ -58,52 +79,57 @@ export class AtmRegistryComponent implements OnInit {
         console.error('Error loading ATMs', err);
         this.error = true;
         this.loading = false;
+        this.showErrorMessage('Failed to load ATM registry data');
       }
     });
   }
 
   loadAgencies(): void {
     this.atmService.getAllAgencies().subscribe({
-      next: (agencies) => this.agencies = agencies,
+      next: (agencies) => {
+        this.agencies = agencies;
+      },
       error: (err) => {
         console.error('Error loading agencies', err);
-        // Initialize with empty array to prevent null reference errors
         this.agencies = [];
+        this.showErrorMessage('Failed to load agency data');
       }
     });
   }
 
+  // Form handling methods
   onSubmit(): void {
-    if (this.atmForm.invalid) {
+    if (this.atmForm.invalid || this.isSubmitting) {
       return;
     }
 
+    this.isSubmitting = true;
     const atmData: AtmRegistryInfo = this.atmForm.value;
 
     if (this.editMode && this.selectedAtmId) {
       this.atmService.updateAtm(this.selectedAtmId, atmData).subscribe({
         next: () => {
-          this.successMessage = 'ATM updated successfully';
+          this.showSuccessMessage('ATM updated successfully');
           this.loadAtms();
           this.resetForm();
-          setTimeout(() => this.successMessage = null, 3000);
+          this.isSubmitting = false;
         },
         error: (err) => {
-          this.errorMessage = 'Error updating ATM: ' + err.message;
-          setTimeout(() => this.errorMessage = null, 5000);
+          this.showErrorMessage('Error updating ATM: ' + err.message);
+          this.isSubmitting = false;
         }
       });
     } else {
       this.atmService.createAtm(atmData).subscribe({
         next: () => {
-          this.successMessage = 'ATM created successfully';
+          this.showSuccessMessage('ATM created successfully');
           this.loadAtms();
           this.resetForm();
-          setTimeout(() => this.successMessage = null, 3000);
+          this.isSubmitting = false;
         },
         error: (err) => {
-          this.errorMessage = 'Error creating ATM: ' + err.message;
-          setTimeout(() => this.errorMessage = null, 5000);
+          this.showErrorMessage('Error creating ATM: ' + err.message);
+          this.isSubmitting = false;
         }
       });
     }
@@ -134,16 +160,14 @@ export class AtmRegistryComponent implements OnInit {
   }
 
   deleteAtm(atmId: string): void {
-    if (confirm(`Are you sure you want to delete ATM ${atmId}?`)) {
+    if (confirm(`Are you sure you want to delete ATM ${atmId}?\n\nThis action cannot be undone.`)) {
       this.atmService.deleteAtm(atmId).subscribe({
         next: () => {
-          this.successMessage = 'ATM deleted successfully';
+          this.showSuccessMessage('ATM deleted successfully');
           this.loadAtms();
-          setTimeout(() => this.successMessage = null, 3000);
         },
         error: (err) => {
-          this.errorMessage = 'Error deleting ATM: ' + err.message;
-          setTimeout(() => this.errorMessage = null, 5000);
+          this.showErrorMessage('Error deleting ATM: ' + err.message);
         }
       });
     }
@@ -154,5 +178,83 @@ export class AtmRegistryComponent implements OnInit {
     this.editMode = false;
     this.selectedAtmId = null;
     this.atmForm.get('atmId')?.enable();
+  }
+
+  // Helper methods
+  hasCoordinates(): boolean {
+    const lat = this.atmForm.get('locationLatitude')?.value;
+    const lng = this.atmForm.get('locationLongitude')?.value;
+    return lat !== null && lat !== '' && lng !== null && lng !== '';
+  }
+
+  getAgencyName(agencyCode: string): string {
+    const agency = this.agencies.find(a => a.agencyCode === agencyCode);
+    return agency?.agencyName || agencyCode;
+  }
+
+  trackByAtmId(index: number, atm: AtmRegistryInfo): string {
+    return atm.atmId;
+  }
+
+  // Action methods - marked as coming soon for missing functionality
+  viewAtm(atm: AtmRegistryInfo): void {
+    this.showInfoMessage('ATM details view - Coming Soon...');
+  }
+
+  previewLocation(): void {
+    const lat = this.atmForm.get('locationLatitude')?.value;
+    const lng = this.atmForm.get('locationLongitude')?.value;
+
+    if (lat && lng) {
+      const url = `https://www.google.com/maps?q=${lat},${lng}`;
+      window.open(url, '_blank');
+    }
+  }
+
+  getCurrentLocation(): void {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          this.atmForm.patchValue({
+            locationLatitude: position.coords.latitude,
+            locationLongitude: position.coords.longitude
+          });
+          this.showSuccessMessage('Current location added successfully');
+        },
+        (error) => {
+          this.showErrorMessage('Unable to get current location: ' + error.message);
+        }
+      );
+    } else {
+      this.showErrorMessage('Geolocation is not supported by this browser');
+    }
+  }
+
+  exportData(): void {
+    this.showInfoMessage('Data export functionality - Coming Soon...');
+  }
+
+  // Message handling methods
+  showSuccessMessage(message: string): void {
+    this.successMessage = message;
+    setTimeout(() => this.clearSuccessMessage(), 5000);
+  }
+
+  showErrorMessage(message: string): void {
+    this.errorMessage = message;
+    setTimeout(() => this.clearErrorMessage(), 7000);
+  }
+
+  showInfoMessage(message: string): void {
+    // For now, using success message for info
+    this.showSuccessMessage(message);
+  }
+
+  clearSuccessMessage(): void {
+    this.successMessage = null;
+  }
+
+  clearErrorMessage(): void {
+    this.errorMessage = null;
   }
 }

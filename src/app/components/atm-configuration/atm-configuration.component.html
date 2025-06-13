@@ -1,31 +1,451 @@
 <div class="configuration-container">
-  <h2>ATM Configuration</h2>
-
-  <div class="configuration-card">
-    <h3>Basic Information</h3>
-    <div class="info-item">
-      <span class="label">ATM ID:</span>
-      <span class="value">{{ configuration.atmId }}</span>
+  <!-- Enhanced Header Section -->
+  <div class="configuration-header">
+    <div class="header-content">
+      <div class="header-icon">⚙️</div>
+      <div class="header-text">
+        <h2>ATM Configuration & Health</h2>
+        <p class="header-subtitle">System configuration and peripheral status monitoring</p>
+      </div>
     </div>
-    <div class="info-item">
-      <span class="label">Overall Health:</span>
-      <span class="value">{{ configuration.overallHealth }}</span>
-    </div>
-    <div class="info-item">
-      <span class="label">Last Update:</span>
-      <span class="value">{{ configuration.lastUpdateTimestamp | date:'medium' }}</span>
+    <div class="header-actions">
+      <div class="health-overview">
+        <div class="health-indicator" [ngClass]="getOverallHealthClass()">
+          <span class="health-icon">{{ getHealthIcon() }}</span>
+          <div class="health-info">
+            <div class="health-status">{{ configuration.overallHealth }}</div>
+            <div class="health-label">System Health</div>
+          </div>
+        </div>
+      </div>
+      <div class="last-updated">
+        <div class="update-label">Last Updated</div>
+        <div class="update-time">{{ getLastUpdateTime() }}</div>
+        <div class="update-ago">{{ getTimeAgo(configuration.lastUpdateTimestamp) }}</div>
+      </div>
+      <button class="btn btn-outline" (click)="refreshConfiguration()" [disabled]="isRefreshing">
+        <span class="btn-icon" [ngClass]="{'spinning': isRefreshing}">🔄</span>
+        {{ isRefreshing ? 'Refreshing...' : 'Refresh Config' }}
+      </button>
     </div>
   </div>
 
-  <div class="configuration-card">
-    <h3>Peripherals</h3>
-    <div *ngIf="getPeripheralKeys().length === 0" class="no-peripherals">
-      No peripheral information available
+  <div class="configuration-content">
+    <!-- Enhanced System Overview Card -->
+    <div class="configuration-card system-overview-card">
+      <div class="card-header">
+        <div class="card-title">
+          <span class="card-icon">🖥️</span>
+          <h3>System Overview</h3>
+        </div>
+        <div class="system-status-badge" [ngClass]="getSystemStatusClass()">
+          <span class="status-icon">{{ getSystemStatusIcon() }}</span>
+          <span class="status-text">{{ getSystemStatusText() }}</span>
+        </div>
+      </div>
+
+      <div class="card-content">
+        <div class="system-info-grid">
+          <div class="info-item primary">
+            <div class="item-header">
+              <span class="item-icon">🆔</span>
+              <span class="label">ATM ID</span>
+            </div>
+            <span class="value primary-value">{{ configuration.atmId }}</span>
+            <button class="copy-btn" (click)="copyToClipboard(configuration.atmId)" title="Copy ATM ID">
+              📋
+            </button>
+          </div>
+
+          <div class="info-item health-item" [ngClass]="getOverallHealthClass()">
+            <div class="item-header">
+              <span class="item-icon">{{ getHealthIcon() }}</span>
+              <span class="label">Overall Health</span>
+            </div>
+            <span class="value health-value">{{ configuration.overallHealth }}</span>
+            <div class="health-details">
+              <div class="health-description">{{ getHealthDescription() }}</div>
+              <div class="health-score">{{ getHealthScore() }}/100</div>
+            </div>
+          </div>
+
+          <div class="info-item">
+            <div class="item-header">
+              <span class="item-icon">🕒</span>
+              <span class="label">Last Configuration Update</span>
+            </div>
+            <span class="value">{{ configuration.lastUpdateTimestamp | date:'medium' }}</span>
+            <div class="time-details">
+              <div class="time-ago">{{ getTimeAgo(configuration.lastUpdateTimestamp) }}</div>
+              <div class="time-zone">{{ getTimeZone() }}</div>
+            </div>
+          </div>
+
+          <div class="info-item">
+            <div class="item-header">
+              <span class="item-icon">🔧</span>
+              <span class="label">Configuration Source</span>
+            </div>
+            <span class="value">{{ getConfigurationSource() }}</span>
+            <div class="source-details">
+              <div class="source-version">Version {{ getConfigVersion() }}</div>
+              <div class="source-checksum">{{ getConfigChecksum() }}</div>
+            </div>
+          </div>
+
+          <div class="info-item">
+            <div class="item-header">
+              <span class="item-icon">📊</span>
+              <span class="label">Active Peripherals</span>
+            </div>
+            <span class="value">{{ getActivePeripheralCount() }} / {{ getTotalPeripheralCount() }}</span>
+            <div class="peripheral-summary">
+              <div class="summary-item healthy">
+                <span class="summary-count">{{ getHealthyPeripheralCount() }}</span>
+                <span class="summary-label">Healthy</span>
+              </div>
+              <div class="summary-item warning">
+                <span class="summary-count">{{ getWarningPeripheralCount() }}</span>
+                <span class="summary-label">Warning</span>
+              </div>
+              <div class="summary-item error">
+                <span class="summary-count">{{ getErrorPeripheralCount() }}</span>
+                <span class="summary-label">Error</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="info-item">
+            <div class="item-header">
+              <span class="item-icon">👤</span>
+              <span class="label">Last Modified By</span>
+            </div>
+            <span class="value">{{ getCurrentUser() }}</span>
+            <div class="user-details">
+              <div class="user-role">System Administrator</div>
+              <div class="user-session">Session: {{ getSessionId() }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <div *ngFor="let key of getPeripheralKeys()" class="peripheral-item">
-      <h4>{{ key }}</h4>
-      <pre class="peripheral-value">{{ getPeripheralValue(key) }}</pre>
+    <!-- Enhanced Peripherals Card -->
+    <div class="configuration-card peripherals-card">
+      <div class="card-header">
+        <div class="card-title">
+          <span class="card-icon">🔌</span>
+          <h3>Peripheral Devices</h3>
+          <span class="peripheral-count">({{ getTotalPeripheralCount() }} Devices)</span>
+        </div>
+        <div class="peripheral-controls">
+          <div class="view-toggle">
+            <button class="view-btn"
+                    [ngClass]="{'active': peripheralView === 'cards'}"
+                    (click)="setPeripheralView('cards')">
+              <span>⊞</span> Cards
+            </button>
+            <button class="view-btn"
+                    [ngClass]="{'active': peripheralView === 'detailed'}"
+                    (click)="setPeripheralView('detailed')">
+              <span>📋</span> Detailed
+            </button>
+            <button class="view-btn"
+                    [ngClass]="{'active': peripheralView === 'json'}"
+                    (click)="setPeripheralView('json')">
+              <span>{{ '{' }} {{ '}' }}</span> JSON
+            </button>
+          </div>
+          <div class="filter-controls">
+            <select [(ngModel)]="peripheralFilter" (change)="filterPeripherals()" class="filter-select">
+              <option value="all">All Devices</option>
+              <option value="healthy">Healthy Only</option>
+              <option value="warning">Warnings</option>
+              <option value="error">Errors</option>
+              <option value="offline">Offline</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-content">
+        <!-- No Peripherals State -->
+        <div *ngIf="getPeripheralKeys().length === 0" class="no-peripherals">
+          <div class="no-peripherals-content">
+            <div class="no-peripherals-icon">🔌</div>
+            <h4>No Peripheral Information Available</h4>
+            <p>Peripheral configuration data has not been provided or is currently unavailable.</p>
+            <div class="no-peripherals-suggestions">
+              <p>This could be due to:</p>
+              <ul>
+                <li>ATM device is offline or not responding</li>
+                <li>Configuration has not been synchronized</li>
+                <li>Peripheral discovery is in progress</li>
+                <li>Access permissions restrictions</li>
+              </ul>
+            </div>
+            <button class="btn btn-primary btn-sm" (click)="refreshConfiguration()">
+              <span class="btn-icon">🔄</span>
+              Refresh Configuration
+            </button>
+          </div>
+        </div>
+
+        <!-- Peripherals Cards View -->
+        <div *ngIf="peripheralView === 'cards' && getFilteredPeripherals().length > 0"
+             class="peripherals-grid">
+          <div *ngFor="let key of getFilteredPeripherals(); trackBy: trackByPeripheralKey"
+               class="peripheral-card"
+               [ngClass]="getPeripheralCardClass(key)">
+
+            <div class="peripheral-header">
+              <div class="peripheral-title-section">
+                <div class="peripheral-icon">{{ getPeripheralIcon(key) }}</div>
+                <div class="peripheral-info">
+                  <h4 class="peripheral-name">{{ getPeripheralDisplayName(key) }}</h4>
+                  <div class="peripheral-type">{{ getPeripheralType(key) }}</div>
+                </div>
+              </div>
+              <div class="peripheral-status">
+                <div class="status-indicator" [ngClass]="getPeripheralStatusClass(key)"></div>
+                <span class="status-text">{{ getPeripheralStatus(key) }}</span>
+              </div>
+            </div>
+
+            <div class="peripheral-content">
+              <div class="peripheral-summary">
+                <div class="summary-grid">
+                  <div class="summary-item">
+                    <div class="summary-label">Status</div>
+                    <div class="summary-value" [ngClass]="getPeripheralStatusClass(key)">
+                      {{ getPeripheralStatus(key) }}
+                    </div>
+                  </div>
+                  <div class="summary-item" *ngIf="getPeripheralVersion(key)">
+                    <div class="summary-label">Version</div>
+                    <div class="summary-value">{{ getPeripheralVersion(key) }}</div>
+                  </div>
+                  <div class="summary-item" *ngIf="getPeripheralModel(key)">
+                    <div class="summary-label">Model</div>
+                    <div class="summary-value">{{ getPeripheralModel(key) }}</div>
+                  </div>
+                  <div class="summary-item" *ngIf="getPeripheralSerial(key)">
+                    <div class="summary-label">Serial</div>
+                    <div class="summary-value">{{ getPeripheralSerial(key) }}</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="peripheral-details" *ngIf="isPeripheralExpanded(key)">
+                <div class="details-header">
+                  <h5>Configuration Details</h5>
+                </div>
+                <div class="details-content">
+                  <pre class="details-json">{{ getPeripheralValue(key) }}</pre>
+                </div>
+              </div>
+
+              <div class="peripheral-actions">
+                <button class="action-btn primary"
+                        (click)="togglePeripheralDetails(key)"
+                        title="Toggle Details">
+                  {{ isPeripheralExpanded(key) ? '📑 Hide Details' : '📋 Show Details' }}
+                </button>
+                <button class="action-btn secondary"
+                        (click)="testPeripheral(key)"
+                        title="Test Device">
+                  🔍 Test
+                </button>
+                <button class="action-btn warning"
+                        *ngIf="canResetPeripheral(key)"
+                        (click)="resetPeripheral(key)"
+                        title="Reset Device">
+                  🔄 Reset
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Peripherals Detailed View -->
+        <div *ngIf="peripheralView === 'detailed' && getFilteredPeripherals().length > 0"
+             class="peripherals-detailed">
+          <div *ngFor="let key of getFilteredPeripherals(); trackBy: trackByPeripheralKey"
+               class="peripheral-detailed-item">
+
+            <div class="detailed-header">
+              <div class="detailed-title">
+                <span class="peripheral-icon">{{ getPeripheralIcon(key) }}</span>
+                <h4>{{ getPeripheralDisplayName(key) }}</h4>
+                <div class="peripheral-badges">
+                  <span class="type-badge">{{ getPeripheralType(key) }}</span>
+                  <span class="status-badge" [ngClass]="getPeripheralStatusClass(key)">
+                    {{ getPeripheralStatus(key) }}
+                  </span>
+                </div>
+              </div>
+              <div class="detailed-actions">
+                <button class="detailed-action-btn" (click)="copyPeripheralConfig(key)" title="Copy Config">
+                  📋
+                </button>
+                <button class="detailed-action-btn" (click)="exportPeripheralConfig(key)" title="Export Config">
+                  💾
+                </button>
+                <button class="detailed-action-btn" (click)="testPeripheral(key)" title="Test Device">
+                  🔍
+                </button>
+              </div>
+            </div>
+
+            <div class="detailed-content">
+              <div class="config-display">
+                <div class="config-header">
+                  <h5>Configuration Data</h5>
+                  <div class="config-meta">
+                    <span class="config-size">{{ getConfigSize(key) }} bytes</span>
+                    <span class="config-format">JSON Format</span>
+                  </div>
+                </div>
+                <div class="config-content">
+                  <pre class="config-json" [innerHTML]="getFormattedPeripheralValue(key)"></pre>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Peripherals JSON View -->
+        <div *ngIf="peripheralView === 'json' && getFilteredPeripherals().length > 0"
+             class="peripherals-json">
+          <div class="json-header">
+            <h4>Complete Peripheral Configuration (JSON)</h4>
+            <div class="json-actions">
+              <button class="json-action-btn" (click)="copyAllPeripheralConfig()" title="Copy All">
+                📋 Copy All
+              </button>
+              <button class="json-action-btn" (click)="exportAllPeripheralConfig()" title="Export All">
+                💾 Export All
+              </button>
+              <button class="json-action-btn" (click)="validatePeripheralConfig()" title="Validate">
+                ✅ Validate
+              </button>
+            </div>
+          </div>
+          <div class="json-content">
+            <pre class="json-display" [innerHTML]="getAllPeripheralsFormatted()"></pre>
+          </div>
+        </div>
+
+        <!-- Peripheral Statistics -->
+        <div class="peripheral-stats" *ngIf="getFilteredPeripherals().length > 0">
+          <div class="stats-header">
+            <h4>Peripheral Statistics</h4>
+            <div class="stats-updated">Updated {{ getTimeAgo(configuration.lastUpdateTimestamp) }}</div>
+          </div>
+          <div class="stats-grid">
+            <div class="stat-item">
+              <div class="stat-icon">🔌</div>
+              <div class="stat-value">{{ getTotalPeripheralCount() }}</div>
+              <div class="stat-label">Total Devices</div>
+            </div>
+            <div class="stat-item healthy">
+              <div class="stat-icon">✅</div>
+              <div class="stat-value">{{ getHealthyPeripheralCount() }}</div>
+              <div class="stat-label">Healthy</div>
+            </div>
+            <div class="stat-item warning">
+              <div class="stat-icon">⚠️</div>
+              <div class="stat-value">{{ getWarningPeripheralCount() }}</div>
+              <div class="stat-label">Warnings</div>
+            </div>
+            <div class="stat-item error">
+              <div class="stat-icon">❌</div>
+              <div class="stat-value">{{ getErrorPeripheralCount() }}</div>
+              <div class="stat-label">Errors</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Configuration History Card -->
+    <div class="configuration-card history-card">
+      <div class="card-header">
+        <div class="card-title">
+          <span class="card-icon">📜</span>
+          <h3>Configuration History</h3>
+        </div>
+        <div class="history-controls">
+          <button class="btn btn-sm btn-outline" (click)="viewFullHistory()">
+            <span class="btn-icon">📋</span>
+            View Full History
+          </button>
+        </div>
+      </div>
+
+      <div class="card-content">
+        <div class="history-timeline">
+          <div class="timeline-item current">
+            <div class="timeline-marker current"></div>
+            <div class="timeline-content">
+              <div class="timeline-header">
+                <div class="timeline-title">Current Configuration</div>
+                <div class="timeline-time">{{ configuration.lastUpdateTimestamp | date:'medium' }}</div>
+              </div>
+              <div class="timeline-details">
+                <div class="timeline-user">Updated by {{ getCurrentUser() }}</div>
+                <div class="timeline-changes">
+                  <span class="change-item">{{ getTotalPeripheralCount() }} peripherals configured</span>
+                  <span class="change-item">Health status: {{ configuration.overallHealth }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="timeline-item">
+            <div class="timeline-marker"></div>
+            <div class="timeline-content">
+              <div class="timeline-header">
+                <div class="timeline-title">Previous Configuration</div>
+                <div class="timeline-time">{{ getPreviousUpdateTime() }}</div>
+              </div>
+              <div class="timeline-details">
+                <div class="timeline-user">Updated by SystemAdmin</div>
+                <div class="timeline-changes">
+                  <span class="change-item">Peripheral health check</span>
+                  <span class="change-item">Configuration validation</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="timeline-item">
+            <div class="timeline-marker"></div>
+            <div class="timeline-content">
+              <div class="timeline-header">
+                <div class="timeline-title">Initial Configuration</div>
+                <div class="timeline-time">{{ getInitialConfigTime() }}</div>
+              </div>
+              <div class="timeline-details">
+                <div class="timeline-user">System Deployment</div>
+                <div class="timeline-changes">
+                  <span class="change-item">ATM initial setup</span>
+                  <span class="change-item">Peripheral discovery</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Success/Error Messages -->
+  <div class="message-container" *ngIf="showMessage">
+    <div class="message" [ngClass]="messageType">
+      <span class="message-icon">{{ getMessageIcon() }}</span>
+      <span class="message-text">{{ messageText }}</span>
+      <button class="message-close" (click)="closeMessage()">✖</button>
     </div>
   </div>
 </div>

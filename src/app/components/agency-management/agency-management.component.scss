@@ -1,20 +1,17 @@
-// ATM Registry Management Component Styles
-.admin-container {
+// Agency Management Component Styles
+.agency-container {
   min-height: 100vh;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   padding: 0;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 
   // Enhanced Header Section
-  .admin-header {
+  .agency-header {
     background: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(20px);
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     padding: 2rem;
     color: white;
-    position: sticky;
-    top: 0;
-    z-index: 100;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
 
     display: flex;
@@ -186,7 +183,7 @@
   }
 
   // Main Content
-  .admin-content {
+  .agency-content {
     padding: 2rem;
     max-width: 1400px;
     margin: 0 auto;
@@ -308,17 +305,15 @@
                 font-weight: 700;
               }
 
-              &[for="label"]::after,
-              &[for="ipAddress"]::after,
-              &[for="region"]::after,
-              &[for="locationAddress"]::after,
-              &[for="locationLatitude"]::after,
-              &[for="locationLongitude"]::after {
+              &[for="description"]::after,
+              &[for="contactEmail"]::after,
+              &[for="contactPhone"]::after,
+              &[for="address"]::after {
                 display: none;
               }
             }
 
-            input, select {
+            input, textarea {
               padding: 0.75rem;
               border: 2px solid #e9ecef;
               border-radius: 10px;
@@ -353,12 +348,10 @@
               }
             }
 
-            select {
-              cursor: pointer;
-
-              option {
-                padding: 0.5rem;
-              }
+            textarea {
+              resize: vertical;
+              min-height: 80px;
+              font-family: inherit;
             }
 
             .error-message {
@@ -366,21 +359,6 @@
               font-size: 0.8rem;
               margin-top: 0.5rem;
               font-weight: 500;
-            }
-          }
-        }
-
-        .location-actions {
-          display: flex;
-          gap: 1rem;
-          margin-top: 1rem;
-          padding: 0 1.5rem 1.5rem;
-
-          .btn {
-            &.btn-sm {
-              padding: 0.5rem 1rem;
-              font-size: 0.85rem;
-              border-radius: 20px;
             }
           }
         }
@@ -665,33 +643,65 @@
                     text-overflow: ellipsis;
                   }
 
-                  .device-info {
-                    .device-brand {
+                  .agency-info {
+                    .agency-name {
                       font-weight: 600;
                       color: #333;
                       margin-bottom: 0.25rem;
                     }
 
-                    .device-model {
+                    .agency-description {
                       font-size: 0.85rem;
                       color: #666;
+                      max-width: 200px;
+                      overflow: hidden;
+                      text-overflow: ellipsis;
+                      white-space: nowrap;
                     }
                   }
 
-                  .agency-info {
-                    .agency-name {
-                      font-weight: 500;
-                      color: #333;
-                      margin-bottom: 0.25rem;
-                    }
-
-                    .agency-code {
+                  .contact-info {
+                    .contact-email,
+                    .contact-phone,
+                    .contact-address {
+                      display: flex;
+                      align-items: center;
+                      gap: 0.25rem;
                       font-size: 0.85rem;
                       color: #666;
-                      background: #e9ecef;
-                      padding: 0.15rem 0.5rem;
-                      border-radius: 8px;
-                      display: inline-block;
+                      margin-bottom: 0.25rem;
+
+                      &:last-child {
+                        margin-bottom: 0;
+                      }
+
+                      .contact-icon {
+                        font-size: 0.9rem;
+                        color: #999;
+                        min-width: 16px;
+                      }
+                    }
+                  }
+
+                  .atm-count {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
+
+                    .count-badge {
+                      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                      color: white;
+                      padding: 0.25rem 0.75rem;
+                      border-radius: 12px;
+                      font-weight: 600;
+                      font-size: 0.85rem;
+                      min-width: 24px;
+                      text-align: center;
+                    }
+
+                    .count-label {
+                      font-size: 0.8rem;
+                      color: #666;
                     }
                   }
                 }
@@ -738,10 +748,21 @@
                       background: rgba(220, 53, 69, 0.1);
                       color: #dc3545;
 
-                      &:hover {
+                      &:hover:not([disabled]) {
                         background: #dc3545;
                         color: white;
                         transform: scale(1.1);
+                      }
+
+                      &[disabled] {
+                        opacity: 0.4;
+                        cursor: not-allowed;
+                        transform: none;
+
+                        &:hover {
+                          background: rgba(220, 53, 69, 0.1);
+                          color: #dc3545;
+                        }
                       }
                     }
                   }
@@ -886,7 +907,7 @@
 
 // Responsive Design
 @media (max-width: 1200px) {
-  .admin-container .admin-content {
+  .agency-container .agency-content {
     grid-template-columns: 1fr;
     gap: 1.5rem;
 
@@ -897,8 +918,8 @@
 }
 
 @media (max-width: 768px) {
-  .admin-container {
-    .admin-header {
+  .agency-container {
+    .agency-header {
       padding: 1rem;
       flex-direction: column;
       gap: 1rem;
@@ -927,7 +948,7 @@
       }
     }
 
-    .admin-content {
+    .agency-content {
       padding: 1rem;
       gap: 1rem;
 
@@ -936,6 +957,17 @@
           padding: 1rem;
           flex-direction: column;
           gap: 1rem;
+
+          .panel-title {
+            flex-direction: column;
+            text-align: center;
+            gap: 0.5rem;
+          }
+
+          .panel-controls {
+            width: 100%;
+            justify-content: center;
+          }
         }
 
         .enhanced-form {
@@ -962,13 +994,33 @@
           }
 
           .cell-content {
-            .device-info, .agency-info {
-              .device-brand, .agency-name {
+            .agency-info {
+              .agency-name {
                 font-size: 0.85rem;
               }
 
-              .device-model, .agency-code {
+              .agency-description {
                 font-size: 0.75rem;
+                max-width: 150px;
+              }
+            }
+
+            .contact-info {
+              .contact-email,
+              .contact-phone,
+              .contact-address {
+                font-size: 0.75rem;
+              }
+            }
+
+            .atm-count {
+              .count-badge {
+                font-size: 0.75rem;
+                padding: 0.2rem 0.6rem;
+              }
+
+              .count-label {
+                font-size: 0.7rem;
               }
             }
           }
@@ -998,8 +1050,8 @@
 }
 
 @media (max-width: 480px) {
-  .admin-container {
-    .admin-header {
+  .agency-container {
+    .agency-header {
       .header-content .header-icon {
         font-size: 2rem;
       }
@@ -1010,18 +1062,7 @@
       }
     }
 
-    .admin-content {
-      .form-panel .enhanced-form {
-        .location-actions {
-          flex-direction: column;
-          padding: 0 1rem 1rem;
-
-          .btn {
-            width: 100%;
-          }
-        }
-      }
-
+    .agency-content {
       .data-panel .table-container .data-table {
         .cell-actions {
           flex-direction: column;

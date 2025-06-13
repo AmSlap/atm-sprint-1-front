@@ -1,75 +1,348 @@
 <div class="counters-container">
-  <h2>ATM Counters</h2>
-
-  <div class="counters-card">
-    <h3>Cash Summary</h3>
-    <div class="info-item">
-      <span class="label">Total Cash Available:</span>
-      <span class="value">{{ counters.totalCashAvailable | currency }}</span>
+  <!-- Enhanced Header Section -->
+  <div class="counters-header">
+    <div class="header-content">
+      <div class="header-icon">💰</div>
+      <div class="header-text">
+        <h2>ATM Cash & Counters</h2>
+        <p class="header-subtitle">Real-time cash levels and transaction data</p>
+      </div>
     </div>
-    <div class="info-item">
-      <span class="label">Low Cash Status:</span>
-      <span class="value" [class.warning]="counters.lowCashFlag">
-        {{ counters.lowCashFlag ? 'Low Cash Warning!' : 'Cash Level Normal' }}
-      </span>
-    </div>
-    <div class="info-item">
-      <span class="label">Reject Bin:</span>
-      <span class="value">
-        {{ counters.rejectBinPercentageFull }}% Full
-        <div class="progress-bar">
-          <div class="progress-fill" [style.width.%]="counters.rejectBinPercentageFull"
-               [ngClass]="{'warning': counters.rejectBinPercentageFull > 70,
-                          'critical': counters.rejectBinPercentageFull > 90}">
-          </div>
-        </div>
-      </span>
-    </div>
-    <div class="info-item">
-      <span class="label">Last Update:</span>
-      <span class="value">{{ counters.lastUpdateTimestamp | date:'medium' }}</span>
+    <div class="header-actions">
+      <div class="last-updated">
+        <div class="update-label">Last Updated</div>
+        <div class="update-time">{{ getLastUpdateTime() }}</div>
+        <div class="update-ago">{{ getTimeAgo(counters.lastUpdateTimestamp) }}</div>
+      </div>
+      <button class="btn btn-outline" (click)="refreshCounters()" [disabled]="isRefreshing">
+        <span class="btn-icon" [ngClass]="{'spinning': isRefreshing}">🔄</span>
+        {{ isRefreshing ? 'Refreshing...' : 'Refresh Data' }}
+      </button>
     </div>
   </div>
 
-  <div class="counters-card">
-    <h3>Cassettes</h3>
-    <div *ngIf="!counters.cassettes || counters.cassettes.length === 0" class="no-cassettes">
-      No cassette information available
-    </div>
+  <div class="counters-content">
+    <!-- Enhanced Cash Summary Card -->
+    <div class="counters-card cash-summary-card">
+      <div class="card-header">
+        <div class="card-title">
+          <span class="card-icon">💵</span>
+          <h3>Cash Summary</h3>
+        </div>
+        <div class="cash-status-badge" [ngClass]="getCashStatusClass()">
+          <span class="status-icon">{{ getCashStatusIcon() }}</span>
+          <span class="status-text">{{ getCashStatusText() }}</span>
+        </div>
+      </div>
 
-    <div class="cassette-grid">
-      <div *ngFor="let cassette of counters.cassettes" class="cassette-item">
-        <div class="cassette-header">
-          <h4>{{ cassette.cassetteId }}</h4>
-          <div class="cassette-status" [style.background-color]="getCassetteStatusColor(cassette.cassetteStatus)"></div>
+      <div class="card-content">
+        <!-- Total Cash Display -->
+        <div class="cash-total-section">
+          <div class="cash-total-display">
+            <div class="cash-amount">{{ counters.totalCashAvailable | currency }}</div>
+            <div class="cash-label">Total Available Cash</div>
+          </div>
+
+          <div class="cash-visual-indicator">
+            <div class="cash-meter">
+              <div class="meter-fill"
+                   [style.height.%]="getCashLevelPercentage()"
+                   [ngClass]="getCashMeterClass()">
+              </div>
+              <div class="meter-markers">
+                <div class="marker high">High</div>
+                <div class="marker medium">Medium</div>
+                <div class="marker low">Low</div>
+              </div>
+            </div>
+            <div class="cash-percentage">{{ getCashLevelPercentage() }}%</div>
+          </div>
         </div>
 
-        <div class="cassette-details">
-          <div class="info-item">
-            <span class="label">Denomination:</span>
-            <span class="value">{{ cassette.denomination | currency:cassette.currency }}</span>
+        <!-- Cash Status Grid -->
+        <div class="cash-status-grid">
+          <div class="status-item" [ngClass]="{'alert': counters.lowCashFlag}">
+            <div class="status-header">
+              <span class="status-icon">⚠️</span>
+              <span class="status-label">Cash Level Status</span>
+            </div>
+            <div class="status-value" [ngClass]="{'warning': counters.lowCashFlag}">
+              {{ counters.lowCashFlag ? 'Low Cash Warning!' : 'Cash Level Normal' }}
+            </div>
+            <div class="status-description">
+              {{ counters.lowCashFlag ? 'Requires immediate attention' : 'Operating within normal parameters' }}
+            </div>
           </div>
-          <div class="info-item">
-            <span class="label">Notes Remaining:</span>
-            <span class="value">{{ cassette.notesRemaining }}</span>
-          </div>
-          <div class="info-item">
-            <span class="label">Status:</span>
-            <span class="value">{{ cassette.cassetteStatus }}</span>
-          </div>
-          <div class="info-item">
-            <span class="label">Fill Level:</span>
-            <span class="value">
-              <div class="progress-bar">
-                <div class="progress-fill" [style.width.%]="getNotesRemainingPercentage(cassette)"
-                     [ngClass]="{'warning': getNotesRemainingPercentage(cassette) < 30,
-                                'critical': getNotesRemainingPercentage(cassette) < 10}">
+
+          <div class="status-item">
+            <div class="status-header">
+              <span class="status-icon">🗑️</span>
+              <span class="status-label">Reject Bin</span>
+            </div>
+            <div class="status-value">{{ counters.rejectBinPercentageFull }}% Full</div>
+            <div class="reject-bin-visual">
+              <div class="reject-bin-bar">
+                <div class="reject-bin-fill"
+                     [style.width.%]="counters.rejectBinPercentageFull"
+                     [ngClass]="getRejectBinClass()">
                 </div>
               </div>
-            </span>
+              <div class="reject-bin-status">{{ getRejectBinStatus() }}</div>
+            </div>
+          </div>
+
+          <div class="status-item">
+            <div class="status-header">
+              <span class="status-icon">📊</span>
+              <span class="status-label">Active Cassettes</span>
+            </div>
+            <div class="status-value">{{ getActiveCassetteCount() }} / {{ getTotalCassetteCount() }}</div>
+            <div class="status-description">Cassettes operational</div>
+          </div>
+
+          <div class="status-item">
+            <div class="status-header">
+              <span class="status-icon">💳</span>
+              <span class="status-label">Denominations</span>
+            </div>
+            <div class="status-value">{{ getAvailableDenominations().length }} Types</div>
+            <div class="denomination-list">
+              <span *ngFor="let denom of getAvailableDenominations(); let last = last" class="denomination-chip">
+                {{ denom }}{{ !last ? ',' : '' }}
+              </span>
+            </div>
           </div>
         </div>
       </div>
+    </div>
+
+    <!-- Enhanced Cassettes Card -->
+    <div class="counters-card cassettes-card">
+      <div class="card-header">
+        <div class="card-title">
+          <span class="card-icon">🏦</span>
+          <h3>Cash Cassettes</h3>
+          <span class="cassette-count">({{ getTotalCassetteCount() }} Total)</span>
+        </div>
+        <div class="cassette-controls">
+          <div class="view-toggle">
+            <button class="view-btn"
+                    [ngClass]="{'active': cassetteView === 'grid'}"
+                    (click)="setCassetteView('grid')">
+              <span>⊞</span> Grid
+            </button>
+            <button class="view-btn"
+                    [ngClass]="{'active': cassetteView === 'list'}"
+                    (click)="setCassetteView('list')">
+              <span>☰</span> List
+            </button>
+          </div>
+          <div class="filter-controls">
+            <select [(ngModel)]="cassetteFilter" (change)="filterCassettes()" class="filter-select">
+              <option value="all">All Cassettes</option>
+              <option value="active">Active Only</option>
+              <option value="warning">Warnings</option>
+              <option value="critical">Critical</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-content">
+        <!-- No Cassettes State -->
+        <div *ngIf="!counters.cassettes || counters.cassettes.length === 0" class="no-cassettes">
+          <div class="no-cassettes-content">
+            <div class="no-cassettes-icon">🏦</div>
+            <h4>No Cassette Information Available</h4>
+            <p>Cassette data has not been provided or is currently unavailable.</p>
+            <button class="btn btn-primary btn-sm" (click)="refreshCounters()">
+              <span class="btn-icon">🔄</span>
+              Refresh Data
+            </button>
+          </div>
+        </div>
+
+        <!-- Cassettes Grid View -->
+        <div *ngIf="cassetteView === 'grid' && getFilteredCassettes().length > 0"
+             class="cassette-grid">
+          <div *ngFor="let cassette of getFilteredCassettes(); trackBy: trackByCassetteId"
+               class="cassette-item"
+               [ngClass]="getCassetteItemClass(cassette)">
+
+            <div class="cassette-header">
+              <div class="cassette-id-section">
+                <h4 class="cassette-id">{{ cassette.cassetteId }}</h4>
+                <div class="cassette-type">{{ getCassetteType(cassette) }}</div>
+              </div>
+              <div class="cassette-status-indicator">
+                <div class="status-dot" [ngClass]="getCassetteStatusClass(cassette.cassetteStatus)"></div>
+                <span class="status-text">{{ cassette.cassetteStatus }}</span>
+              </div>
+            </div>
+
+            <div class="cassette-content">
+              <!-- Denomination Display -->
+              <div class="denomination-section">
+                <div class="denomination-amount">
+                  {{ cassette.denomination | currency:cassette.currency:'symbol':'1.0-0' }}
+                </div>
+                <div class="denomination-label">{{ cassette.currency }} Denomination</div>
+              </div>
+
+              <!-- Notes Counter -->
+              <div class="notes-section">
+                <div class="notes-display">
+                  <div class="notes-count">{{ cassette.notesRemaining | number }}</div>
+                  <div class="notes-label">Notes Remaining</div>
+                </div>
+                <div class="notes-value">
+                  <div class="value-amount">{{ calculateCassetteValue(cassette) | currency:cassette.currency }}</div>
+                  <div class="value-label">Total Value</div>
+                </div>
+              </div>
+
+              <!-- Fill Level Indicator -->
+              <div class="fill-level-section">
+                <div class="fill-level-header">
+                  <span class="fill-label">Fill Level</span>
+                  <span class="fill-percentage">{{ getNotesRemainingPercentage(cassette) }}%</span>
+                </div>
+                <div class="fill-level-bar">
+                  <div class="fill-level-track">
+                    <div class="fill-level-progress"
+                         [style.width.%]="getNotesRemainingPercentage(cassette)"
+                         [ngClass]="getFillLevelClass(cassette)">
+                    </div>
+                  </div>
+                  <div class="fill-level-markers">
+                    <div class="marker" style="left: 25%"></div>
+                    <div class="marker" style="left: 50%"></div>
+                    <div class="marker" style="left: 75%"></div>
+                  </div>
+                </div>
+                <div class="fill-level-status">{{ getFillLevelStatus(cassette) }}</div>
+              </div>
+
+              <!-- Cassette Actions -->
+              <div class="cassette-actions">
+                <button class="action-btn primary"
+                        (click)="viewCassetteDetails(cassette)"
+                        title="View Details">
+                  📊 Details
+                </button>
+                <button class="action-btn secondary"
+                        (click)="refreshCassette(cassette)"
+                        title="Refresh Cassette">
+                  🔄 Refresh
+                </button>
+                <button class="action-btn warning"
+                        *ngIf="canRefillCassette(cassette)"
+                        (click)="refillCassette(cassette)"
+                        title="Schedule Refill">
+                  💰 Refill
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cassettes List View -->
+        <div *ngIf="cassetteView === 'list' && getFilteredCassettes().length > 0"
+             class="cassette-list">
+          <div class="list-header">
+            <div class="list-column">Cassette</div>
+            <div class="list-column">Denomination</div>
+            <div class="list-column">Notes</div>
+            <div class="list-column">Value</div>
+            <div class="list-column">Fill Level</div>
+            <div class="list-column">Status</div>
+            <div class="list-column">Actions</div>
+          </div>
+
+          <div *ngFor="let cassette of getFilteredCassettes(); trackBy: trackByCassetteId"
+               class="list-item"
+               [ngClass]="getCassetteItemClass(cassette)">
+            <div class="list-column cassette-info">
+              <div class="cassette-id">{{ cassette.cassetteId }}</div>
+              <div class="cassette-type">{{ getCassetteType(cassette) }}</div>
+            </div>
+            <div class="list-column denomination-info">
+              <div class="denomination">{{ cassette.denomination | currency:cassette.currency:'symbol':'1.0-0' }}</div>
+              <div class="currency">{{ cassette.currency }}</div>
+            </div>
+            <div class="list-column notes-info">
+              <div class="notes-count">{{ cassette.notesRemaining | number }}</div>
+              <div class="notes-label">remaining</div>
+            </div>
+            <div class="list-column value-info">
+              <div class="value-amount">{{ calculateCassetteValue(cassette) | currency:cassette.currency }}</div>
+            </div>
+            <div class="list-column fill-info">
+              <div class="fill-bar-small">
+                <div class="fill-progress-small"
+                     [style.width.%]="getNotesRemainingPercentage(cassette)"
+                     [ngClass]="getFillLevelClass(cassette)">
+                </div>
+              </div>
+              <div class="fill-percentage-small">{{ getNotesRemainingPercentage(cassette) }}%</div>
+            </div>
+            <div class="list-column status-info">
+              <div class="status-badge" [ngClass]="getCassetteStatusClass(cassette.cassetteStatus)">
+                {{ cassette.cassetteStatus }}
+              </div>
+            </div>
+            <div class="list-column actions-info">
+              <div class="list-actions">
+                <button class="list-action-btn" (click)="viewCassetteDetails(cassette)" title="Details">📊</button>
+                <button class="list-action-btn" (click)="refreshCassette(cassette)" title="Refresh">🔄</button>
+                <button class="list-action-btn warning"
+                        *ngIf="canRefillCassette(cassette)"
+                        (click)="refillCassette(cassette)"
+                        title="Refill">💰</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Statistics Summary -->
+        <div class="cassette-stats" *ngIf="getFilteredCassettes().length > 0">
+          <div class="stats-header">
+            <h4>Cassette Statistics</h4>
+            <div class="stats-updated">Updated {{ getTimeAgo(counters.lastUpdateTimestamp) }}</div>
+          </div>
+          <div class="stats-grid">
+            <div class="stat-item">
+              <div class="stat-icon">💰</div>
+              <div class="stat-value">{{ getTotalCassetteValue() | currency }}</div>
+              <div class="stat-label">Total Cassette Value</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-icon">📄</div>
+              <div class="stat-value">{{ getTotalNotesCount() | number }}</div>
+              <div class="stat-label">Total Notes</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-icon">⚡</div>
+              <div class="stat-value">{{ getActiveCassetteCount() }}</div>
+              <div class="stat-label">Active Cassettes</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-icon">⚠️</div>
+              <div class="stat-value">{{ getWarningCassetteCount() }}</div>
+              <div class="stat-label">Warnings</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Success/Error Messages -->
+  <div class="message-container" *ngIf="showMessage">
+    <div class="message" [ngClass]="messageType">
+      <span class="message-icon">{{ getMessageIcon() }}</span>
+      <span class="message-text">{{ messageText }}</span>
+      <button class="message-close" (click)="closeMessage()">✖</button>
     </div>
   </div>
 </div>

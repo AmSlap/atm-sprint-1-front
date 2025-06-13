@@ -71,3 +71,36 @@ export interface Agency {
   contactEmail?: string;
   contactPhone?: string;
 }
+
+// Combined ATM data for dashboard
+export interface AtmCombinedDto extends AtmStateSummaryDto {
+  registryInfo?: Partial<AtmRegistryInfo>;
+  // Flattened registry fields for easier access
+  label?: string;
+  brand?: string;
+  model?: string;
+  region?: string;
+  agencyName?: string;
+  agencyCode?: string;
+  locationAddress?: string;
+  locationLatitude?: number;
+  locationLongitude?: number;
+}
+
+export interface AtmEnhancedDetailDto {
+  atmId: string;
+  status: AtmStatusDto;
+  configuration: AtmConfigurationDto;
+  counters: AtmCounterDto;
+  registryInfo: AtmRegistryInfo | null;
+}
+
+// If you don't have AtmStatusDto, add it:
+export interface AtmStatusDto {
+  atmId: string;
+  operationalState: string;
+  maintenanceMode: boolean;
+  lastSuccessfulConnection: string;
+  lastSuccessfulTransaction: string;
+  lastUpdateTimestamp: string;
+}

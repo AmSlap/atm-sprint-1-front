@@ -1,59 +1,433 @@
 <div class="info-container">
-  <h2>ATM Information</h2>
+  <!-- Enhanced Header Section -->
+  <div class="info-header">
+    <div class="header-content">
+      <div class="header-icon">ℹ️</div>
+      <div class="header-text">
+        <h2>ATM Registry Information</h2>
+        <p class="header-subtitle">Complete details and location data</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-outline" (click)="copyAtmInfo()" title="Copy ATM Info">
+        <span class="btn-icon">📋</span>
+        Copy Info
+      </button>
+      <button class="btn btn-primary" (click)="editAtmInfo()" title="Edit ATM Info">
+        <span class="btn-icon">✏️</span>
+        Edit Info
+      </button>
+    </div>
+  </div>
 
-  <div class="info-card">
-    <h3>Basic Information</h3>
-    <div class="info-grid">
-      <div class="info-item">
-        <span class="label">ATM ID:</span>
-        <span class="value">{{ registryInfo.atmId }}</span>
+  <div class="info-content">
+    <!-- Basic Information Card -->
+    <div class="info-card basic-info">
+      <div class="card-header">
+        <div class="card-title">
+          <span class="card-icon">🏧</span>
+          <h3>Basic Information</h3>
+        </div>
+        <div class="card-badge">
+          <span class="badge-text">Registry Data</span>
+        </div>
       </div>
-      <div class="info-item">
-        <span class="label">Serial Number:</span>
-        <span class="value">{{ registryInfo.serialNumber }}</span>
+
+      <div class="card-content">
+        <div class="info-grid">
+          <div class="info-item primary">
+            <div class="item-header">
+              <span class="item-icon">🆔</span>
+              <span class="label">ATM ID</span>
+            </div>
+            <span class="value primary-value">{{ registryInfo.atmId }}</span>
+            <button class="copy-btn" (click)="copyToClipboard(registryInfo.atmId)" title="Copy ATM ID">
+              📋
+            </button>
+          </div>
+
+          <div class="info-item" *ngIf="registryInfo.serialNumber">
+            <div class="item-header">
+              <span class="item-icon">🔢</span>
+              <span class="label">Serial Number</span>
+            </div>
+            <span class="value">{{ registryInfo.serialNumber }}</span>
+            <button class="copy-btn" (click)="copyToClipboard(registryInfo.serialNumber)" title="Copy Serial">
+              📋
+            </button>
+          </div>
+
+          <div class="info-item" *ngIf="registryInfo.brand">
+            <div class="item-header">
+              <span class="item-icon">🏭</span>
+              <span class="label">Brand</span>
+            </div>
+            <span class="value">{{ registryInfo.brand }}</span>
+          </div>
+
+          <div class="info-item" *ngIf="registryInfo.model">
+            <div class="item-header">
+              <span class="item-icon">📱</span>
+              <span class="label">Model</span>
+            </div>
+            <span class="value">{{ registryInfo.model }}</span>
+          </div>
+
+          <div class="info-item" *ngIf="registryInfo.label">
+            <div class="item-header">
+              <span class="item-icon">🏷️</span>
+              <span class="label">Label</span>
+            </div>
+            <span class="value">{{ registryInfo.label }}</span>
+          </div>
+
+          <div class="info-item" *ngIf="registryInfo.ipAddress">
+            <div class="item-header">
+              <span class="item-icon">🌐</span>
+              <span class="label">IP Address</span>
+            </div>
+            <span class="value ip-address">{{ registryInfo.ipAddress }}</span>
+            <button class="copy-btn" (click)="copyToClipboard(registryInfo.ipAddress)" title="Copy IP">
+              📋
+            </button>
+            <button class="ping-btn" (click)="pingAtm()" title="Test Connection">
+              📡
+            </button>
+          </div>
+        </div>
       </div>
-      <div class="info-item">
-        <span class="label">Brand:</span>
-        <span class="value">{{ registryInfo.brand }}</span>
+    </div>
+
+    <!-- Agency & Region Card -->
+    <div class="info-card agency-info">
+      <div class="card-header">
+        <div class="card-title">
+          <span class="card-icon">🏢</span>
+          <h3>Agency & Region</h3>
+        </div>
       </div>
-      <div class="info-item">
-        <span class="label">Model:</span>
-        <span class="value">{{ registryInfo.model }}</span>
+
+      <div class="card-content">
+        <div class="agency-grid">
+          <div class="agency-item" *ngIf="registryInfo.agencyName || registryInfo.agencyCode">
+            <div class="agency-header">
+              <span class="agency-icon">🏢</span>
+              <div class="agency-details">
+                <div class="agency-name">{{ registryInfo.agencyName || registryInfo.agencyCode }}</div>
+                <div class="agency-code" *ngIf="registryInfo.agencyCode && registryInfo.agencyName">
+                  Code: {{ registryInfo.agencyCode }}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="region-item" *ngIf="registryInfo.region">
+            <div class="region-header">
+              <span class="region-icon">🌍</span>
+              <div class="region-details">
+                <div class="region-name">{{ registryInfo.region }}</div>
+                <div class="region-label">Region</div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="info-item">
-        <span class="label">Label:</span>
-        <span class="value">{{ registryInfo.label || '-' }}</span>
+    </div>
+
+    <!-- Location Card -->
+    <div class="info-card location-info">
+      <div class="card-header">
+        <div class="card-title">
+          <span class="card-icon">📍</span>
+          <h3>Location Details</h3>
+        </div>
+        <div class="location-actions">
+          <button class="btn btn-sm btn-outline"
+                  *ngIf="hasCoordinates()"
+                  (click)="openInMaps()"
+                  title="Open in Google Maps">
+            <span class="btn-icon">🗺️</span>
+            View in Maps
+          </button>
+          <button class="btn btn-sm btn-outline"
+                  *ngIf="hasCoordinates()"
+                  (click)="getDirections()"
+                  title="Get Directions">
+            <span class="btn-icon">🧭</span>
+            Directions
+          </button>
+        </div>
       </div>
-      <div class="info-item">
-        <span class="label">IP Address:</span>
-        <span class="value">{{ registryInfo.ipAddress || '-' }}</span>
+
+      <div class="card-content">
+        <!-- Address Section -->
+        <div class="location-section" *ngIf="registryInfo.locationAddress">
+          <div class="location-item">
+            <div class="item-header">
+              <span class="item-icon">📮</span>
+              <span class="label">Address</span>
+            </div>
+            <div class="address-content">
+              <span class="value address-text">{{ registryInfo.locationAddress }}</span>
+              <div class="address-actions">
+                <button class="copy-btn" (click)="copyToClipboard(registryInfo.locationAddress)" title="Copy Address">
+                  📋
+                </button>
+                <button class="search-btn" (click)="searchAddress()" title="Search Address">
+                  🔍
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Coordinates Section -->
+        <div class="coordinates-section" *ngIf="hasCoordinates()">
+          <div class="coordinates-grid">
+            <div class="coordinate-item">
+              <div class="coordinate-header">
+                <span class="coordinate-icon">🧭</span>
+                <span class="coordinate-label">Latitude</span>
+              </div>
+              <span class="coordinate-value">{{ registryInfo.locationLatitude | number:'1.6-6' }}°</span>
+              <button class="copy-btn" (click)="copyToClipboard(registryInfo.locationLatitude?.toString())" title="Copy Latitude">
+                📋
+              </button>
+            </div>
+
+            <div class="coordinate-item">
+              <div class="coordinate-header">
+                <span class="coordinate-icon">🧭</span>
+                <span class="coordinate-label">Longitude</span>
+              </div>
+              <span class="coordinate-value">{{ registryInfo.locationLongitude | number:'1.6-6' }}°</span>
+              <button class="copy-btn" (click)="copyToClipboard(registryInfo.locationLongitude?.toString())" title="Copy Longitude">
+                📋
+              </button>
+            </div>
+          </div>
+
+          <div class="coordinate-combined">
+            <div class="combined-header">
+              <span class="combined-icon">📐</span>
+              <span class="combined-label">Full Coordinates</span>
+            </div>
+            <span class="combined-value">{{ getFormattedCoordinates() }}</span>
+            <button class="copy-btn" (click)="copyToClipboard(getFormattedCoordinates())" title="Copy Coordinates">
+              📋
+            </button>
+          </div>
+        </div>
+
+        <!-- Map Placeholder with External Links -->
+        <div class="map-placeholder" *ngIf="hasCoordinates()">
+          <div class="map-placeholder-content">
+            <div class="map-icon">🗺️</div>
+            <h4>Location on Map</h4>
+            <p>View this ATM's location on external mapping services</p>
+
+            <div class="map-services">
+              <a [href]="getGoogleMapsUrl()" target="_blank" class="map-service-btn google-maps">
+                <span class="service-icon">🌍</span>
+                <div class="service-details">
+                  <div class="service-name">Google Maps</div>
+                  <div class="service-desc">Open in Google Maps</div>
+                </div>
+              </a>
+
+              <a [href]="getAppleMapsUrl()" target="_blank" class="map-service-btn apple-maps">
+                <span class="service-icon">🗺️</span>
+                <div class="service-details">
+                  <div class="service-name">Apple Maps</div>
+                  <div class="service-desc">Open in Apple Maps</div>
+                </div>
+              </a>
+
+              <a [href]="getOpenStreetMapUrl()" target="_blank" class="map-service-btn osm">
+                <span class="service-icon">🌐</span>
+                <div class="service-details">
+                  <div class="service-name">OpenStreetMap</div>
+                  <div class="service-desc">Open in OSM</div>
+                </div>
+              </a>
+
+              <button class="map-service-btn share-location" (click)="shareLocation()">
+                <span class="service-icon">📤</span>
+                <div class="service-details">
+                  <div class="service-name">Share Location</div>
+                  <div class="service-desc">Copy location link</div>
+                </div>
+              </button>
+            </div>
+
+            <div class="coordinates-display">
+              <div class="coord-item">
+                <span class="coord-label">Latitude:</span>
+                <span class="coord-value">{{ registryInfo.locationLatitude | number:'1.6-6' }}°</span>
+              </div>
+              <div class="coord-item">
+                <span class="coord-label">Longitude:</span>
+                <span class="coord-value">{{ registryInfo.locationLongitude | number:'1.6-6' }}°</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- No Location Data -->
+        <div class="no-location" *ngIf="!hasCoordinates() && !registryInfo.locationAddress">
+          <div class="no-location-content">
+            <div class="no-location-icon">📍</div>
+            <h4>No Location Data Available</h4>
+            <p>Location information has not been provided for this ATM.</p>
+            <button class="btn btn-primary btn-sm" (click)="addLocationData()">
+              <span class="btn-icon">➕</span>
+              Add Location Data
+            </button>
+          </div>
+        </div>
       </div>
-      <div class="info-item">
-        <span class="label">Region:</span>
-        <span class="value">{{ registryInfo.region || '-' }}</span>
+    </div>
+
+    <!-- Technical Specifications Card -->
+    <div class="info-card technical-info">
+      <div class="card-header">
+        <div class="card-title">
+          <span class="card-icon">⚙️</span>
+          <h3>Technical Specifications</h3>
+        </div>
+        <div class="card-badge expandable" (click)="toggleTechnicalDetails()">
+          <span class="badge-text">{{ showTechnicalDetails ? 'Collapse' : 'Expand' }}</span>
+          <span class="badge-icon">{{ showTechnicalDetails ? '▲' : '▼' }}</span>
+        </div>
       </div>
-      <div class="info-item">
-        <span class="label">Agency:</span>
-        <span class="value">{{ registryInfo.agencyName || registryInfo.agencyCode }}</span>
+
+      <div class="card-content" [ngClass]="{'expanded': showTechnicalDetails}">
+        <div class="technical-grid">
+          <div class="tech-item" *ngIf="registryInfo.brand && registryInfo.model">
+            <div class="tech-header">
+              <span class="tech-icon">🏷️</span>
+              <span class="tech-label">Device Model</span>
+            </div>
+            <span class="tech-value">{{ registryInfo.brand }} {{ registryInfo.model }}</span>
+          </div>
+
+          <div class="tech-item" *ngIf="registryInfo.serialNumber">
+            <div class="tech-header">
+              <span class="tech-icon">🔢</span>
+              <span class="tech-label">Serial Number</span>
+            </div>
+            <span class="tech-value">{{ registryInfo.serialNumber }}</span>
+          </div>
+
+          <div class="tech-item" *ngIf="registryInfo.ipAddress">
+            <div class="tech-header">
+              <span class="tech-icon">🌐</span>
+              <span class="tech-label">Network Address</span>
+            </div>
+            <span class="tech-value">{{ registryInfo.ipAddress }}</span>
+            <div class="tech-status">
+              <span class="status-indicator" [ngClass]="networkStatus">{{ getNetworkStatusText() }}</span>
+            </div>
+          </div>
+
+          <!-- Additional technical details when expanded -->
+          <div class="tech-details" *ngIf="showTechnicalDetails">
+            <div class="tech-item">
+              <div class="tech-header">
+                <span class="tech-icon">📅</span>
+                <span class="tech-label">Registration Date</span>
+              </div>
+              <span class="tech-value">{{ getRegistrationDate() }}</span>
+            </div>
+
+            <div class="tech-item">
+              <div class="tech-header">
+                <span class="tech-icon">🔄</span>
+                <span class="tech-label">Last Updated</span>
+              </div>
+              <span class="tech-value">{{ getLastUpdated() }}</span>
+            </div>
+
+            <div class="tech-item">
+              <div class="tech-header">
+                <span class="tech-icon">✅</span>
+                <span class="tech-label">Registry Status</span>
+              </div>
+              <span class="tech-value">
+                <span class="status-badge active">Active</span>
+              </span>
+            </div>
+
+            <div class="tech-item">
+              <div class="tech-header">
+                <span class="tech-icon">👤</span>
+                <span class="tech-label">Last Modified By</span>
+              </div>
+              <span class="tech-value">{{ getCurrentUser() }}</span>
+            </div>
+
+            <div class="tech-item">
+              <div class="tech-header">
+                <span class="tech-icon">🕒</span>
+                <span class="tech-label">Current Time</span>
+              </div>
+              <span class="tech-value">{{ getCurrentDateTime() }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- QR Code Card -->
+    <div class="info-card qr-info">
+      <div class="card-header">
+        <div class="card-title">
+          <span class="card-icon">📱</span>
+          <h3>Quick Access</h3>
+        </div>
+      </div>
+
+      <div class="card-content">
+        <div class="qr-section">
+          <div class="qr-container">
+            <div class="qr-placeholder" [ngClass]="{'generated': qrCodeGenerated}">
+              <div class="qr-icon" *ngIf="!qrCodeGenerated">📱</div>
+              <div class="qr-code" *ngIf="qrCodeGenerated">
+                <!-- Simple ASCII QR code representation -->
+                <div class="qr-pattern">
+                  <div class="qr-row">███&nbsp;&nbsp;&nbsp;███&nbsp;&nbsp;&nbsp;███</div>
+                  <div class="qr-row">█&nbsp;&nbsp;█&nbsp;&nbsp;█&nbsp;&nbsp;█&nbsp;&nbsp;█&nbsp;&nbsp;█</div>
+                  <div class="qr-row">█&nbsp;█&nbsp;█&nbsp;&nbsp;█&nbsp;█&nbsp;█&nbsp;&nbsp;█&nbsp;█&nbsp;█</div>
+                  <div class="qr-row">█&nbsp;█&nbsp;█&nbsp;&nbsp;█&nbsp;█&nbsp;█&nbsp;&nbsp;█&nbsp;█&nbsp;█</div>
+                  <div class="qr-row">█&nbsp;&nbsp;█&nbsp;&nbsp;█&nbsp;&nbsp;█&nbsp;&nbsp;█&nbsp;&nbsp;█</div>
+                  <div class="qr-row">███&nbsp;&nbsp;&nbsp;███&nbsp;&nbsp;&nbsp;███</div>
+                </div>
+              </div>
+              <div class="qr-text" *ngIf="!qrCodeGenerated">QR Code</div>
+              <div class="qr-subtitle" *ngIf="!qrCodeGenerated">Scan for quick access</div>
+            </div>
+          </div>
+          <div class="qr-actions">
+            <button class="btn btn-primary btn-sm" (click)="generateQRCode()">
+              <span class="btn-icon">📱</span>
+              {{ qrCodeGenerated ? 'Regenerate' : 'Generate' }} QR Code
+            </button>
+            <button class="btn btn-outline btn-sm" (click)="downloadQRCode()" [disabled]="!qrCodeGenerated">
+              <span class="btn-icon">💾</span>
+              Download
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 
-  <div class="info-card">
-    <h3>Location</h3>
-    <div class="info-item">
-      <span class="label">Address:</span>
-      <span class="value">{{ registryInfo.locationAddress || '-' }}</span>
-    </div>
-    <div class="info-item">
-      <span class="label">Coordinates:</span>
-      <span class="value">{{ registryInfo.locationLatitude || '-' }}, {{ registryInfo.locationLongitude || '-' }}</span>
-    </div>
-
-    <div class="map-container" *ngIf="registryInfo.locationLatitude && registryInfo.locationLongitude">
-      <google-map [options]="mapOptions" [center]="markerPosition" width="100%" height="300px">
-        <map-marker [position]="markerPosition" [title]="registryInfo.label || registryInfo.atmId"></map-marker>
-      </google-map>
+  <!-- Success/Error Messages -->
+  <div class="message-container" *ngIf="showMessage">
+    <div class="message" [ngClass]="messageType">
+      <span class="message-icon">{{ getMessageIcon() }}</span>
+      <span class="message-text">{{ messageText }}</span>
+      <button class="message-close" (click)="closeMessage()">✖</button>
     </div>
   </div>
 </div>

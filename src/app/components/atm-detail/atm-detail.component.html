@@ -1,88 +1,468 @@
 <div class="atm-detail-container">
+  <!-- Enhanced Header Section -->
   <div class="atm-detail-header">
-    <button class="back-button" routerLink="/">← Back to Dashboard</button>
-    <h1>ATM Details: {{ atmId }}</h1>
+    <div class="header-navigation">
+      <button class="back-button" routerLink="/">
+        <span class="back-icon">←</span>
+        Back to Dashboard
+      </button>
+      <div class="breadcrumb">
+        <span>Dashboard</span>
+        <span class="separator">›</span>
+        <span>ATM Details</span>
+        <span class="separator">›</span>
+        <span class="current">{{ atmId }}</span>
+      </div>
+    </div>
+
+    <div class="header-title">
+      <h1>
+        <span class="atm-icon">🏧</span>
+        ATM Details: {{ atmId }}
+      </h1>
+      <div class="header-subtitle" *ngIf="atmDetails && atmDetails.registryInfo">
+        <span>{{ atmDetails.registryInfo?.label || 'No Label' }}</span>
+        <span class="separator">•</span>
+        <span>{{ atmDetails.registryInfo.agencyName || 'No Agency' }}</span>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <div class="last-refresh" *ngIf="!loading">
+        <span>Last updated: {{ getLastRefreshTime() }}</span>
+      </div>
+      <button class="btn btn-outline"
+              (click)="loadAtmDetails()"
+              [disabled]="loading">
+        <span class="btn-icon" [ngClass]="{'spinning': loading}">🔄</span>
+        {{ loading ? 'Refreshing...' : 'Refresh' }}
+      </button>
+      <button class="btn btn-secondary"
+              *ngIf="atmDetails && atmDetails.registryInfo"
+              routerLink="/admin/registry/atms/edit/{{ atmId }}">
+        <span>✏️</span>
+        Edit ATM
+      </button>
+    </div>
   </div>
 
+  <!-- Quick Status Banner -->
+  <div class="status-banner"
+       *ngIf="!loading && !error && atmDetails"
+       [ngClass]="getStatusBannerClass()">
+    <div class="status-indicator" [style.background-color]="getStatusColor()"></div>
+    <div class="status-content">
+      <div class="status-primary">
+        <span class="status-text">{{ atmDetails.status.operationalState }}</span>
+        <span class="health-text">• {{ atmDetails.configuration.overallHealth }}</span>
+      </div>
+      <div class="status-alerts">
+        <span class="alert-item" *ngIf="atmDetails.status.maintenanceMode">
+          🔧 Maintenance Mode
+        </span>
+        <span class="alert-item critical" *ngIf="atmDetails.counters.lowCashFlag">
+          💰 Low Cash Alert
+        </span>
+        <span class="alert-item warning" *ngIf="isConnectionStale()">
+          📡 Connection Stale
+        </span>
+        <span class="alert-item info" *ngIf="atmDetails.counters.rejectBinPercentageFull > 80">
+          🗑️ Reject Bin {{ atmDetails.counters.rejectBinPercentageFull }}% Full
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
   <div *ngIf="loading" class="loading">
-    <span>Loading ATM details...</span>
+    <div class="loading-content">
+      <div class="spinner"></div>
+      <h3>Loading ATM Details</h3>
+      <p>Fetching real-time data for {{ atmId }}...</p>
+      <div class="loading-progress">
+        <div class="progress-bar"></div>
+      </div>
+    </div>
   </div>
 
-  <div *ngIf="error" class="error-message">
-    <p>Failed to load ATM details. Please try again later.</p>
-    <button (click)="loadAtmDetails()">Retry</button>
+  <!-- Error State -->
+  <div *ngIf="error" class="error-state">
+    <div class="error-content">
+      <div class="error-icon">🚫</div>
+      <h2>Unable to Load ATM Details</h2>
+      <p>Could not retrieve data for ATM {{ atmId }}</p>
+      <div class="error-details">
+        <ul>
+          <li>Check if the ATM ID is correct</li>
+          <li>Verify network connectivity</li>
+          <li>Ensure backend services are running</li>
+        </ul>
+      </div>
+      <div class="error-actions">
+        <button class="btn btn-primary" (click)="loadAtmDetails()">
+          <span>🔄</span>
+          Retry Loading
+        </button>
+        <button class="btn btn-secondary" routerLink="/">
+          <span>🏠</span>
+          Back to Dashboard
+        </button>
+      </div>
+    </div>
   </div>
 
+  <!-- Main Content -->
   <div class="atm-detail-content" *ngIf="!loading && !error && atmDetails">
-    <div class="atm-overview">
-      <div class="atm-status-card">
-        <div class="status-header">
-          <div class="status-indicator" [style.background-color]="getStatusColor()"></div>
-          <h2>Status: {{ atmDetails.status.operationalState }}</h2>
-        </div>
-        <div class="status-details">
-          <p>Maintenance Mode: {{ atmDetails.status.maintenanceMode ? 'Yes' : 'No' }}</p>
-          <p>Last Connection: {{ atmDetails.status.lastSuccessfulConnection | date:'medium' }}</p>
-          <p>Last Transaction: {{ atmDetails.status.lastSuccessfulTransaction | date:'medium' }}</p>
-          <p>Health: {{ atmDetails.configuration.overallHealth }}</p>
-          <p *ngIf="atmDetails.counters.lowCashFlag" class="low-cash-warning">Low Cash Warning!</p>
-        </div>
-      </div>
 
-      <div class="view-selector">
-        <button
-          class="view-button"
-          [class.active]="activeView === 'overview'"
-          (click)="setActiveView('overview')">
-          Overview
+    <!-- Enhanced View Selector -->
+    <div class="view-selector">
+      <div class="view-tabs">
+        <button class="view-tab"
+                [class.active]="activeView === 'overview'"
+                (click)="setActiveView('overview')">
+          <span class="tab-icon">📊</span>
+          <span class="tab-label">Overview</span>
         </button>
-        <button
-          class="view-button"
-          [class.active]="activeView === 'configuration'"
-          (click)="setActiveView('configuration')">
-          Configuration
+
+        <button class="view-tab"
+                [class.active]="activeView === 'status'"
+                (click)="setActiveView('status')">
+          <span class="tab-icon">🔍</span>
+          <span class="tab-label">Status Details</span>
         </button>
-        <button
-          class="view-button"
-          [class.active]="activeView === 'counters'"
-          (click)="setActiveView('counters')">
-          Counters
+
+        <button class="view-tab"
+                [class.active]="activeView === 'configuration'"
+                (click)="setActiveView('configuration')">
+          <span class="tab-icon">⚙️</span>
+          <span class="tab-label">Configuration</span>
+          <span class="tab-badge" *ngIf="hasConfigurationAlerts()">!</span>
         </button>
-        <button
-          class="view-button"
-          [class.active]="activeView === 'info'"
-          (click)="setActiveView('info')">
-          Info
+
+        <button class="view-tab"
+                [class.active]="activeView === 'counters'"
+                (click)="setActiveView('counters')">
+          <span class="tab-icon">💰</span>
+          <span class="tab-label">Cash & Counters</span>
+          <span class="tab-badge" *ngIf="atmDetails.counters.lowCashFlag">!</span>
+        </button>
+
+        <button class="view-tab"
+                [class.active]="activeView === 'info'"
+                (click)="setActiveView('info')">
+          <span class="tab-icon">ℹ️</span>
+          <span class="tab-label">Registry Info</span>
+        </button>
+
+        <button class="view-tab"
+                [class.active]="activeView === 'history'"
+                (click)="setActiveView('history')">
+          <span class="tab-icon">📈</span>
+          <span class="tab-label">History</span>
         </button>
       </div>
+    </div>
 
-      <div [ngSwitch]="activeView">
-        <div *ngSwitchCase="'overview'" class="overview-section">
-          <div class="overview-card">
-            <h3>ATM Summary</h3>
-            <p>ID: {{ atmDetails.atmId }}</p>
-            <p *ngIf="atmDetails.registryInfo">Label: {{ atmDetails.registryInfo.label || 'N/A' }}</p>
-            <p *ngIf="atmDetails.registryInfo">Brand/Model: {{ atmDetails.registryInfo.brand }} {{ atmDetails.registryInfo.model }}</p>
-            <p>Operational State: {{ atmDetails.status.operationalState }}</p>
-            <p>Overall Health: {{ atmDetails.configuration.overallHealth }}</p>
-            <p>Total Cash Available: {{ atmDetails.counters.totalCashAvailable | currency }}</p>
-            <p>Reject Bin: {{ atmDetails.counters.rejectBinPercentageFull }}% full</p>
-            <p>Last Update: {{ atmDetails.status.lastUpdateTimestamp | date:'medium' }}</p>
+    <!-- Content Sections -->
+    <div class="view-content">
+
+      <!-- Overview Section -->
+      <div *ngIf="activeView === 'overview'" class="overview-section">
+        <div class="overview-grid">
+
+          <!-- Primary Stats Card -->
+          <div class="overview-card primary-stats">
+            <div class="card-header">
+              <h3>
+                <span class="card-icon">📊</span>
+                ATM Overview
+              </h3>
+              <div class="status-badge" [ngClass]="getStatusClass()">
+                {{ atmDetails.status.operationalState }}
+              </div>
+            </div>
+            <div class="card-content">
+              <div class="stat-grid">
+                <div class="stat-item">
+                  <div class="stat-label">ATM ID</div>
+                  <div class="stat-value">{{ atmDetails.atmId }}</div>
+                </div>
+                <div class="stat-item" *ngIf="atmDetails.registryInfo?.label">
+                  <div class="stat-label">Label</div>
+                  <div class="stat-value">{{ atmDetails.registryInfo?.label }}</div>
+                </div>
+                <div class="stat-item" *ngIf="atmDetails.registryInfo">
+                  <div class="stat-label">Device</div>
+                  <div class="stat-value">{{ atmDetails.registryInfo.brand }} {{ atmDetails.registryInfo.model }}</div>
+                </div>
+                <div class="stat-item">
+                  <div class="stat-label">Health Status</div>
+                  <div class="stat-value" [ngClass]="getHealthClass()">
+                    {{ atmDetails.configuration.overallHealth }}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Cash Status Card -->
+          <div class="overview-card cash-status">
+            <div class="card-header">
+              <h3>
+                <span class="card-icon">💰</span>
+                Cash Status
+              </h3>
+              <div class="cash-alert" *ngIf="atmDetails.counters.lowCashFlag">
+                LOW CASH
+              </div>
+            </div>
+            <div class="card-content">
+              <div class="cash-summary">
+                <div class="cash-total">
+                  <div class="cash-amount">{{ atmDetails.counters.totalCashAvailable | currency }}</div>
+                  <div class="cash-label">Total Available</div>
+                </div>
+                <div class="cash-indicator" [ngClass]="{'low-cash': atmDetails.counters.lowCashFlag}">
+                  <div class="indicator-bar">
+                    <div class="indicator-fill" [style.width]="getCashLevelPercentage() + '%'"></div>
+                  </div>
+                  <div class="indicator-text">
+                    {{ atmDetails.counters.lowCashFlag ? 'LOW' : 'NORMAL' }}
+                  </div>
+                </div>
+              </div>
+
+              <!-- Cassette Summary -->
+              <div class="cassette-summary" *ngIf="atmDetails.counters.cassettes?.length">
+                <h4>Cassettes ({{ atmDetails.counters.cassettes.length }})</h4>
+                <div class="cassette-list">
+                  <div class="cassette-item"
+                       *ngFor="let cassette of atmDetails.counters.cassettes"
+                       [ngClass]="getCassetteClass(cassette)">
+                    <div class="cassette-denomination">{{ cassette.denomination }} {{ cassette.currency }}</div>
+                    <div class="cassette-count">{{ cassette.notesRemaining }} notes</div>
+                    <div class="cassette-status">{{ cassette.cassetteStatus }}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Connection Status Card -->
+          <div class="overview-card connection-status">
+            <div class="card-header">
+              <h3>
+                <span class="card-icon">📡</span>
+                Connection Status
+              </h3>
+              <div class="connection-indicator" [ngClass]="getConnectionClass()"></div>
+            </div>
+            <div class="card-content">
+              <div class="connection-details">
+                <div class="connection-item">
+                  <div class="connection-label">Last Connection</div>
+                  <div class="connection-value">
+                    {{ atmDetails.status.lastSuccessfulConnection | date:'MMM d, y, h:mm:ss a' }}
+                  </div>
+                  <div class="connection-ago">{{ getTimeAgo(atmDetails.status.lastSuccessfulConnection) }}</div>
+                </div>
+                <div class="connection-item">
+                  <div class="connection-label">Last Transaction</div>
+                  <div class="connection-value">
+                    {{ atmDetails.status.lastSuccessfulTransaction | date:'MMM d, y, h:mm:ss a' }}
+                  </div>
+                  <div class="connection-ago">{{ getTimeAgo(atmDetails.status.lastSuccessfulTransaction) }}</div>
+                </div>
+                <div class="connection-item" *ngIf="atmDetails.registryInfo?.ipAddress">
+                  <div class="connection-label">IP Address</div>
+                  <div class="connection-value">{{ atmDetails.registryInfo?.ipAddress }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Location Card -->
+          <div class="overview-card location-info" *ngIf="atmDetails.registryInfo">
+            <div class="card-header">
+              <h3>
+                <span class="card-icon">📍</span>
+                Location Info
+              </h3>
+              <button class="map-button" *ngIf="hasLocationCoordinates()" (click)="showOnMap()">
+                🗺️ View on Map
+              </button>
+            </div>
+            <div class="card-content">
+              <div class="location-details">
+                <div class="location-item" *ngIf="atmDetails.registryInfo.agencyName">
+                  <div class="location-label">Agency</div>
+                  <div class="location-value">{{ atmDetails.registryInfo.agencyName }}</div>
+                </div>
+                <div class="location-item" *ngIf="atmDetails.registryInfo.region">
+                  <div class="location-label">Region</div>
+                  <div class="location-value">{{ atmDetails.registryInfo.region }}</div>
+                </div>
+                <div class="location-item" *ngIf="atmDetails.registryInfo.locationAddress">
+                  <div class="location-label">Address</div>
+                  <div class="location-value">{{ atmDetails.registryInfo.locationAddress }}</div>
+                </div>
+                <div class="location-item" *ngIf="hasLocationCoordinates()">
+                  <div class="location-label">Coordinates</div>
+                  <div class="location-value">
+                    {{ atmDetails.registryInfo.locationLatitude }}, {{ atmDetails.registryInfo.locationLongitude }}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Maintenance Card -->
+          <div class="overview-card maintenance-info">
+            <div class="card-header">
+              <h3>
+                <span class="card-icon">🔧</span>
+                Maintenance
+              </h3>
+              <div class="maintenance-status" [ngClass]="{'active': atmDetails.status.maintenanceMode}">
+                {{ atmDetails.status.maintenanceMode ? 'ACTIVE' : 'NORMAL' }}
+              </div>
+            </div>
+            <div class="card-content">
+              <div class="maintenance-details">
+                <div class="maintenance-item">
+                  <div class="maintenance-label">Reject Bin</div>
+                  <div class="maintenance-value" [ngClass]="getRejectBinClass()">
+                    {{ atmDetails.counters.rejectBinPercentageFull }}% Full
+                  </div>
+                  <div class="maintenance-bar">
+                    <div class="bar-fill"
+                         [style.width]="atmDetails.counters.rejectBinPercentageFull + '%'"
+                         [ngClass]="getRejectBinClass()"></div>
+                  </div>
+                </div>
+                <div class="maintenance-item">
+                  <div class="maintenance-label">Last Data Update</div>
+                  <div class="maintenance-value">
+                    {{ atmDetails.status.lastUpdateTimestamp | date:'MMM d, y, h:mm:ss a' }}
+                  </div>
+                  <div class="maintenance-ago">{{ getTimeAgo(atmDetails.status.lastUpdateTimestamp) }}</div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
+      </div>
 
-        <div *ngSwitchCase="'configuration'">
-          <app-atm-configuration [configuration]="atmDetails.configuration"></app-atm-configuration>
+      <!-- Status Details Section -->
+      <div *ngIf="activeView === 'status'" class="status-section">
+        <div class="status-detail-card">
+          <div class="card-header">
+            <h3>
+              <span class="card-icon">🔍</span>
+              Detailed Status Information
+            </h3>
+          </div>
+          <div class="card-content">
+            <div class="status-grid">
+              <div class="status-group">
+                <h4>Operational Status</h4>
+                <div class="status-list">
+                  <div class="status-row">
+                    <span class="status-key">State:</span>
+                    <span class="status-value" [ngClass]="getStatusClass()">
+                      {{ atmDetails.status.operationalState }}
+                    </span>
+                  </div>
+                  <div class="status-row">
+                    <span class="status-key">Maintenance Mode:</span>
+                    <span class="status-value" [ngClass]="{'warning': atmDetails.status.maintenanceMode}">
+                      {{ atmDetails.status.maintenanceMode ? 'Active' : 'Inactive' }}
+                    </span>
+                  </div>
+                  <div class="status-row">
+                    <span class="status-key">Overall Health:</span>
+                    <span class="status-value" [ngClass]="getHealthClass()">
+                      {{ atmDetails.configuration.overallHealth }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="status-group">
+                <h4>Connection History</h4>
+                <div class="status-list">
+                  <div class="status-row">
+                    <span class="status-key">Last Successful Connection:</span>
+                    <span class="status-value">
+                      {{ atmDetails.status.lastSuccessfulConnection | date:'full' }}
+                    </span>
+                  </div>
+                  <div class="status-row">
+                    <span class="status-key">Last Successful Transaction:</span>
+                    <span class="status-value">
+                      {{ atmDetails.status.lastSuccessfulTransaction | date:'full' }}
+                    </span>
+                  </div>
+                  <div class="status-row">
+                    <span class="status-key">Data Last Updated:</span>
+                    <span class="status-value">
+                      {{ atmDetails.status.lastUpdateTimestamp | date:'full' }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
+      </div>
 
-        <div *ngSwitchCase="'counters'">
-          <app-atm-counters [counters]="atmDetails.counters"></app-atm-counters>
+      <!-- Configuration Section -->
+      <div *ngIf="activeView === 'configuration'">
+        <app-atm-configuration [configuration]="atmDetails.configuration"></app-atm-configuration>
+      </div>
+
+      <!-- Counters Section -->
+      <div *ngIf="activeView === 'counters'">
+        <app-atm-counters [counters]="atmDetails.counters"></app-atm-counters>
+      </div>
+
+      <!-- Registry Info Section -->
+      <div *ngIf="activeView === 'info'">
+        <app-atm-info *ngIf="atmDetails.registryInfo" [registryInfo]="atmDetails.registryInfo"></app-atm-info>
+        <div *ngIf="!atmDetails.registryInfo" class="no-data-card">
+          <div class="no-data-content">
+            <div class="no-data-icon">📄</div>
+            <h3>No Registry Information</h3>
+            <p>Registry information is not available for this ATM.</p>
+            <button class="btn btn-primary" routerLink="/admin/registry/atms/create">
+              <span>➕</span>
+              Add Registry Info
+            </button>
+          </div>
         </div>
+      </div>
 
-        <div *ngSwitchCase="'info'">
-          <app-atm-info *ngIf="atmDetails.registryInfo" [registryInfo]="atmDetails.registryInfo"></app-atm-info>
-          <div *ngIf="!atmDetails.registryInfo" class="no-data-message">
-            <p>Registry information not available for this ATM.</p>
+      <!-- History Section -->
+      <div *ngIf="activeView === 'history'" class="history-section">
+        <div class="history-card">
+          <div class="card-header">
+            <h3>
+              <span class="card-icon">📈</span>
+              ATM History & Analytics
+            </h3>
+          </div>
+          <div class="card-content">
+            <div class="history-placeholder">
+              <div class="placeholder-icon">📊</div>
+              <h4>History & Analytics Coming Soon</h4>
+              <p>This section will display:</p>
+              <ul>
+                <li>Cash level trends over time</li>
+                <li>Transaction volume history</li>
+                <li>Uptime/downtime reports</li>
+                <li>Maintenance schedule</li>
+              </ul>
+            </div>
           </div>
         </div>
       </div>
