@@ -90,6 +90,618 @@
           <context context-type="linenumber">82,83</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="4726342384143649038" datatype="html">
+        <source>ATM Monitoring Dashboard</source>
+        <target>لوحة مراقبة الصراف الآلي</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">6,7</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4200317694838753109" datatype="html">
+        <source>Welcome back</source>
+        <target>مرحباً بعودتك</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">8,9</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="631870821641035760" datatype="html">
+        <source>Auto-refresh</source>
+        <target>تحديث تلقائي</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">24,25</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7478008016037580534" datatype="html">
+        <source>10s</source>
+        <target>10 ثوانٍ</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">29,30</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3354280307248939733" datatype="html">
+        <source>30s</source>
+        <target>30 ثانية</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">30,31</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5873551151235656167" datatype="html">
+        <source>1m</source>
+        <target>1 دقيقة</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">31,32</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5332350867129241974" datatype="html">
+        <source>5m</source>
+        <target>5 دقائق</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">32,33</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8287153699996520718" datatype="html">
+        <source>Last refresh</source>
+        <target>آخر تحديث</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">37,38</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2584323826211532325" datatype="html">
+        <source>Admin Panel</source>
+        <target>لوحة التحكم الإدارية</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">54,55</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6692986441409148743" datatype="html">
+        <source>Healthy ATMs</source>
+        <target>الصرافات السليمة</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">64,65</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4190791764195289014" datatype="html">
+        <source>Need Attention</source>
+        <target>تحتاج إلى انتباه</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">71,72</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3360190627086193195" datatype="html">
+        <source>Critical Issues</source>
+        <target>مشاكل حرجة</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">78,79</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2087020390150557403" datatype="html">
+        <source>Low Cash</source>
+        <target>نقص في النقد</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">85,86</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">242,243</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="699590710757792843" datatype="html">
+        <source>Regions</source>
+        <target>المناطق</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">95,96</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4961943756415979976" datatype="html">
+        <source>Agencies</source>
+        <target>الوكالات</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">101,102</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5745956642862494928" datatype="html">
+        <source>Loading ATM data...</source>
+        <target>جاري تحميل بيانات الصراف الآلي...</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">109,110</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2112713030785979056" datatype="html">
+        <source>Fetching real-time status...</source>
+        <target>جاري جلب حالة الوقت الفعلي...</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">111,112</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2273433089898617728" datatype="html">
+        <source>Unable to Load Data</source>
+        <target>تعذر تحميل البيانات</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">120,121</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8571912226663503082" datatype="html">
+        <source>Connection error or service unavailable</source>
+        <target>خطأ في الاتصال أو الخدمة غير متوفرة</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">121,122</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5649210536348693830" datatype="html">
+        <source>Check your network connection and backend services</source>
+        <target>تحقق من اتصال الشبكة وخدمات الخلفية</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">123,124</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7934833136974560675" datatype="html">
+        <source>Retry</source>
+        <target>إعادة المحاولة</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">128,129</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="579912113060173772" datatype="html">
+        <source>Contact Support</source>
+        <target>الاتصال بالدعم</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">132,133</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7574525580934317098" datatype="html">
+        <source>Filter &amp; Search</source>
+        <target>تصفية وبحث</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">141,142</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5737287568482767307" datatype="html">
+        <source>Grid</source>
+        <target>شبكة</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">148,149</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1358239534403218079" datatype="html">
+        <source>Table</source>
+        <target>جدول</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">154,155</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5158177792461436439" datatype="html">
+        <source>Export CSV</source>
+        <target>تصدير CSV</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">159,160</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5790618064356741024" datatype="html">
+        <source>Search ATMs</source>
+        <target>البحث عن الصرافات الآلية</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">165,166</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7437708274870868121" datatype="html">
+        <source>Search by ID, label, address, or agency...</source>
+        <target>البحث حسب المعرف أو التسمية أو العنوان أو الوكالة...</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">170,171</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3643866539136239218" datatype="html">
+        <source>Clear search</source>
+        <target>مسح البحث</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">180,181</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6199236710364080292" datatype="html">
+        <source>Operational Status</source>
+        <target>الحالة التشغيلية</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">187,188</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2506799423809651300" datatype="html">
+        <source>All Statuses</source>
+        <target>جميع الحالات</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">189,190</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4016774570903735270" datatype="html">
+        <source>Working</source>
+        <target>يعمل</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">190,191</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="683686927860933400" datatype="html">
+        <source>Out of service</source>
+        <target>خارج الخدمة</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">191,192</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3465942650835858981" datatype="html">
+        <source>Maintenance</source>
+        <target>صيانة</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">192,193</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8224256776618044490" datatype="html">
+        <source>Health Status</source>
+        <target>حالة الصحة</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">197,198</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8083103839359329918" datatype="html">
+        <source>All Health Levels</source>
+        <target>جميع مستويات الصحة</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">199,200</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="9099440603799364256" datatype="html">
+        <source>Healthy (Green)</source>
+        <target>سليم (أخضر)</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">200,201</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="9209695524503835578" datatype="html">
+        <source>Warning (Orange)</source>
+        <target>تحذير (برتقالي)</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">201,202</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2004858308693501907" datatype="html">
+        <source>Critical (Red)</source>
+        <target>حرج (أحمر)</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">202,203</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2702200797962830082" datatype="html">
+        <source>Region</source>
+        <target>المنطقة</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">207,208</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">343,344</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2541564443216628513" datatype="html">
+        <source>All Regions</source>
+        <target>جميع المناطق</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">209,210</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5785509338831794802" datatype="html">
+        <source>Agency</source>
+        <target>وكالة</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">215,216</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">281,282</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">351,352</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2584764485203393410" datatype="html">
+        <source>All Agencies</source>
+        <target>جميع الوكالات</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">217,218</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8789570580147330990" datatype="html">
+        <source>Quick Filters</source>
+        <target>مرشحات سريعة</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">226,227</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7790772795962334429" datatype="html">
+        <source>Healthy</source>
+        <target>سليم</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">230,231</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6759205696902713848" datatype="html">
+        <source>Warning</source>
+        <target>تحذير</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">234,235</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2437478124199610198" datatype="html">
+        <source>Critical</source>
+        <target>حرج</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">238,239</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5444793444198351071" datatype="html">
+        <source> Showing <x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/><x id="INTERPOLATION" equiv-text="{{ filteredAtms.length }}"/><x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> of <x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/><x id="INTERPOLATION_1" equiv-text="{{ atms.length }}"/><x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> ATMs </source>
+        <target> عرض <x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/><x id="INTERPOLATION" equiv-text="{{ filteredAtms.length }}"/><x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> من <x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/><x id="INTERPOLATION_1" equiv-text="{{ atms.length }}"/><x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> صرافات آلية </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">252,254</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8766543515727166681" datatype="html">
+        <source>Status:</source>
+        <target>الحالة:</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">256</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="647889145669623486" datatype="html">
+        <source>✖</source>
+        <target>✖</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">257,258</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">261,262</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">265,266</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">269,270</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2097644462847725984" datatype="html">
+        <source>Health:</source>
+        <target>الصحة:</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">260</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="9045403869878239024" datatype="html">
+        <source>Region:</source>
+        <target>المنطقة:</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">264</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3820935563199186497" datatype="html">
+        <source>Search:</source>
+        <target>بحث:</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">268</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1218302359178184742" datatype="html">
+        <source>Sort by:</source>
+        <target>ترتيب حسب:</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">276,277</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4279937793560233510" datatype="html">
+        <source>ATM ID</source>
+        <target>معرف الصراف الآلي</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">278,279</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6100937266574901228" datatype="html">
+        <source>Health Priority</source>
+        <target>أولوية الصحة</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">279,280</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1225956843096417360" datatype="html">
+        <source>Last Update</source>
+        <target>آخر تحديث</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">280,281</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2724611353584251336" datatype="html">
+        <source>Clear All Filters</source>
+        <target>مسح جميع المرشحات</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">290,291</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6074052742399753440" datatype="html">
+        <source> 💰 LOW CASH </source>
+        <target> 💰 نقص في النقد </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">305</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7292902857194439444" datatype="html">
+        <source>Device</source>
+        <target>الجهاز</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">335,336</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="471816275243265264" datatype="html">
+        <source>Location</source>
+        <target>الموقع</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">359,360</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8661051913197064854" datatype="html">
+        <source> Last updated: <x id="INTERPOLATION" equiv-text="{{ atm.lastUpdateTimestamp | date:&apos;MMM d, y, h:mm a&apos; }}"/> </source>
+        <target> آخر تحديث: <x id="INTERPOLATION" equiv-text="{{ atm.lastUpdateTimestamp | date:&apos;MMM d, y, h:mm a&apos; }}"/> </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">369,370</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1468015720862673946" datatype="html">
+        <source>View Details</source>
+        <target>عرض التفاصيل</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">375,376</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1102717806459547726" datatype="html">
+        <source>Refresh</source>
+        <target>تحديث</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">382</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7128029855064766450" datatype="html">
+        <source>View on Map</source>
+        <target>عرض على الخريطة</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">387,388</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6328337820290457819" datatype="html">
+        <source>No ATMs Found</source>
+        <target>لم يتم العثور على صرافات آلية</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">400,401</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8374123278740713788" datatype="html">
+        <source>No ATMs match your current search criteria</source>
+        <target>لا توجد صرافات آلية تطابق معايير البحث الحالية</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">401,402</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4778037312918388642" datatype="html">
+        <source>Try:</source>
+        <target>حاول:</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">404</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4477380261647878507" datatype="html">
+        <source>Clearing your search filters</source>
+        <target>مسح مرشحات البحث</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">405,406</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1308238508559518535" datatype="html">
+        <source>Broadening your search terms</source>
+        <target>توسيع مصطلحات البحث</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">406,407</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="365734836321331024" datatype="html">
+        <source>Checking different regions or agencies</source>
+        <target>التحقق من مناطق أو وكالات مختلفة</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">407,408</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6141420670869088519" datatype="html">
+        <source>Reset All Filters</source>
+        <target>إعادة تعيين جميع المرشحات</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">413,414</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1320644199076283672" datatype="html">
+        <source>Refresh Data</source>
+        <target>تحديث البيانات</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/atm-dashboard/atm-dashboard.component.html</context>
+          <context context-type="linenumber">417,418</context>
+        </context-group>
+      </trans-unit>
     </body>
   </file>
 </xliff>

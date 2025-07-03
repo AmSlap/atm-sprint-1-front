@@ -8,7 +8,7 @@ import { AtmRegistryInfo, Agency } from '../../../models/atm.models';
 @Component({
   selector: 'app-atm-registry',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './atm-registry.component.html',
   styleUrl: './atm-registry.component.scss'
 })

@@ -3,9 +3,9 @@
     <!-- Enhanced Header Section -->
     <div class="dashboard-header">
       <div class="title-section">
-        <h1>ATM Monitoring Dashboard</h1>
+        <h1 i18n>ATM Monitoring Dashboard</h1>
         <div class="subtitle">
-          <span>Welcome back</span>
+          <span i18n>Welcome back</span>
           <span class="user-info">&#64;AmSlap</span>
           <span>•</span>
           <span>{{ getCurrentDateTime() }}</span>
@@ -21,20 +21,20 @@
                      (change)="toggleAutoRefresh()">
               <span class="toggle-slider"></span>
             </label>
-            <span class="toggle-label">Auto-refresh</span>
+            <span class="toggle-label" i18n>Auto-refresh</span>
           </div>
           <select class="refresh-interval"
                   [(ngModel)]="refreshInterval"
                   (change)="updateRefreshInterval(refreshInterval)">
-            <option value="10">10s</option>
-            <option value="30">30s</option>
-            <option value="60">1m</option>
-            <option value="300">5m</option>
+            <option value="10" i18n>10s</option>
+            <option value="30" i18n>30s</option>
+            <option value="60" i18n>1m</option>
+            <option value="300" i18n>5m</option>
           </select>
         </div>
 
         <div class="last-updated" *ngIf="!loading">
-          <div>Last refresh</div>
+          <div i18n>Last refresh</div>
           <div>{{ getLastRefreshTime() }}</div>
           <div class="refresh-status"
                [ngClass]="{'auto-active': autoRefreshEnabled}">
@@ -46,12 +46,12 @@
                 (click)="loadAtms()"
                 [disabled]="loading">
           <span class="btn-icon" [ngClass]="{'spinning': loading}">🔄</span>
-          {{ loading ? 'Refreshing...' : 'Refresh' }}
+          {{ loading ? ('Refreshing...' ) : ('Refresh' ) }}
         </button>
 
         <a routerLink="/admin/registry" class="btn btn-primary">
           <span>⚙️</span>
-          Admin Panel
+          <span i18n>Admin Panel</span>
         </a>
       </div>
     </div>
@@ -61,28 +61,28 @@
       <div class="stat-card stat-healthy" (click)="filterByHealthStatus('healthy')">
         <div class="stat-icon">✅</div>
         <div class="stat-value">{{ getHealthyCount() }}</div>
-        <div class="stat-label">Healthy ATMs</div>
+        <div class="stat-label" i18n>Healthy ATMs</div>
         <div class="stat-change positive" *ngIf="getHealthyCount() > 0">+{{ getHealthyCount() }}</div>
       </div>
 
       <div class="stat-card stat-warning" (click)="filterByHealthStatus('warning')">
         <div class="stat-icon">⚠️</div>
         <div class="stat-value">{{ getWarningCount() }}</div>
-        <div class="stat-label">Need Attention</div>
+        <div class="stat-label" i18n>Need Attention</div>
         <div class="stat-change warning" *ngIf="getWarningCount() > 0">{{ getWarningCount() }}</div>
       </div>
 
       <div class="stat-card stat-error" (click)="filterByHealthStatus('error')">
         <div class="stat-icon">❌</div>
         <div class="stat-value">{{ getErrorCount() }}</div>
-        <div class="stat-label">Critical Issues</div>
+        <div class="stat-label" i18n>Critical Issues</div>
         <div class="stat-change negative" *ngIf="getErrorCount() > 0">{{ getErrorCount() }}</div>
       </div>
 
       <div class="stat-card stat-cash" (click)="filterByLowCash()">
         <div class="stat-icon">💰</div>
         <div class="stat-value">{{ getLowCashCount() }}</div>
-        <div class="stat-label">Low Cash</div>
+        <div class="stat-label" i18n>Low Cash</div>
         <div class="stat-change" [ngClass]="{'negative': getLowCashCount() > 0}">
           {{ getLowCashCount() > 0 ? getLowCashCount() : '0' }}
         </div>
@@ -92,13 +92,13 @@
       <div class="stat-card stat-info">
         <div class="stat-icon">📍</div>
         <div class="stat-value">{{ regions.length }}</div>
-        <div class="stat-label">Regions</div>
+        <div class="stat-label" i18n>Regions</div>
       </div>
 
       <div class="stat-card stat-info">
         <div class="stat-icon">🏢</div>
         <div class="stat-value">{{ agencies.length }}</div>
-        <div class="stat-label">Agencies</div>
+        <div class="stat-label" i18n>Agencies</div>
       </div>
     </div>
 
@@ -106,9 +106,9 @@
     <div *ngIf="loading" class="loading">
       <div class="loading-content">
         <div class="spinner"></div>
-        <p>Loading ATM data...</p>
+        <p i18n>Loading ATM data...</p>
         <div class="loading-details">
-          <span>Fetching real-time status...</span>
+          <span i18n>Fetching real-time status...</span>
         </div>
       </div>
     </div>
@@ -117,19 +117,19 @@
     <div *ngIf="error" class="error-state">
       <div class="error-content">
         <div class="error-icon">🚫</div>
-        <h2>Unable to Load Data</h2>
-        <p>Connection error or service unavailable</p>
+        <h2 i18n>Unable to Load Data</h2>
+        <p i18n>Connection error or service unavailable</p>
         <div class="error-details">
-          <span>Check your network connection and backend services</span>
+          <span i18n>Check your network connection and backend services</span>
         </div>
         <div class="error-actions">
           <button class="btn btn-primary" (click)="loadAtms()">
             <span>🔄</span>
-            Retry
+            <span i18n>Retry</span>
           </button>
           <button class="btn btn-secondary" (click)="loadAtms()">
             <span>📞</span>
-            Contact Support
+            <span i18n>Contact Support</span>
           </button>
         </div>
       </div>
@@ -138,81 +138,83 @@
     <!-- Enhanced Filter Section -->
     <div class="filter-section" *ngIf="!loading && !error">
       <div class="filter-header">
-        <h2>Filter & Search</h2>
+        <h2 i18n>Filter & Search</h2>
         <div class="view-controls">
           <div class="view-toggle">
             <button class="view-btn"
                     [ngClass]="{'active': viewMode === 'grid'}"
                     (click)="viewMode = 'grid'">
               <span>⊞</span>
-              Grid
+              <span i18n>Grid</span>
             </button>
             <button class="view-btn"
                     [ngClass]="{'active': viewMode === 'table'}"
                     (click)="viewMode = 'table'">
               <span>☰</span>
-              Table
+              <span i18n>Table</span>
             </button>
           </div>
           <button class="btn btn-secondary btn-sm" (click)="exportToCSV()">
             <span>📊</span>
-            Export CSV
+            <span i18n>Export CSV</span>
           </button>
         </div>
       </div>
-
       <div class="filter-grid">
         <div class="form-group search-group">
-          <label for="search">Search ATMs</label>
+          <label for="search" i18n>Search ATMs</label>
           <div class="search-input-wrapper">
             <input
               type="text"
               id="search"
               placeholder="Search by ID, label, address, or agency..."
+              i18n-placeholder
               [(ngModel)]="searchTerm"
               (input)="applyFilters()"
               class="search-input">
             <span class="search-icon">🔍</span>
             <button *ngIf="searchTerm"
                     class="clear-search"
-                    (click)="searchTerm = ''; applyFilters()">
+                    (click)="searchTerm = ''; applyFilters()"
+                    i18n-title
+                    title="Clear search">
               ✖
             </button>
           </div>
         </div>
 
         <div class="form-group">
-          <label for="status">Operational Status</label>
+          <label for="status" i18n>Operational Status</label>
           <select id="status" [(ngModel)]="selectedStatus" (change)="applyFilters()" class="filter-select">
-            <option value="all">All Statuses</option>
-            <option value="WORKING">Working</option>
-            <option value="OUTOFSERVICE">Out of service</option>
-            <option value="maintenance">Maintenance</option>
+            <option value="all" i18n>All Statuses</option>
+            <option value="WORKING" i18n>Working</option>
+            <option value="OUTOFSERVICE" i18n>Out of service</option>
+            <option value="maintenance" i18n>Maintenance</option>
           </select>
         </div>
 
         <div class="form-group">
-          <label for="health">Health Status</label>
+          <label for="health" i18n>Health Status</label>
           <select id="health" [(ngModel)]="selectedHealth" (change)="applyFilters()" class="filter-select">
-            <option value="all">All Health Levels</option>
-            <option value="green">Healthy (Green)</option>
-            <option value="orange">Warning (Orange)</option>
-            <option value="red">Critical (Red)</option>
+            <option value="all" i18n>All Health Levels</option>
+            <option value="green" i18n>Healthy (Green)</option>
+            <option value="orange" i18n>Warning (Orange)</option>
+            <option value="red" i18n>Critical (Red)</option>
           </select>
         </div>
 
         <div class="form-group" *ngIf="regions.length > 0">
-          <label for="region">Region</label>
+          <label for="region" i18n>Region</label>
           <select id="region" [(ngModel)]="selectedRegion" (change)="applyFilters()" class="filter-select">
-            <option value="all">All Regions</option>
+            <option value="all" i18n>All Regions</option>
             <option *ngFor="let region of regions" [value]="region">{{ region }}</option>
           </select>
         </div>
 
         <div class="form-group" *ngIf="agencies.length > 0">
-          <label for="agency">Agency</label>
+          <label for="agency" i18n>Agency</label>
           <select id="agency" [(ngModel)]="selectedAgency" (change)="applyFilters()" class="filter-select">
-            <option value="all">All Agencies</option>
+            <option value="all" i18n>All Agencies</option>
             <option *ngFor="let agency of agencies" [value]="agency.agencyCode">
               {{ agency.agencyName }}
             </option>
@@ -221,23 +223,23 @@
 
         <!-- Quick filter buttons -->
         <div class="form-group quick-filters">
-          <label>Quick Filters</label>
+          <label i18n>Quick Filters</label>
           <div class="quick-filter-buttons">
             <button class="quick-filter-btn healthy"
                     (click)="filterByHealthStatus('healthy')">
-              ✅ Healthy
+              ✅ <span i18n>Healthy</span>
             </button>
             <button class="quick-filter-btn warning"
                     (click)="filterByHealthStatus('warning')">
-              ⚠️ Warning
+              ⚠️ <span i18n>Warning</span>
             </button>
             <button class="quick-filter-btn error"
                     (click)="filterByHealthStatus('error')">
-              ❌ Critical
+              ❌ <span i18n>Critical</span>
             </button>
             <button class="quick-filter-btn cash"
                     (click)="filterByLowCash()">
-              💰 Low Cash
+              💰 <span i18n>Low Cash</span>
             </button>
           </div>
         </div>
@@ -246,37 +248,37 @@
       <!-- Enhanced Filter Summary -->
       <div class="filter-summary">
         <div class="results-info">
-          <div class="results-count">
+          <div class="results-count" i18n>
             Showing <strong>{{ filteredAtms.length }}</strong> of <strong>{{ atms.length }}</strong> ATMs
           </div>
           <div class="active-filters" *ngIf="hasActiveFilters()">
             <span class="filter-tag" *ngIf="selectedStatus !== 'all'">
-              Status: {{ selectedStatus }}
-              <button (click)="selectedStatus = 'all'; applyFilters()">✖</button>
+              <span i18n>Status:</span> {{ selectedStatus }}
+              <button (click)="selectedStatus = 'all'; applyFilters()" i18n>✖</button>
             </span>
             <span class="filter-tag" *ngIf="selectedHealth !== 'all'">
-              Health: {{ selectedHealth }}
-              <button (click)="selectedHealth = 'all'; applyFilters()">✖</button>
+              <span i18n>Health:</span> {{ selectedHealth }}
+              <button (click)="selectedHealth = 'all'; applyFilters()" i18n>✖</button>
             </span>
             <span class="filter-tag" *ngIf="selectedRegion !== 'all'">
-              Region: {{ selectedRegion }}
-              <button (click)="selectedRegion = 'all'; applyFilters()">✖</button>
+              <span i18n>Region:</span> {{ selectedRegion }}
+              <button (click)="selectedRegion = 'all'; applyFilters()" i18n>✖</button>
             </span>
             <span class="filter-tag" *ngIf="searchTerm">
-              Search: "{{ searchTerm }}"
-              <button (click)="searchTerm = ''; applyFilters()">✖</button>
+              <span i18n>Search:</span> "{{ searchTerm }}"
+              <button (click)="searchTerm = ''; applyFilters()" i18n>✖</button>
             </span>
           </div>
         </div>
         <div class="filter-actions">
           <!-- Sorting controls -->
           <div class="sort-controls">
-            <label>Sort by:</label>
+            <label i18n>Sort by:</label>
             <select [(ngModel)]="sortBy" (change)="applySorting()" class="sort-select">
-              <option value="atmId">ATM ID</option>
-              <option value="health">Health Priority</option>
-              <option value="lastUpdate">Last Update</option>
-              <option value="agency">Agency</option>
+              <option value="atmId" i18n>ATM ID</option>
+              <option value="health" i18n>Health Priority</option>
+              <option value="lastUpdate" i18n>Last Update</option>
+              <option value="agency" i18n>Agency</option>
             </select>
             <button class="sort-direction"
                     (click)="sortDirection = sortDirection === 'asc' ? 'desc' : 'asc'; applySorting()">
@@ -285,12 +287,11 @@
           </div>
           <button class="btn btn-secondary btn-sm" (click)="resetFilters()">
             <span>🔄</span>
-            Clear All Filters
+            <span i18n>Clear All Filters</span>
           </button>
         </div>
       </div>
     </div>
-
     <!-- ATM Grid View -->
     <div class="atm-grid" *ngIf="!loading && !error && viewMode === 'grid'">
       <div class="atm-card"
@@ -300,7 +301,7 @@
 
         <!-- Enhanced card header -->
         <div class="card-indicators">
-          <div class="low-cash-indicator" *ngIf="atm.lowCashFlag">
+          <div class="low-cash-indicator" *ngIf="atm.lowCashFlag" i18n>
             💰 LOW CASH
           </div>
           <div class="last-update-indicator"
@@ -320,9 +321,6 @@
               <span class="status-indicator" [ngClass]="getStatusClass(atm)"></span>
               {{ atm.operationalState }}
             </div>
-            <div class="health-badge" [ngClass]="getHealthClass(atm)">
-              {{ atm.overallHealth }}
-            </div>
           </div>
         </div>
 
@@ -331,7 +329,7 @@
           <div class="detail-row" *ngIf="atm.brand && atm.model">
             <span class="label">
               <span class="icon">🏧</span>
-              Device
+              <span i18n>Device</span>
             </span>
             <span class="value">{{ atm.brand }} {{ atm.model }}</span>
           </div>
@@ -339,7 +337,7 @@
           <div class="detail-row" *ngIf="atm.region">
             <span class="label">
               <span class="icon">🌍</span>
-              Region
+              <span i18n>Region</span>
             </span>
             <span class="value">{{ atm.region }}</span>
           </div>
@@ -347,7 +345,7 @@
           <div class="detail-row" *ngIf="atm.agencyName">
             <span class="label">
               <span class="icon">🏢</span>
-              Agency
+              <span i18n>Agency</span>
             </span>
             <span class="value">{{ atm.agencyName }}</span>
           </div>
@@ -355,7 +353,7 @@
           <div class="detail-row" *ngIf="atm.locationAddress">
             <span class="label">
               <span class="icon">📍</span>
-              Location
+              <span i18n>Location</span>
             </span>
             <span class="value">{{ atm.locationAddress }}</span>
           </div>
@@ -364,24 +362,27 @@
         <!-- Card actions -->
         <div class="card-footer">
           <div class="footer-info">
-            <div class="last-updated">
+            <div class="last-updated" i18n>
               Last updated: {{ atm.lastUpdateTimestamp | date:'MMM d, y, h:mm a' }}
             </div>
           </div>
           <div class="card-actions" (click)="$event.stopPropagation()">
             <button class="action-btn primary"
                     [routerLink]="['/atm', atm.atmId]"
-                    title="View Details">
+                    title="View Details"
+                    i18n-title>
               👁️
             </button>
             <button class="action-btn secondary"
                     (click)="refreshSingleAtm(atm.atmId)"
-                    title="Refresh">
+                    title="Refresh"
+                    i18n-title>
               🔄
             </button>
             <button class="action-btn secondary"
                     *ngIf="atm.locationLatitude && atm.locationLongitude"
-                    title="View on Map">
+                    title="View on Map"
+                    i18n-title>
               🗺️
             </button>
           </div>
@@ -389,109 +390,28 @@
       </div>
     </div>
 
-    <!-- ATM Table View -->
-    <div class="atm-table-container" *ngIf="!loading && !error && viewMode === 'table'">
-      <table class="atm-table">
-        <thead>
-        <tr>
-          <th (click)="setSortBy('atmId')" class="sortable">
-            ATM ID
-            <span class="sort-indicator" *ngIf="sortBy === 'atmId'">
-                {{ sortDirection === 'asc' ? '↑' : '↓' }}
-              </span>
-          </th>
-          <th>Status</th>
-          <th (click)="setSortBy('health')" class="sortable">
-            Health
-            <span class="sort-indicator" *ngIf="sortBy === 'health'">
-                {{ sortDirection === 'asc' ? '↑' : '↓' }}
-              </span>
-          </th>
-          <th (click)="setSortBy('agency')" class="sortable">
-            Agency
-            <span class="sort-indicator" *ngIf="sortBy === 'agency'">
-                {{ sortDirection === 'asc' ? '↑' : '↓' }}
-              </span>
-          </th>
-          <th>Region</th>
-          <th>Cash</th>
-          <th (click)="setSortBy('lastUpdate')" class="sortable">
-            Last Update
-            <span class="sort-indicator" *ngIf="sortBy === 'lastUpdate'">
-                {{ sortDirection === 'asc' ? '↑' : '↓' }}
-              </span>
-          </th>
-          <th>Actions</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr *ngFor="let atm of filteredAtms; trackBy: trackByAtmId"
-            [ngClass]="getStatusClass(atm)"
-            (click)="navigateToAtmDetails(atm.atmId)">
-          <td class="atm-id-cell">
-            <div class="atm-id">{{ atm.atmId }}</div>
-            <div class="atm-label" *ngIf="atm.label">{{ atm.label }}</div>
-          </td>
-          <td>
-              <span class="status-badge-small" [ngClass]="getStatusClass(atm)">
-                {{ atm.operationalState }}
-              </span>
-          </td>
-          <td>
-              <span class="health-badge-small" [ngClass]="getHealthClass(atm)">
-                {{ atm.overallHealth }}
-              </span>
-          </td>
-          <td>{{ atm.agencyName || '-' }}</td>
-          <td>{{ atm.region || '-' }}</td>
-          <td>
-              <span class="cash-indicator" [ngClass]="{'low-cash': atm.lowCashFlag}">
-                {{ atm.lowCashFlag ? '💰 Low' : '✅ OK' }}
-              </span>
-          </td>
-          <td class="last-update-cell">
-            <div class="update-time">{{ atm.lastUpdateTimestamp | date:'MMM d, h:mm a' }}</div>
-            <div class="time-ago">{{ getTimeAgo(atm.lastUpdateTimestamp) }}</div>
-          </td>
-          <td class="actions-cell" (click)="$event.stopPropagation()">
-            <button class="action-btn-small"
-                    [routerLink]="['/atm', atm.atmId]"
-                    title="View Details">
-              👁️
-            </button>
-            <button class="action-btn-small"
-                    (click)="refreshSingleAtm(atm.atmId)"
-                    title="Refresh">
-              🔄
-            </button>
-          </td>
-        </tr>
-        </tbody>
-      </table>
-    </div>
-
     <!-- Empty State -->
     <div *ngIf="!loading && !error && filteredAtms.length === 0" class="empty-state">
       <div class="empty-content">
         <div class="empty-icon">🔍</div>
-        <h2>No ATMs Found</h2>
-        <p>No ATMs match your current search criteria</p>
+        <h2 i18n>No ATMs Found</h2>
+        <p i18n>No ATMs match your current search criteria</p>
         <div class="empty-suggestions">
-          <p>Try:</p>
+          <p i18n>Try:</p>
           <ul>
-            <li>Clearing your search filters</li>
-            <li>Broadening your search terms</li>
-            <li>Checking different regions or agencies</li>
+            <li i18n>Clearing your search filters</li>
+            <li i18n>Broadening your search terms</li>
+            <li i18n>Checking different regions or agencies</li>
           </ul>
         </div>
         <div class="empty-actions">
           <button class="btn btn-primary" (click)="resetFilters()">
             <span>🔄</span>
-            Reset All Filters
+            <span i18n>Reset All Filters</span>
           </button>
           <button class="btn btn-secondary" (click)="loadAtms()">
             <span>📡</span>
-            Refresh Data
+            <span i18n>Refresh Data</span>
           </button>
         </div>
       </div>
