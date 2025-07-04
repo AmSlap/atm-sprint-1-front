@@ -1,121 +1,109 @@
-<div class="app-container" [class.sidebar-open]="sidebarOpen">
-  <!-- Side Navigation -->
-  <nav class="sidebar" [class.open]="sidebarOpen">
+<div class="app-container" [class.sidebar-collapsed]="!sidebarOpen">
+  <!-- Sidebar Navigation -->
+  <nav class="sidebar">
+    <!-- Header -->
     <div class="sidebar-header">
-      <div class="sidebar-brand">
+      <div class="sidebar-brand" *ngIf="sidebarOpen">
         <span class="brand-icon">🏧</span>
-        <span i18n class="brand-text" *ngIf="sidebarOpen">ATM Manager</span>
+        <span class="brand-text">ATM Manager</span>
       </div>
-      <button class="sidebar-toggle" (click)="toggleSidebar()">
-        <span class="toggle-icon">{{ sidebarOpen ? '✖' : '☰' }}</span>
+      <button class="sidebar-toggle btn" (click)="toggleSidebar()" [title]="sidebarOpen ? 'Collapse Sidebar' : 'Expand Sidebar'">
+        <span class="toggle-icon">{{ sidebarOpen ? '‹' : '›' }}</span>
       </button>
     </div>
 
+    <!-- Menu -->
     <div class="sidebar-content">
-      <div class="user-info" *ngIf="sidebarOpen">
-        <div class="user-avatar">{{ getCurrentUser().charAt(0) }}</div>
-        <div class="user-details">
-          <div class="user-name">{{ getCurrentUser() }}</div>
-          <div class="user-role" i18n>Administrator</div>
-          <div class="user-time">{{ getCurrentDateTime() }}</div>
-        </div>
-      </div>
-
       <ul class="sidebar-menu">
-        <!-- Dashboard -->
-        <li class="menu-item" [class.active]="isRouteActive('/')">
-          <a routerLink="/" class="menu-link" (click)="closeSidebarOnMobile()">
-            <span class="menu-icon">📊</span>
-            <span i18n class="menu-text" *ngIf="sidebarOpen">Dashboard</span>
-          </a>
+        <!-- ATM Monitoring Module -->
+        <li class="menu-module">
+          <div class="module-header" (click)="toggleAtmModule()">
+            <span class="module-icon" title="ATM Monitoring">🖥️</span>
+            <span class="module-title" *ngIf="sidebarOpen">ATM Monitoring</span>
+            <span class="expand-icon" *ngIf="sidebarOpen">{{ atmModuleExpanded ? '▼' : '▶' }}</span>
+          </div>
+          <ul class="module-menu" [class.expanded]="atmModuleExpanded" *ngIf="sidebarOpen">
+            <li class="menu-item" [class.active]="isRouteActive('/')">
+              <a routerLink="/" class="menu-link" (click)="closeSidebarOnMobile()">
+                <span class="menu-icon">📊</span>
+                <span class="menu-text">Dashboard</span>
+              </a>
+            </li>
+            <li class="menu-item" [class.active]="isRouteActive('/admin/registry')">
+              <a routerLink="/admin/registry" class="menu-link" (click)="closeSidebarOnMobile()">
+                <span class="menu-icon">🗄️</span>
+                <span class="menu-text">ATM Registry</span>
+              </a>
+            </li>
+            <li class="menu-item" [class.active]="isRouteActive('/agency-management')">
+              <a routerLink="/agency-management" class="menu-link" (click)="closeSidebarOnMobile()">
+                <span class="menu-icon">🏢</span>
+                <span class="menu-text">Agencies</span>
+              </a>
+            </li>
+          </ul>
         </li>
 
-        <!-- ATM Management Section -->
+        <!-- Incident Management Module -->
+        <li class="menu-module">
+          <div class="module-header" (click)="toggleIncidentModule()">
+            <span class="module-icon" title="Incident Management">🚨</span>
+            <span class="module-title" *ngIf="sidebarOpen">Incidents</span>
+            <span class="expand-icon" *ngIf="sidebarOpen">{{ incidentModuleExpanded ? '▼' : '▶' }}</span>
+          </div>
+          <ul class="module-menu" [class.expanded]="incidentModuleExpanded" *ngIf="sidebarOpen">
+            <li class="menu-item" [class.active]="isRouteActive('/dashboard')"><a routerLink="/dashboard" class="menu-link" (click)="closeSidebarOnMobile()"><span class="menu-icon">📈</span><span class="menu-text">Dashboard</span></a></li>
+            <li class="menu-item" [class.active]="isRouteActive('/incidents')"><a routerLink="/incidents" class="menu-link" (click)="closeSidebarOnMobile()"><span class="menu-icon">🐛</span><span class="menu-text">All Incidents</span></a></li>
+            <li class="menu-item" [class.active]="isRouteActive('/create-incident')"><a routerLink="/create-incident" class="menu-link" (click)="closeSidebarOnMobile()"><span class="menu-icon">➕</span><span class="menu-text">Create New</span></a></li>
+            <li class="menu-item" [class.active]="isRouteActive('/my-tasks')"><a routerLink="/my-tasks" class="menu-link" (click)="closeSidebarOnMobile()"><span class="menu-icon">👤</span><span class="menu-text">My Tasks</span></a></li>
+            <li class="menu-item" [class.active]="isRouteActive('/available-tasks')"><a routerLink="/available-tasks" class="menu-link" (click)="closeSidebarOnMobile()"><span class="menu-icon">📋</span><span class="menu-text">Available Tasks</span></a></li>
+          </ul>
+        </li>
+
+        <!-- System Section -->
         <li class="menu-section" *ngIf="sidebarOpen">
-          <span i18n class="section-title">ATM Management</span>
+          <span class="section-title">System</span>
         </li>
-
-        <li class="menu-item" [class.active]="isRouteActive('/admin/registry')">
-          <a routerLink="/admin/registry" class="menu-link" (click)="closeSidebarOnMobile()">
-            <span class="menu-icon">🏛️</span>
-            <span i18n class="menu-text" *ngIf="sidebarOpen">ATM Registry</span>
-          </a>
-        </li>
-
-        <li class="menu-item" [class.active]="isRouteActive('/agency-management')">
-          <a routerLink="/agency-management" class="menu-link" (click)="closeSidebarOnMobile()">
-            <span class="menu-icon">🏢</span>
-            <span i18n class="menu-text" *ngIf="sidebarOpen">Agency Management</span>
-          </a>
-        </li>
-
-        <!-- Configuration Section -->
-        <li class="menu-section" *ngIf="sidebarOpen">
-          <span i18n class="section-title">System</span>
-        </li>
-
         <li class="menu-item">
-          <a href="#" class="menu-link" (click)="showComingSoon('Settings')">
-            <span class="menu-icon">⚙️</span>
-            <span i18n class="menu-text" *ngIf="sidebarOpen">Settings</span>
+          <a class="menu-link" (click)="showComingSoon('Settings')">
+            <span class="menu-icon" title="Settings">⚙️</span>
+            <span class="menu-text" *ngIf="sidebarOpen">Settings</span>
           </a>
         </li>
-
         <li class="menu-item">
-          <a href="#" class="menu-link" (click)="showComingSoon('Reports')">
-            <span class="menu-icon">📈</span>
-            <span i18n class="menu-text" *ngIf="sidebarOpen">Reports</span>
-          </a>
-        </li>
-
-        <li class="menu-item">
-          <a href="#" class="menu-link" (click)="showComingSoon('Monitoring')">
-            <span class="menu-icon">📺</span>
-            <span i18n class="menu-text" *ngIf="sidebarOpen">Monitoring</span>
+          <a class="menu-link" (click)="showComingSoon('Reports')">
+            <span class="menu-icon" title="Reports">📄</span>
+            <span class="menu-text" *ngIf="sidebarOpen">Reports</span>
           </a>
         </li>
       </ul>
     </div>
 
-    <div class="sidebar-footer" *ngIf="sidebarOpen">
-      <div class="footer-info">
-        <div i18n class="app-version">Version 1.0.0</div>
-        <div class="current-time">{{ getCurrentTime() }}</div>
+    <!-- Footer / User Info -->
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar">{{ getCurrentUser().charAt(0) }}</div>
+        <div class="user-details" *ngIf="sidebarOpen">
+          <div class="user-name">{{ getCurrentUser() }}</div>
+          <div class="user-role">Administrator</div>
+        </div>
       </div>
     </div>
   </nav>
 
   <!-- Main Content -->
-  <main class="main-content" [class.shifted]="sidebarOpen">
-    <!-- Mobile Header -->
-    <header class="mobile-header" *ngIf="!sidebarOpen">
-      <button class="mobile-menu-btn" (click)="toggleSidebar()">
-        <span class="menu-icon">☰</span>
-      </button>
-      <div class="mobile-title">
-        <span class="mobile-brand-icon">🏧</span>
-        <span class="mobile-brand-text">ATM Manager</span>
-      </div>
-      <div class="mobile-user">
-        <span class="mobile-user-name">{{ getCurrentUser() }}</span>
-      </div>
-    </header>
-
-    <!-- Router Outlet -->
+  <main class="main-content">
     <div class="content-wrapper">
       <router-outlet></router-outlet>
     </div>
   </main>
 
   <!-- Mobile Overlay -->
-  <div class="mobile-overlay"
-       *ngIf="sidebarOpen && isMobile()"
-       (click)="closeSidebar()">
-  </div>
+  <div class="mobile-overlay" *ngIf="sidebarOpen && isMobile()" (click)="closeSidebar()"></div>
 
-  <!-- Success/Error Messages -->
+  <!-- Message System -->
   <div class="message-container" *ngIf="showMessage">
-    <div class="message" [ngClass]="messageType">
+    <div class="message card" [ngClass]="messageType">
       <span class="message-icon">{{ getMessageIcon() }}</span>
       <span class="message-text">{{ messageText }}</span>
       <button class="message-close" (click)="closeMessage()">✖</button>

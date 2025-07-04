@@ -1,0 +1,284 @@
+
+    <div class="incident-list-container">
+      <!-- Header -->
+      <div class="page-header">
+        <div class="header-content">
+          <h1>All Incidents</h1>
+          <p>Monitor and manage incident reports across all ATMs</p>
+          <div class="header-stats">
+            <span class="stat-item">
+              <strong>{{ totalIncidents() }}</strong> Total Incidents
+            </span>
+            <span class="stat-item">
+              <strong>{{ activeIncidents() }}</strong> Active
+            </span>
+            <span class="stat-item">
+              Last updated: {{ currentDateTime }}
+            </span>
+          </div>
+        </div>
+        <div class="header-actions">
+          <button mat-raised-button color="primary" (click)="createIncident()">
+            <mat-icon>add</mat-icon>
+            Create Incident
+          </button>
+          <button mat-icon-button (click)="refreshData()" matTooltip="Refresh">
+            <mat-icon [class.spinning]="isLoading()">refresh</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <!-- Filters Card -->
+      <mat-card class="filters-card">
+        <mat-card-content>
+          <div class="filters-section">
+            <div class="search-filters">
+              <mat-form-field appearance="outline" class="search-field">
+                <mat-label>Search incidents</mat-label>
+                <input matInput
+                       [formControl]="searchControl"
+                       placeholder="Search by incident number, ATM ID, or description...">
+                <mat-icon matSuffix>search</mat-icon>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="filter-field">
+                <mat-label>Status</mat-label>
+                <mat-select [formControl]="statusFilterControl" multiple>
+                  <mat-option *ngFor="let status of statusOptions" [value]="status.value">
+                    {{ status.label }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="filter-field">
+                <mat-label>ATM ID</mat-label>
+                <mat-select [formControl]="atmFilterControl" multiple>
+                  <mat-option *ngFor="let atm of uniqueAtmIds()" [value]="atm">
+                    {{ atm }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="filter-field">
+                <mat-label>Created By</mat-label>
+                <mat-select [formControl]="createdByFilterControl" multiple>
+                  <mat-option *ngFor="let user of uniqueCreatedBy()" [value]="user">
+                    {{ user }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+
+            <div class="filter-actions">
+              <button mat-button (click)="clearFilters()">
+                <mat-icon>clear</mat-icon>
+                Clear Filters
+              </button>
+              <button mat-button (click)="exportData()" [disabled]="isLoading()">
+                <mat-icon>download</mat-icon>
+                Export
+              </button>
+            </div>
+          </div>
+
+          <!-- Active Filters Display -->
+          <div class="active-filters" *ngIf="hasActiveFilters()">
+            <span class="filter-label">Active Filters:</span>
+            <mat-chip-set>
+              <mat-chip *ngIf="searchControl.value" removable (removed)="clearSearch()">
+                Search: "{{ searchControl.value }}"
+                <mat-icon matChipRemove>cancel</mat-icon>
+              </mat-chip>
+              <mat-chip *ngFor="let status of statusFilterControl.value || []"
+                        removable
+                        (removed)="removeStatusFilter(status)">
+                Status: {{ getStatusLabel(status) }}
+                <mat-icon matChipRemove>cancel</mat-icon>
+              </mat-chip>
+              <mat-chip *ngFor="let atm of atmFilterControl.value || []"
+                        removable
+                        (removed)="removeAtmFilter(atm)">
+                ATM: {{ atm }}
+                <mat-icon matChipRemove>cancel</mat-icon>
+              </mat-chip>
+              <mat-chip *ngFor="let user of createdByFilterControl.value || []"
+                        removable
+                        (removed)="removeCreatedByFilter(user)">
+                Created By: {{ user }}
+                <mat-icon matChipRemove>cancel</mat-icon>
+              </mat-chip>
+            </mat-chip-set>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Incidents Table -->
+      <mat-card class="table-card">
+        <mat-card-content>
+          <div class="table-container">
+            <table mat-table [dataSource]="dataSource" matSort class="incidents-table">
+
+              <!-- Incident Number Column -->
+              <ng-container matColumnDef="incidentNumber">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Incident #</th>
+                <td mat-cell *matCellDef="let incident">
+                  <div class="incident-number-cell">
+                    <span class="incident-number"
+                          (click)="viewIncident(incident)"
+                          matTooltip="Click to view details">
+                      {{ incident.incidentNumber }}
+                    </span>
+                    <mat-icon *ngIf="isUrgent(incident)"
+                              class="urgent-icon"
+                              matTooltip="Urgent Incident">
+                      priority_high
+                    </mat-icon>
+                  </div>
+                </td>
+              </ng-container>
+
+              <!-- Status Column -->
+              <ng-container matColumnDef="status">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Status</th>
+                <td mat-cell *matCellDef="let incident">
+                  <mat-chip [class]="getStatusClass(incident.status)">
+                    {{ getStatusLabel(incident.status) }}
+                  </mat-chip>
+                </td>
+              </ng-container>
+
+              <!-- ATM ID Column -->
+              <ng-container matColumnDef="atmId">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>ATM ID</th>
+                <td mat-cell *matCellDef="let incident">
+                  <span class="atm-id">{{ incident.atmId }}</span>
+                </td>
+              </ng-container>
+
+              <!-- Error Type Column -->
+              <ng-container matColumnDef="errorType">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Error Type</th>
+                <td mat-cell *matCellDef="let incident">
+                  <div class="error-type-cell">
+                    <span class="error-type" matTooltip="{{ incident.incidentDescription }}">
+                      {{ incident.errorType }}
+                    </span>
+                  </div>
+                </td>
+              </ng-container>
+
+              <!-- Created By Column -->
+              <ng-container matColumnDef="createdBy">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Created By</th>
+                <td mat-cell *matCellDef="let incident">
+                  <span class="created-by">{{ incident.createdBy }}</span>
+                </td>
+              </ng-container>
+
+              <!-- Created At Column -->
+              <ng-container matColumnDef="createdAt">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Created</th>
+                <td mat-cell *matCellDef="let incident">
+                  <div class="date-cell">
+                    <span class="date">{{ formatDate(incident.createdAt) }}</span>
+                    <span class="time">{{ formatTime(incident.createdAt) }}</span>
+                  </div>
+                </td>
+              </ng-container>
+
+              <!-- Duration Column -->
+              <ng-container matColumnDef="duration">
+                <th mat-header-cell *matHeaderCellDef>Duration</th>
+                <td mat-cell *matCellDef="let incident">
+                  <span class="duration" [class]="getDurationClass(incident)">
+                    {{ calculateDuration(incident) }}
+                  </span>
+                </td>
+              </ng-container>
+
+              <!-- Actions Column -->
+              <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef>Actions</th>
+                <td mat-cell *matCellDef="let incident">
+                  <div class="action-buttons">
+                    <button mat-icon-button
+                            (click)="viewIncident(incident)"
+                            matTooltip="View Details"
+                            color="primary">
+                      <mat-icon>visibility</mat-icon>
+                    </button>
+
+                    <button mat-icon-button
+                            [matMenuTriggerFor]="actionMenu"
+                            matTooltip="More Actions"
+                            #menuTrigger="matMenuTrigger"
+                            (click)="setSelectedIncident(incident)">
+                      <mat-icon>more_vert</mat-icon>
+                    </button>
+
+                    <mat-menu #actionMenu="matMenu">
+                      <button mat-menu-item (click)="viewIncidentFromMenu()">
+                        <mat-icon>visibility</mat-icon>
+                        <span>View Details</span>
+                      </button>
+                      <button mat-menu-item
+                              (click)="viewProcessInstanceFromMenu()"
+                              *ngIf="selectedIncident()?.processInstanceId">
+                        <mat-icon>account_tree</mat-icon>
+                        <span>View Process</span>
+                      </button>
+                      <button mat-menu-item
+                              (click)="copyIncidentNumberFromMenu()"
+                              class="copy-action">
+                        <mat-icon>content_copy</mat-icon>
+                        <span>Copy Incident #</span>
+                      </button>
+                      <mat-divider></mat-divider>
+                      <button mat-menu-item
+                              (click)="abortIncidentFromMenu()"
+                              *ngIf="selectedIncident() && canAbortIncident(selectedIncident()!)"
+                              class="danger-action">
+                        <mat-icon>block</mat-icon>
+                        <span>Abort Incident</span>
+                      </button>
+                    </mat-menu>
+                  </div>
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns;"
+                  class="incident-row"
+                  [class.urgent-row]="isUrgent(row)"
+                  (click)="viewIncident(row)"></tr>
+            </table>
+
+            <!-- Loading State -->
+            <div class="loading-state" *ngIf="isLoading()">
+              <mat-spinner diameter="40"></mat-spinner>
+              <p>Loading incidents...</p>
+            </div>
+
+            <!-- Empty State -->
+            <div class="empty-state" *ngIf="!isLoading() && dataSource.data.length === 0">
+              <mat-icon class="empty-icon">inbox</mat-icon>
+              <h3>No incidents found</h3>
+              <p *ngIf="hasActiveFilters()">Try adjusting your filters or search criteria</p>
+              <p *ngIf="!hasActiveFilters()">No incidents have been created yet</p>
+              <button mat-raised-button color="primary" (click)="createIncident()" *ngIf="!hasActiveFilters()">
+                <mat-icon>add</mat-icon>
+                Create First Incident
+              </button>
+            </div>
+          </div>
+
+          <!-- Pagination -->
+          <mat-paginator
+            [pageSizeOptions]="[10, 25, 50, 100]"
+            [pageSize]="25"
+            showFirstLastButtons
+            class="table-paginator">
+          </mat-paginator>
+        </mat-card-content>
+      </mat-card>
+    </div>

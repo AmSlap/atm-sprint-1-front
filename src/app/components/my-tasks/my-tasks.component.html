@@ -1,0 +1,399 @@
+<div class="my-tasks-container">
+      <!-- Header -->
+      <div class="page-header">
+        <div class="header-content">
+          <h1>My Tasks</h1>
+          <p>Tasks assigned to {{ currentUser().displayName }} ({{ currentUser().username }})</p>
+          <div class="header-stats">
+            <span class="stat-item">
+              <strong>{{ totalTasks() }}</strong> Total Tasks
+            </span>
+            <span class="stat-item">
+              <strong>{{ activeTasks() }}</strong> Active
+            </span>
+            <span class="stat-item">
+              Last updated: {{ currentDateTime }}
+            </span>
+          </div>
+        </div>
+        <div class="header-actions">
+          <button mat-raised-button color="accent" (click)="viewAvailableTasks()">
+            <mat-icon>assignment</mat-icon>
+            Available Tasks
+          </button>
+          <button mat-icon-button (click)="refreshTasks()" matTooltip="Refresh">
+            <mat-icon [class.spinning]="isLoading()">refresh</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <!-- Task Tabs -->
+      <mat-card class="tasks-card">
+        <mat-tab-group mat-stretch-tabs="false" class="task-tabs">
+          <!-- Active Tasks Tab -->
+          <mat-tab>
+            <ng-template mat-tab-label>
+              <span matBadge="{{ activeTasks() }}" matBadgeColor="accent" [matBadgeHidden]="activeTasks() === 0">
+                Active Tasks
+              </span>
+            </ng-template>
+
+            <div class="tab-content">
+              <div class="tasks-list" *ngIf="activeTasksList().length > 0; else noActiveTasks">
+                <mat-expansion-panel
+                  *ngFor="let task of activeTasksList(); trackBy: trackByTaskId"
+                  class="task-panel"
+                  [class]="getTaskPriorityClass(task)">
+
+                  <mat-expansion-panel-header>
+                    <mat-panel-title>
+                      <div class="task-header">
+                        <div class="task-info">
+                          <span class="task-name">{{ task.taskName }}</span>
+                          <mat-chip [class]="getTaskStatusClass(task.status)" class="status-chip">
+                            {{ getTaskStatusLabel(task.status) }}
+                          </mat-chip>
+                        </div>
+                        <div class="task-meta">
+                          <span class="task-id">Task #{{ task.taskInstanceId }}</span>
+                          <span class="task-duration" [class]="getTaskDurationClass(task)">
+                            {{ calculateTaskDuration(task) }}
+                          </span>
+                        </div>
+                      </div>
+                    </mat-panel-title>
+                  </mat-expansion-panel-header>
+
+                  <div class="task-details">
+                    <!-- Task Information -->
+                    <div class="task-info-section">
+                      <h4><mat-icon>info</mat-icon> Task Information</h4>
+                      <div class="info-grid">
+                        <div class="info-item">
+                          <span class="label">Task ID:</span>
+                          <span class="value">{{ task.taskInstanceId }}</span>
+                        </div>
+                        <div class="info-item">
+                          <span class="label">Status:</span>
+                          <span class="value">
+                            <mat-chip [class]="getTaskStatusClass(task.status)">
+                              {{ getTaskStatusLabel(task.status) }}
+                            </mat-chip>
+                          </span>
+                        </div>
+                        <div class="info-item">
+                          <span class="label">Assigned Group:</span>
+                          <span class="value">{{ task.assignedGroup || 'N/A' }}</span>
+                        </div>
+                        <div class="info-item">
+                          <span class="label">Priority:</span>
+                          <span class="value">{{ task.priority || 'Normal' }}</span>
+                        </div>
+                        <div class="info-item">
+                          <span class="label">Created:</span>
+                          <span class="value">{{ formatDateTime(task.createdAt) }}</span>
+                        </div>
+                        <div class="info-item" *ngIf="task.dueDate">
+                          <span class="label">Due Date:</span>
+                          <span class="value" [class]="getTaskDueDateClass(task)">
+                            {{ formatDateTime(task.dueDate) }}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Input Data -->
+                    <div class="input-data-section" *ngIf="getTaskInputDataItems(task).length > 0">
+                      <h4><mat-icon>input</mat-icon> Task Input Data</h4>
+                      <div class="input-data-grid">
+                        <div class="input-item" *ngFor="let item of getTaskInputDataItems(task)">
+                          <span class="input-label">{{ formatInputLabel(item.key) }}:</span>
+                          <span class="input-value">{{ item.value }}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Task Actions -->
+                    <div class="task-actions-section">
+                      <h4><mat-icon>play_arrow</mat-icon> Actions</h4>
+                      <div class="action-buttons">
+
+                        <!-- Claim Task Button (if not claimed) -->
+                        <button mat-raised-button
+                                color="primary"
+                                (click)="claimTask(task)"
+                                *ngIf="task.status === 'READY'"
+                                [disabled]="isProcessing()">
+                          <mat-icon>how_to_reg</mat-icon>
+                          Claim Task
+                        </button>
+
+                        <!-- Work on Task Button (if claimed but not started) -->
+                        <button mat-raised-button
+                                color="accent"
+                                (click)="startTask(task)"
+                                *ngIf="task.status === 'RESERVED'"
+                                [disabled]="isProcessing()">
+                          <mat-icon>play_arrow</mat-icon>
+                          Start Working
+                        </button>
+
+                        <!-- Complete Task Button (if in progress) -->
+                        <button mat-raised-button
+                                color="primary"
+                                (click)="openTaskCompletionDialog(task)"
+                                *ngIf="task.status === 'IN_PROGRESS' || task.status === 'RESERVED'"
+                                [disabled]="isProcessing()">
+                          <mat-icon>done</mat-icon>
+                          Complete Task
+                        </button>
+
+                        <!-- Release Task Button -->
+                        <button mat-button
+                                (click)="releaseTask(task)"
+                                *ngIf="task.status === 'RESERVED'"
+                                [disabled]="isProcessing()">
+                          <mat-icon>undo</mat-icon>
+                          Release Task
+                        </button>
+
+                        <!-- View Incident Button -->
+                        <button mat-button
+                                (click)="viewIncident(task)"
+                                color="primary">
+                          <mat-icon>visibility</mat-icon>
+                          View Incident
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </mat-expansion-panel>
+              </div>
+
+              <ng-template #noActiveTasks>
+                <div class="empty-state">
+                  <mat-icon class="empty-icon">assignment_turned_in</mat-icon>
+                  <h3>No active tasks</h3>
+                  <p>You don't have any active tasks assigned at the moment</p>
+                  <button mat-raised-button color="primary" (click)="viewAvailableTasks()">
+                    <mat-icon>assignment</mat-icon>
+                    View Available Tasks
+                  </button>
+                </div>
+              </ng-template>
+            </div>
+          </mat-tab>
+
+          <!-- Completed Tasks Tab -->
+          <mat-tab>
+            <ng-template mat-tab-label>
+              <span matBadge="{{ completedTasks() }}" matBadgeColor="primary" [matBadgeHidden]="completedTasks() === 0">
+                Completed Tasks
+              </span>
+            </ng-template>
+
+            <div class="tab-content">
+              <div class="tasks-list" *ngIf="completedTasksList().length > 0; else noCompletedTasks">
+                <mat-expansion-panel
+                  *ngFor="let task of completedTasksList(); trackBy: trackByTaskId"
+                  class="task-panel completed-task">
+
+                  <mat-expansion-panel-header>
+                    <mat-panel-title>
+                      <div class="task-header">
+                        <div class="task-info">
+                          <span class="task-name">{{ task.taskName }}</span>
+                          <mat-chip class="status-completed">Completed</mat-chip>
+                        </div>
+                        <div class="task-meta">
+                          <span class="task-id">Task #{{ task.taskInstanceId }}</span>
+                          <span class="completion-time">
+                            Completed {{ getRelativeTime(task.completedAt!) }}
+                          </span>
+                        </div>
+                      </div>
+                    </mat-panel-title>
+                  </mat-expansion-panel-header>
+
+                  <div class="task-details">
+                    <!-- Completion Summary -->
+                    <div class="completion-section">
+                      <h4><mat-icon>check_circle</mat-icon> Completion Summary</h4>
+                      <div class="completion-info">
+                        <p><strong>Completed:</strong> {{ formatDateTime(task.completedAt!) }}</p>
+                        <p><strong>Duration:</strong> {{ calculateCompletionDuration(task) }}</p>
+                        <p *ngIf="task.outputData"><strong>Output:</strong> {{ getTaskOutputSummary(task) }}</p>
+                      </div>
+                    </div>
+
+                    <!-- View Incident Button -->
+                    <div class="task-actions-section">
+                      <button mat-button (click)="viewIncident(task)" color="primary">
+                        <mat-icon>visibility</mat-icon>
+                        View Incident
+                      </button>
+                    </div>
+                  </div>
+                </mat-expansion-panel>
+              </div>
+
+              <ng-template #noCompletedTasks>
+                <div class="empty-state">
+                  <mat-icon class="empty-icon">history</mat-icon>
+                  <h3>No completed tasks</h3>
+                  <p>Your completed tasks will appear here</p>
+                </div>
+              </ng-template>
+            </div>
+          </mat-tab>
+        </mat-tab-group>
+      </mat-card>
+
+      <!-- Loading Overlay -->
+      <div class="loading-overlay" *ngIf="isLoading()">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>Loading tasks...</p>
+      </div>
+    </div>
+
+    <!-- Task Completion Dialog -->
+    <div *ngIf="showCompletionDialog()" class="dialog-overlay" (click)="closeCompletionDialog()">
+      <div class="completion-dialog" (click)="$event.stopPropagation()">
+        <div class="dialog-header">
+          <h2>Complete Task: {{ selectedTask()?.taskName }}</h2>
+          <button mat-icon-button (click)="closeCompletionDialog()">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+
+        <div class="dialog-content">
+          <form [formGroup]="completionForm" *ngIf="completionForm">
+
+            <!-- Process Incident Task -->
+            <div *ngIf="selectedTask()?.taskName === 'Process Incident'">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Initial Diagnosis</mat-label>
+                <textarea matInput
+                          formControlName="initialDiagnosis"
+                          rows="4"
+                          placeholder="Provide your initial diagnosis of the incident..."></textarea>
+                <mat-error *ngIf="completionForm.get('initialDiagnosis')?.hasError('required')">
+                  Initial diagnosis is required
+                </mat-error>
+              </mat-form-field>
+            </div>
+
+            <!-- Analyze Incident Task -->
+            <div *ngIf="selectedTask()?.taskName === 'Analyze Incident'">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Incident Type</mat-label>
+                <mat-select formControlName="incidentType">
+                  <mat-option value="under_maintenance">Under Maintenance</mat-option>
+                  <mat-option value="outside_maintenance_under_insurance">Outside Maintenance - Under Insurance</mat-option>
+                  <mat-option value="outside_maintenance_outside_insurance">Outside Maintenance - Outside Insurance</mat-option>
+                </mat-select>
+                <mat-error *ngIf="completionForm.get('incidentType')?.hasError('required')">
+                  Incident type is required
+                </mat-error>
+              </mat-form-field>
+            </div>
+
+            <!-- Assess Incident Task -->
+            <div *ngIf="selectedTask()?.taskName === 'Assess Incident'">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Assessment Details</mat-label>
+                <textarea matInput
+                          formControlName="assessmentDetails"
+                          rows="4"
+                          placeholder="Provide detailed assessment of the incident..."></textarea>
+                <mat-error *ngIf="completionForm.get('assessmentDetails')?.hasError('required')">
+                  Assessment details are required
+                </mat-error>
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Supplier Ticket Number</mat-label>
+                <input matInput formControlName="supplierTicketNumber" placeholder="Enter supplier ticket number">
+                <mat-error *ngIf="completionForm.get('supplierTicketNumber')?.hasError('required')">
+                  Supplier ticket number is required
+                </mat-error>
+              </mat-form-field>
+            </div>
+
+            <!-- Approve Insurance Task -->
+            <div *ngIf="selectedTask()?.taskName === 'Approve Insurance'">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Reimbursement Details</mat-label>
+                <textarea matInput
+                          formControlName="reimbursementDetails"
+                          rows="4"
+                          placeholder="Provide reimbursement details and approval information..."></textarea>
+                <mat-error *ngIf="completionForm.get('reimbursementDetails')?.hasError('required')">
+                  Reimbursement details are required
+                </mat-error>
+              </mat-form-field>
+            </div>
+
+            <!-- Procure Parts/Services Task -->
+            <div *ngIf="selectedTask()?.taskName === 'Procure Parts/Services'">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Procurement Details</mat-label>
+                <textarea matInput
+                          formControlName="procurementDetails"
+                          rows="4"
+                          placeholder="Provide procurement details and item information..."></textarea>
+                <mat-error *ngIf="completionForm.get('procurementDetails')?.hasError('required')">
+                  Procurement details are required
+                </mat-error>
+              </mat-form-field>
+            </div>
+
+            <!-- Resolve Incident Tasks -->
+            <div *ngIf="selectedTask()?.taskName === 'Resolve Incident' || selectedTask()?.taskName === 'Resolve Incident Under Maintenance'">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Resolution Details</mat-label>
+                <textarea matInput
+                          formControlName="resolutionDetails"
+                          rows="4"
+                          placeholder="Provide detailed resolution information..."></textarea>
+                <mat-error *ngIf="completionForm.get('resolutionDetails')?.hasError('required')">
+                  Resolution details are required
+                </mat-error>
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Supplier Ticket Number</mat-label>
+                <input matInput formControlName="supplierTicketNumber" placeholder="Enter supplier ticket number">
+                <mat-error *ngIf="completionForm.get('supplierTicketNumber')?.hasError('required')">
+                  Supplier ticket number is required
+                </mat-error>
+              </mat-form-field>
+            </div>
+
+            <!-- Close Incident Task -->
+            <div *ngIf="selectedTask()?.taskName === 'Close Incident'">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Closure Details</mat-label>
+                <textarea matInput
+                          formControlName="closureDetails"
+                          rows="4"
+                          placeholder="Provide closure details and final comments..."></textarea>
+                <mat-error *ngIf="completionForm.get('closureDetails')?.hasError('required')">
+                  Closure details are required
+                </mat-error>
+              </mat-form-field>
+            </div>
+          </form>
+        </div>
+
+        <div class="dialog-actions">
+          <button mat-button (click)="closeCompletionDialog()">Cancel</button>
+          <button mat-raised-button
+                  color="primary"
+                  (click)="completeTask()"
+                  [disabled]="!completionForm?.valid || isProcessing()">
+            <mat-icon *ngIf="!isProcessing()">done</mat-icon>
+            <mat-icon *ngIf="isProcessing()" class="spinning">refresh</mat-icon>
+            {{ isProcessing() ? 'Completing...' : 'Complete Task' }}
+          </button>
+        </div>
+      </div>
+    </div>

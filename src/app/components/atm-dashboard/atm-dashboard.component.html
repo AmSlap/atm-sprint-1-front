@@ -140,25 +140,12 @@
       <div class="filter-header">
         <h2 i18n>Filter & Search</h2>
         <div class="view-controls">
-          <div class="view-toggle">
-            <button class="view-btn"
-                    [ngClass]="{'active': viewMode === 'grid'}"
-                    (click)="viewMode = 'grid'">
-              <span>⊞</span>
-              <span i18n>Grid</span>
-            </button>
-            <button class="view-btn"
-                    [ngClass]="{'active': viewMode === 'table'}"
-                    (click)="viewMode = 'table'">
-              <span>☰</span>
-              <span i18n>Table</span>
-            </button>
-          </div>
-          <button class="btn btn-secondary btn-sm" (click)="exportToCSV()">
-            <span>📊</span>
-            <span i18n>Export CSV</span>
-          </button>
-        </div>
+  <div class="view-toggle">
+    <button class="view-btn" [class.active]="viewMode === 'grid'" (click)="setViewMode('grid')">⊞ Grid</button>
+    <button class="view-btn" [class.active]="viewMode === 'table'" (click)="setViewMode('table')">☰ Table</button>
+  </div>
+  <button class="btn btn-secondary" (click)="exportToCSV()">📊 Export CSV</button>
+</div>
       </div>
       <div class="filter-grid">
         <div class="form-group search-group">
@@ -190,16 +177,6 @@
             <option value="WORKING" i18n>Working</option>
             <option value="OUTOFSERVICE" i18n>Out of service</option>
             <option value="maintenance" i18n>Maintenance</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label for="health" i18n>Health Status</label>
-          <select id="health" [(ngModel)]="selectedHealth" (change)="applyFilters()" class="filter-select">
-            <option value="all" i18n>All Health Levels</option>
-            <option value="green" i18n>Healthy (Green)</option>
-            <option value="orange" i18n>Warning (Orange)</option>
-            <option value="red" i18n>Critical (Red)</option>
           </select>
         </div>
 
@@ -292,6 +269,45 @@
         </div>
       </div>
     </div>
+    <!-- ATM Table View -->
+     <div class="atm-table-container" *ngIf="viewMode === 'table'">
+  <table class="atm-table">
+    <thead>
+      <tr>
+        <th class="sortable" (click)="setSortBy('atmId')">ATM ID <span class="sort-indicator" *ngIf="sortBy === 'atmId'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span></th>
+        <th>Status</th>
+        <th>Health</th>
+        <th>Cash</th>
+        <th>Region</th>
+        <th>Agency</th>
+        <th class="sortable" (click)="setSortBy('lastUpdate')">Last Update <span class="sort-indicator" *ngIf="sortBy === 'lastUpdate'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span></th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let atm of filteredAtms" [class.status-active]="atm.operationalState === 'Working'" [class.status-warning]="atm.operationalState === 'Maintenance'" [class.status-error]="atm.operationalState === 'Out of service'">
+        <td class="atm-id-cell">
+          <div class="atm-id">{{ atm.atmId }}</div>
+          <div class="atm-label">{{ atm.label }}</div>
+        </td>
+        <td><div class="status-badge-small" [ngClass]="getStatusClass(atm)">{{ atm.operationalState }}</div></td>
+        <td><div class="health-badge-small" [ngClass]="getHealthClass(atm)">{{ atm.overallHealth }}</div></td>
+        <td><div class="cash-indicator" [class.low-cash]="atm.lowCashFlag">{{ atm.lowCashFlag ? 'Low' : 'Normal' }}</div></td>
+        <td>{{ atm.region }}</td>
+        <td>{{ atm.agencyName }}</td>
+        <td class="last-update-cell">
+          <div class="update-time">{{ atm.lastUpdateTimestamp | date:'MMM d, y, h:mm a' }}</div>
+          <div class="time-ago">{{ getTimeAgo(atm.lastUpdateTimestamp) }}</div>
+        </td>
+        <td class="actions-cell">
+          <a class="action-btn-small primary" (click)="navigateToAtmDetails(atm.atmId)">👁️</a>
+          <a class="action-btn-small" (click)="refreshSingleAtm(atm.atmId)">🔄</a>
+          <a class="action-btn-small" (click)="navigateToAtmDetails(atm.atmId)">🗺️</a>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
     <!-- ATM Grid View -->
     <div class="atm-grid" *ngIf="!loading && !error && viewMode === 'grid'">
       <div class="atm-card"

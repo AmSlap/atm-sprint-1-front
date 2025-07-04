@@ -1,34 +1,25 @@
 <div class="agency-container">
-  <!-- Enhanced Header Section -->
-  <div class="agency-header">
-    <div class="header-content">
-      <div class="header-icon">🏢</div>
-      <div class="header-text">
-        <h1>Agency Management</h1>
-        <p class="header-subtitle">Manage agency information and ATM assignments</p>
+  <header class="agency-header">
+    <div class="title-section">
+      <h1>Agency Management</h1>
+      <div class="subtitle">
+        Welcome back <span class="user-info">{{ getCurrentUser() }}</span> • {{ getCurrentDateTime() | date:'MMM d, y' }}
       </div>
     </div>
     <div class="header-actions">
-      <div class="last-updated">
-        <div class="update-label">Last Updated</div>
-        <div class="update-time">{{ getCurrentTime() }}</div>
-        <div class="update-user">by {{ getCurrentUser() }}</div>
-      </div>
-      <button class="btn btn-outline" (click)="refreshAgencies()" [disabled]="loading">
-        <span class="btn-icon" [ngClass]="{'spinning': loading}">🔄</span>
+      <button class="btn btn-primary" (click)="refreshAgencies()">
+        <span class="btn-icon">🔄</span>
         Refresh
       </button>
     </div>
-  </div>
+  </header>
 
-  <!-- Success/Error Messages -->
   <div class="message-container">
     <div *ngIf="successMessage" class="message success">
       <span class="message-icon">✅</span>
       <span class="message-text">{{ successMessage }}</span>
       <button class="message-close" (click)="clearSuccessMessage()">✖</button>
     </div>
-
     <div *ngIf="errorMessage" class="message error">
       <span class="message-icon">❌</span>
       <span class="message-text">{{ errorMessage }}</span>
@@ -37,289 +28,177 @@
   </div>
 
   <div class="agency-content">
-    <!-- Enhanced Form Panel -->
-    <div class="form-panel">
-      <div class="panel-header">
-        <div class="panel-title">
-          <span class="panel-icon">{{ editMode ? '✏️' : '➕' }}</span>
+    <div class="content-grid">
+      <section class="form-panel">
+        <header class="panel-header">
           <h2>{{ editMode ? 'Edit Agency' : 'Add New Agency' }}</h2>
-        </div>
-        <div class="panel-status" *ngIf="editMode">
-          <span class="status-badge editing">
-            <span class="status-icon">✏️</span>
-            Editing: {{ selectedAgencyCode }}
-          </span>
-        </div>
-      </div>
-
-      <form [formGroup]="agencyForm" (ngSubmit)="onSubmit()" class="enhanced-form">
-        <!-- Basic Information Section -->
-        <div class="form-section">
-          <div class="section-header">
-            <span class="section-icon">🏢</span>
-            <h3>Agency Information</h3>
+          <div class="panel-status" *ngIf="editMode">
+            <span class="status-badge">Editing</span>
           </div>
+        </header>
 
-          <div class="form-grid">
-            <div class="form-group">
-              <label for="agencyCode">Agency Code *</label>
-              <input
-                id="agencyCode"
-                type="text"
-                formControlName="agencyCode"
-                [class.error]="agencyForm.get('agencyCode')?.invalid && agencyForm.get('agencyCode')?.touched"
-                placeholder="Enter unique agency code">
-              <div class="error-message" *ngIf="agencyForm.get('agencyCode')?.invalid && agencyForm.get('agencyCode')?.touched">
-                Agency Code is required
+        <div class="edit-mode-indicator" *ngIf="editMode">
+          <div class="edit-banner">
+            <div class="edit-info">
+              <span class="edit-icon">✏️</span>
+              <div>
+                <div class="edit-title">Editing Agency: {{ selectedAgencyCode }}</div>
+                <div class="edit-subtitle">Make your changes and click "Update Agency" to save</div>
               </div>
             </div>
-
-            <div class="form-group">
-              <label for="agencyName">Agency Name *</label>
-              <input
-                id="agencyName"
-                type="text"
-                formControlName="agencyName"
-                [class.error]="agencyForm.get('agencyName')?.invalid && agencyForm.get('agencyName')?.touched"
-                placeholder="Enter full agency name">
-              <div class="error-message" *ngIf="agencyForm.get('agencyName')?.invalid && agencyForm.get('agencyName')?.touched">
-                Agency Name is required
-              </div>
-            </div>
-          </div>
-
-          <div class="form-group full-width">
-            <label for="description">Description</label>
-            <textarea
-              id="description"
-              formControlName="description"
-              placeholder="Optional description of the agency"
-              rows="3">
-            </textarea>
+            <button class="btn" (click)="resetForm()">Cancel Edit</button>
           </div>
         </div>
 
-        <!-- Contact Information Section -->
-        <div class="form-section">
-          <div class="section-header">
-            <span class="section-icon">📞</span>
-            <h3>Contact Information</h3>
-          </div>
-
-          <div class="form-grid">
-            <div class="form-group">
-              <label for="contactEmail">Contact Email</label>
-              <input
-                id="contactEmail"
-                type="email"
-                formControlName="contactEmail"
-                placeholder="agency@example.com">
-            </div>
-
-            <div class="form-group">
-              <label for="contactPhone">Contact Phone</label>
-              <input
-                id="contactPhone"
-                type="tel"
-                formControlName="contactPhone"
-                placeholder="+1 (555) 123-4567">
-            </div>
-          </div>
-
-          <div class="form-group full-width">
-            <label for="address">Address</label>
-            <input
-              id="address"
-              type="text"
-              formControlName="address"
-              placeholder="Street address, city, state/province">
-          </div>
-        </div>
-
-        <!-- Form Actions -->
-        <div class="form-actions">
-          <button
-            type="submit"
-            class="btn btn-primary"
-            [disabled]="agencyForm.invalid || isSubmitting">
-            <span class="btn-icon" [ngClass]="{'spinning': isSubmitting}">
-              {{ isSubmitting ? '🔄' : (editMode ? '💾' : '➕') }}
-            </span>
-            {{ isSubmitting ? 'Processing...' : (editMode ? 'Update Agency' : 'Add Agency') }}
-          </button>
-          <button
-            type="button"
-            class="btn btn-secondary"
-            (click)="resetForm()"
-            [disabled]="isSubmitting">
-            <span class="btn-icon">🔄</span>
-            {{ editMode ? 'Cancel Edit' : 'Reset Form' }}
-          </button>
-        </div>
-      </form>
-    </div>
-
-    <!-- Enhanced Data Panel -->
-    <div class="data-panel">
-      <div class="panel-header">
-        <div class="panel-title">
-          <span class="panel-icon">📋</span>
-          <h2>Agency Directory</h2>
-          <span class="record-count">({{ agencies.length }} Agencies)</span>
-        </div>
-        <div class="panel-controls">
-          <button class="btn btn-sm btn-outline" (click)="refreshAgencies()" [disabled]="loading">
-            <span class="btn-icon" [ngClass]="{'spinning': loading}">🔄</span>
-            Refresh
-          </button>
-          <button class="btn btn-sm btn-outline" (click)="exportData()">
-            <span class="btn-icon">📤</span>
-            Export
-          </button>
-        </div>
-      </div>
-
-      <!-- Loading State -->
-      <div *ngIf="loading" class="loading-state">
-        <div class="loading-content">
-          <div class="loading-spinner"></div>
-          <div class="loading-text">Loading agency data...</div>
-        </div>
-      </div>
-
-      <!-- Error State -->
-      <div *ngIf="error && !loading" class="error-state">
-        <div class="error-content">
-          <div class="error-icon">❌</div>
-          <h3>Failed to Load Agencies</h3>
-          <p>Unable to retrieve agency data. Please check your connection and try again.</p>
-          <button class="btn btn-primary" (click)="refreshAgencies()">
-            <span class="btn-icon">🔄</span>
-            Retry
-          </button>
-        </div>
-      </div>
-
-      <!-- Data Table -->
-      <div *ngIf="!loading && !error" class="table-container">
-        <table class="data-table">
-          <thead>
-          <tr>
-            <th>
-              <div class="th-content">
-                <span class="th-icon">🏢</span>
-                Agency Code
-              </div>
-            </th>
-            <th>
-              <div class="th-content">
-                <span class="th-icon">🏷️</span>
-                Agency Name
-              </div>
-            </th>
-            <th>
-              <div class="th-content">
-                <span class="th-icon">📞</span>
-                Contact
-              </div>
-            </th>
-            <th>
-              <div class="th-content">
-                <span class="th-icon">🏧</span>
-                ATMs
-              </div>
-            </th>
-            <th>
-              <div class="th-content">
-                <span class="th-icon">⚙️</span>
-                Actions
-              </div>
-            </th>
-          </tr>
-          </thead>
-          <tbody>
-          <tr *ngFor="let agency of agencies; trackBy: trackByAgencyCode"
-              [class.editing]="selectedAgencyCode === agency.agencyCode">
-            <td>
-              <div class="cell-content primary">
-                <span class="cell-icon">🏢</span>
-                <span class="cell-text">{{ agency.agencyCode }}</span>
-              </div>
-            </td>
-            <td>
-              <div class="cell-content">
-                <div class="agency-info">
-                  <div class="agency-name">{{ agency.agencyName }}</div>
+        <form class="enhanced-form" [formGroup]="agencyForm" (ngSubmit)="onSubmit()">
+          <div class="form-section">
+            <header class="section-header">
+              <span class="section-icon">🏢</span>
+              <h3>Agency Information</h3>
+            </header>
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="agencyCode">Agency Code *</label>
+                <input type="text" id="agencyCode" formControlName="agencyCode" [class.error]="agencyForm.get('agencyCode')?.invalid && agencyForm.get('agencyCode')?.touched" [disabled]="editMode">
+                <div class="error-message" *ngIf="agencyForm.get('agencyCode')?.invalid && agencyForm.get('agencyCode')?.touched">
+                  Agency Code is required and must contain only uppercase letters, numbers, underscores, or hyphens
                 </div>
               </div>
-            </td>
-            <td>
-              <div class="cell-content">
-                <div class="contact-info">
+              <div class="form-group">
+                <label for="agencyName">Agency Name *</label>
+                <input type="text" id="agencyName" formControlName="agencyName" [class.error]="agencyForm.get('agencyName')?.invalid && agencyForm.get('agencyName')?.touched">
+                <div class="error-message" *ngIf="agencyForm.get('agencyName')?.invalid && agencyForm.get('agencyName')?.touched">
+                  Agency Name is required and must be at least 2 characters
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="form-section">
+            <header class="section-header">
+              <span class="section-icon">📞</span>
+              <h3>Contact Information</h3>
+            </header>
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="contactEmail">Contact Email</label>
+                <input type="email" id="contactEmail" formControlName="contactEmail" [class.error]="agencyForm.get('contactEmail')?.invalid && agencyForm.get('contactEmail')?.touched">
+                <div class="error-message" *ngIf="agencyForm.get('contactEmail')?.invalid && agencyForm.get('contactEmail')?.touched">
+                  Please enter a valid email address
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="contactPhone">Contact Phone</label>
+                <input type="text" id="contactPhone" formControlName="contactPhone">
+              </div>
+              <div class="form-group full-width">
+                <label for="address">Address</label>
+                <input type="text" id="address" formControlName="address">
+              </div>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary" [disabled]="agencyForm.invalid || isSubmitting">
+              <span class="btn-icon">{{ isSubmitting ? '🔄' : (editMode ? '💾' : '➕') }}</span>
+              {{ isSubmitting ? 'Processing...' : (editMode ? 'Update Agency' : 'Add Agency') }}
+            </button>
+            <button type="button" class="btn" (click)="resetForm()">
+              <span class="btn-icon">🔄</span>
+              {{ editMode ? 'Cancel Edit' : 'Reset Form' }}
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <section class="data-panel">
+        <header class="panel-header">
+          <h2>Agency Directory</h2>
+          <div class="panel-controls">
+            <span class="record-count">({{ agencies.length }} Agencies)</span>
+            <button class="btn" (click)="refreshAgencies()">
+              <span class="btn-icon">🔄</span>
+              Refresh
+            </button>
+            <button class="btn" (click)="exportData()">
+              <span class="btn-icon">📤</span>
+              Export
+            </button>
+          </div>
+        </header>
+
+        <div class="loading-state" *ngIf="loading">
+          <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <p>Loading agency data...</p>
+          </div>
+        </div>
+
+        <div class="error-state" *ngIf="error && !loading">
+          <div class="error-content">
+            <span class="error-icon">❌</span>
+            <h3>Failed to Load Agencies</h3>
+            <p>Unable to retrieve agency data. Please check your connection and try again.</p>
+            <div class="error-actions">
+              <button class="btn btn-primary" (click)="refreshAgencies()">Retry</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="table-container" *ngIf="!loading && !error">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th><span class="th-content"><span class="th-icon">🏢</span>Agency Code</span></th>
+                <th><span class="th-content"><span class="th-icon">🏷️</span>Agency Name</span></th>
+                <th><span class="th-content"><span class="th-icon">📞</span>Contact</span></th>
+                <th><span class="th-content"><span class="th-icon">🏧</span>ATMs</span></th>
+                <th><span class="th-content"><span class="th-icon">⚙️</span>Actions</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let agency of agencies; trackBy: trackByAgencyCode" [class.editing]="editMode && selectedAgencyCode === agency.agencyCode">
+                <td class="cell-content">
+                  <span class="cell-icon">🏢</span>
+                  {{ agency.agencyCode }}
+                </td>
+                <td class="cell-content agency-info">
+                  <div class="agency-name">{{ agency.agencyName }}</div>
+                </td>
+                <td class="cell-content contact-info">
                   <div class="contact-email" *ngIf="agency.contactEmail">
-                    <span class="contact-icon">📧</span>
-                    {{ agency.contactEmail }}
+                    <span class="contact-icon">📧</span>{{ agency.contactEmail }}
                   </div>
                   <div class="contact-phone" *ngIf="agency.contactPhone">
-                    <span class="contact-icon">📞</span>
-                    {{ agency.contactPhone }}
+                    <span class="contact-icon">📞</span>{{ agency.contactPhone }}
                   </div>
                   <div class="contact-address" *ngIf="agency.address">
-                    <span class="contact-icon">📍</span>
-                    {{ agency.address }}
+                    <span class="contact-icon">📍</span>{{ agency.address }}
                   </div>
-                </div>
-              </div>
-            </td>
-            <td>
-              <div class="cell-content">
-                <div class="atm-count">
+                </td>
+                <td class="cell-content atm-count">
                   <span class="count-badge">{{ getATMCount(agency.agencyCode) }}</span>
                   <span class="count-label">ATMs</span>
-                </div>
-              </div>
-            </td>
-            <td>
-              <div class="cell-actions">
-                <button
-                  class="action-btn edit"
-                  (click)="editAgency(agency)"
-                  title="Edit Agency">
-                  ✏️
-                </button>
-                <button
-                  class="action-btn view"
-                  (click)="viewAgency(agency)"
-                  title="View Details">
-                  👁️
-                </button>
-                <button
-                  class="action-btn delete"
-                  (click)="deleteAgency(agency.agencyCode)"
-                  title="Delete Agency"
-                  [disabled]="getATMCount(agency.agencyCode) > 0">
-                  🗑️
-                </button>
-              </div>
-            </td>
-          </tr>
-          <tr *ngIf="agencies.length === 0" class="no-data-row">
-            <td colspan="5">
-              <div class="no-data">
-                <div class="no-data-icon">📭</div>
-                <div class="no-data-text">No agencies registered yet</div>
-                <div class="no-data-subtitle">Add your first agency using the form above</div>
-              </div>
-            </td>
-          </tr>
-          </tbody>
-        </table>
-      </div>
+                </td>
+                <td class="cell-content cell-actions">
+                  <button class="action-btn edit" (click)="editAgency(agency)">✏️</button>
+                  <button class="action-btn view" (click)="viewAgency(agency)">👁️</button>
+                  <button class="action-btn delete" (click)="deleteAgency(agency.agencyCode)" [disabled]="getATMCount(agency.agencyCode) > 0">🗑️</button>
+                </td>
+              </tr>
+              <tr *ngIf="agencies.length === 0">
+                <td colspan="5" class="no-data">
+                  <span class="no-data-icon">📭</span>
+                  <div class="no-data-text">No agencies registered yet</div>
+                  <div class="no-data-subtitle">Add your first agency using the form on the left</div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
     </div>
   </div>
 
-  <!-- Processing Overlay -->
-  <div *ngIf="isSubmitting" class="processing-overlay">
+  <div class="processing-overlay" *ngIf="isSubmitting">
     <div class="processing-content">
       <div class="processing-spinner"></div>
       <div class="processing-text">{{ editMode ? 'Updating agency...' : 'Creating agency...' }}</div>

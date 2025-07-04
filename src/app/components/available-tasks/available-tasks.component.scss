@@ -1,0 +1,462 @@
+.available-tasks-container {
+      padding: 20px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 24px;
+      gap: 20px;
+    }
+
+    .header-content h1 {
+      margin: 0 0 8px 0;
+      color: #333;
+      font-size: 2rem;
+    }
+
+    .header-content p {
+      margin: 0 0 12px 0;
+      color: #666;
+      font-size: 1rem;
+    }
+
+    .header-stats {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .stat-item {
+      color: #666;
+      font-size: 0.9rem;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .groups-info-card {
+      margin-bottom: 20px;
+    }
+
+    .groups-section {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .groups-info h4 {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0 0 12px 0;
+      color: #333;
+    }
+
+    .groups-list {
+      margin-bottom: 8px;
+    }
+
+    .group-chip {
+      background-color: #e3f2fd;
+      color: #1976d2;
+    }
+
+    .groups-note {
+      margin: 0;
+      color: #666;
+      font-size: 0.9rem;
+    }
+
+    .filters-section {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .search-field {
+      min-width: 250px;
+    }
+
+    .filter-field {
+      min-width: 150px;
+    }
+
+    .active-filters {
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid #e0e0e0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .filter-label {
+      font-weight: 500;
+      color: #666;
+      font-size: 0.9rem;
+    }
+
+    .tasks-card {
+      margin-bottom: 20px;
+    }
+
+    .task-tabs {
+      min-height: 500px;
+    }
+
+    .tab-content {
+      padding: 20px;
+    }
+
+    .tasks-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .task-panel {
+      border-left: 4px solid #e0e0e0;
+    }
+
+    .task-panel.priority-high {
+      border-left-color: #f44336;
+    }
+
+    .task-panel.priority-medium {
+      border-left-color: #ff9800;
+    }
+
+    .task-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+    }
+
+    .task-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .task-name {
+      font-weight: 500;
+      color: #333;
+    }
+
+    .claimable-chip {
+      background-color: #e8f5e8;
+      color: #2e7d32;
+      font-size: 0.75rem;
+    }
+
+    .not-claimable-chip {
+      background-color: #ffebee;
+      color: #d32f2f;
+      font-size: 0.75rem;
+    }
+
+    .task-meta {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 4px;
+    }
+
+    .task-id {
+      font-size: 0.85rem;
+      color: #666;
+    }
+
+    .task-age {
+      font-size: 0.8rem;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-weight: 500;
+    }
+
+    .task-age.fresh { background: #e8f5e8; color: #2e7d32; }
+    .task-age.aging { background: #fff3e0; color: #f57c00; }
+    .task-age.old { background: #ffebee; color: #d32f2f; }
+
+    .task-details {
+      padding: 20px 0;
+    }
+
+    .task-info-section,
+    .input-data-section,
+    .task-actions-section {
+      margin-bottom: 24px;
+    }
+
+    .task-info-section h4,
+    .input-data-section h4,
+    .task-actions-section h4 {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0 0 16px 0;
+      color: #333;
+      font-size: 1rem;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 12px;
+    }
+
+    .info-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 12px;
+      background: #f8f9fa;
+      border-radius: 4px;
+    }
+
+    .label {
+      font-weight: 500;
+      color: #666;
+    }
+
+    .value {
+      color: #333;
+    }
+
+    .due-date-overdue { color: #f44336; font-weight: 500; }
+    .due-date-warning { color: #ff9800; font-weight: 500; }
+
+    .input-data-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .input-item {
+      display: flex;
+      gap: 12px;
+      padding: 8px 12px;
+      background: #f0f7ff;
+      border-radius: 4px;
+      border-left: 3px solid #2196f3;
+    }
+
+    .input-label {
+      font-weight: 500;
+      color: #1976d2;
+      min-width: 150px;
+    }
+
+    .input-value {
+      color: #333;
+      flex: 1;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .cannot-claim-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      background: #fff3e0;
+      border-radius: 4px;
+      color: #f57c00;
+      font-size: 0.9rem;
+    }
+
+    .grouped-tasks {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .group-panel {
+      border-left: 4px solid #e0e0e0;
+    }
+
+    .group-panel.my-group {
+      border-left-color: #4caf50;
+      background-color: #f8fff8;
+    }
+
+    .group-header {
+      width: 100%;
+    }
+
+    .group-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .group-name {
+      font-weight: 500;
+      color: #333;
+    }
+
+    .task-count-chip {
+      background-color: #f5f5f5;
+      color: #666;
+      font-size: 0.75rem;
+    }
+
+    .my-group-chip {
+      background-color: #e8f5e8;
+      color: #2e7d32;
+      font-size: 0.75rem;
+    }
+
+    .group-tasks {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 16px 0;
+    }
+
+    .task-card {
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 16px;
+      background: white;
+    }
+
+    .task-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .task-card-meta {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 12px;
+      font-size: 0.85rem;
+      color: #666;
+    }
+
+    .task-card-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 20px;
+      text-align: center;
+    }
+
+    .empty-icon {
+      font-size: 64px;
+      width: 64px;
+      height: 64px;
+      color: #ccc;
+      margin-bottom: 16px;
+    }
+
+    .empty-state h3 {
+      margin: 0 0 8px 0;
+      color: #666;
+    }
+
+    .empty-state p {
+      margin: 0 0 20px 0;
+      color: #999;
+    }
+
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(255, 255, 255, 0.8);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .spinning {
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* Responsive */
+    @media (max-width: 1200px) {
+      .groups-section {
+        flex-direction: column;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .available-tasks-container {
+        padding: 10px;
+      }
+
+      .page-header {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .header-stats {
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .filters-section {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .search-field,
+      .filter-field {
+        min-width: unset;
+      }
+
+      .task-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+      }
+
+      .info-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .action-buttons {
+        flex-direction: column;
+      }
+
+      .task-card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+      }
+    }

@@ -1,0 +1,510 @@
+<div class="incident-detail-container">
+      <!-- Header -->
+      <div class="page-header">
+        <div class="header-navigation">
+          <button mat-icon-button (click)="goBack()" class="back-button">
+            <mat-icon>arrow_back</mat-icon>
+          </button>
+          <div class="breadcrumb">
+            <span class="breadcrumb-item" (click)="navigateToIncidents()">All Incidents</span>
+            <mat-icon>chevron_right</mat-icon>
+            <span class="breadcrumb-current">{{ incident()?.incidentNumber || 'Loading...' }}</span>
+          </div>
+        </div>
+        <div class="header-actions">
+          <button mat-button (click)="copyIncidentNumber()" *ngIf="incident()">
+            <mat-icon>content_copy</mat-icon>
+            Copy Number
+          </button>
+          <button mat-button [matMenuTriggerFor]="actionMenu" *ngIf="incident()">
+            <mat-icon>more_vert</mat-icon>
+            Actions
+          </button>
+          <mat-menu #actionMenu="matMenu">
+            <button mat-menu-item (click)="refreshIncident()">
+              <mat-icon>refresh</mat-icon>
+              <span>Refresh</span>
+            </button>
+            <button mat-menu-item (click)="viewProcessInstance()" *ngIf="incident()?.processInstanceId">
+              <mat-icon>account_tree</mat-icon>
+              <span>View Process</span>
+            </button>
+            <mat-divider></mat-divider>
+            <button mat-menu-item (click)="abortIncident()"
+                    *ngIf="incident() && canAbortIncident()"
+                    class="danger-action">
+              <mat-icon>block</mat-icon>
+              <span>Abort Incident</span>
+            </button>
+          </mat-menu>
+          <button mat-icon-button (click)="refreshIncident()" matTooltip="Refresh">
+            <mat-icon [class.spinning]="isLoading()">refresh</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      <div class="loading-state" *ngIf="isLoading() && !incident()">
+        <mat-spinner diameter="50"></mat-spinner>
+        <p>Loading incident details...</p>
+      </div>
+
+      <!-- Error State -->
+      <div class="error-state" *ngIf="errorMessage()">
+        <mat-icon class="error-icon">error</mat-icon>
+        <h3>Failed to Load Incident</h3>
+        <p>{{ errorMessage() }}</p>
+        <button mat-raised-button color="primary" (click)="refreshIncident()">
+          <mat-icon>refresh</mat-icon>
+          Try Again
+        </button>
+      </div>
+
+      <!-- Incident Content -->
+      <div class="incident-content" *ngIf="incident() && !isLoading()">
+
+        <!-- Incident Overview Card -->
+        <mat-card class="overview-card">
+          <mat-card-header>
+            <div class="incident-header">
+              <div class="incident-title">
+                <h1>{{ incident()!.incidentNumber }}</h1>
+                <mat-chip [class]="getStatusClass(incident()!.status)" class="status-chip">
+                  {{ getStatusLabel(incident()!.status) }}
+                </mat-chip>
+                <mat-chip *ngIf="isUrgent()" class="urgent-chip">
+                  <mat-icon>priority_high</mat-icon>
+                  URGENT
+                </mat-chip>
+              </div>
+              <div class="incident-meta">
+                <div class="meta-item">
+                  <mat-icon>schedule</mat-icon>
+                  <span>{{ formatDateTime(incident()!.createdAt) }}</span>
+                </div>
+                <div class="meta-item">
+                  <mat-icon>person</mat-icon>
+                  <span>{{ incident()!.createdBy }}</span>
+                </div>
+                <div class="meta-item" *ngIf="incident()!.assignedTo">
+                  <mat-icon>assignment_ind</mat-icon>
+                  <span>{{ incident()!.assignedTo }}</span>
+                </div>
+                <div class="meta-item">
+                  <mat-icon>timer</mat-icon>
+                  <span>{{ calculateDuration() }}</span>
+                </div>
+              </div>
+            </div>
+          </mat-card-header>
+
+          <mat-card-content>
+            <div class="overview-grid">
+              <div class="overview-section">
+                <h4><mat-icon>location_on</mat-icon> ATM Information</h4>
+                <div class="detail-grid">
+                  <div class="detail-item">
+                    <span class="label">ATM ID:</span>
+                    <span class="value">{{ incident()!.atmId }}</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="label">Error Type:</span>
+                    <span class="value">{{ incident()!.errorType }}</span>
+                  </div>
+                  <div class="detail-item" *ngIf="incident()!.incidentType">
+                    <span class="label">Incident Type:</span>
+                    <span class="value">{{ formatIncidentType(incident()!.incidentType) }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="overview-section">
+                <h4><mat-icon>info</mat-icon> Process Information</h4>
+                <div class="detail-grid">
+                  <div class="detail-item">
+                    <span class="label">Process ID:</span>
+                    <span class="value">{{ incident()!.processInstanceId || 'N/A' }}</span>
+                  </div>
+                  <div class="detail-item" *ngIf="incidentReport()?.statistics">
+                    <span class="label">Current Step:</span>
+                    <span class="value">{{ incidentReport()!.statistics.currentStep }}</span>
+                  </div>
+                  <div class="detail-item" *ngIf="incidentReport()?.statistics">
+                    <span class="label">Progress:</span>
+                    <span class="value">{{ incidentReport()!.statistics.completionPercentage }}%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Main Content Tabs -->
+        <mat-card class="content-card">
+          <mat-tab-group mat-stretch-tabs="false" class="incident-tabs">
+
+            <!-- Description Tab -->
+            <mat-tab>
+              <ng-template mat-tab-label>
+                <mat-icon>description</mat-icon>
+                Description
+              </ng-template>
+
+              <div class="tab-content">
+                <div class="description-section">
+                  <h3>Incident Description</h3>
+                  <div class="description-content">
+                    <pre>{{ incident()!.incidentDescription }}</pre>
+                  </div>
+
+                  <div class="diagnosis-section" *ngIf="incident()!.initialDiagnosis">
+                    <h4>Initial Diagnosis</h4>
+                    <div class="diagnosis-content">
+                      {{ incident()!.initialDiagnosis }}
+                    </div>
+                  </div>
+
+                  <div class="assessment-section" *ngIf="incident()!.assessmentDetails">
+                    <h4>Assessment Details</h4>
+                    <div class="assessment-content">
+                      {{ incident()!.assessmentDetails }}
+                    </div>
+                  </div>
+
+                  <div class="resolution-section" *ngIf="incident()!.resolutionDetails">
+                    <h4>Resolution Details</h4>
+                    <div class="resolution-content">
+                      {{ incident()!.resolutionDetails }}
+                    </div>
+                  </div>
+
+                  <div class="closure-section" *ngIf="incident()!.closureDetails">
+                    <h4>Closure Details</h4>
+                    <div class="closure-content">
+                      {{ incident()!.closureDetails }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </mat-tab>
+
+            <!-- Process Flow Tab -->
+            <mat-tab>
+              <ng-template mat-tab-label>
+                <span matBadge="{{ incidentReport()?.statistics?.completionPercentage || 0 }}%"
+                      matBadgeColor="accent"
+                      matBadgeSize="small">
+                  <mat-icon>account_tree</mat-icon>
+                  Process Flow
+                </span>
+              </ng-template>
+
+              <div class="tab-content">
+                <div class="process-flow-section">
+                  <div class="process-header">
+                    <h3>Incident Process Flow</h3>
+                    <div class="process-stats" *ngIf="incidentReport()?.statistics">
+                      <!-- 
+                      <div class="stat-item">
+                        <span class="stat-value">{{ incidentReport()!.statistics.completionPercentage }}%</span>
+                        <span class="stat-label">Complete</span>
+                      </div> -->
+                      <div class="stat-item">
+                        <span class="stat-value">{{ incidentReport()!.statistics.completedTasks }}</span>
+                        <span class="stat-label">Tasks Done</span>
+                      </div>
+                      <div class="stat-item">
+                        <span class="stat-value">{{ incidentReport()!.statistics.pendingTasks }}</span>
+                        <span class="stat-label">Pending</span>
+                      </div>
+                      <div class="stat-item">
+                        <span class="stat-value">{{ formatDuration(incidentReport()!.statistics.totalDurationMinutes) }}</span>
+                        <span class="stat-label">Duration</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Process Diagram -->
+                  <div class="process-diagram-section" *ngIf="incident()?.processInstanceId">
+                    <div class="diagram-header">
+                      <h4><mat-icon>schema</mat-icon> Process Diagram</h4>
+                      <button mat-icon-button 
+                              (click)="loadProcessDiagram(incident()!.processInstanceId!)"
+                              matTooltip="Refresh Diagram"
+                              [disabled]="isDiagramLoading()">
+                        <mat-icon [class.spinning]="isDiagramLoading()">refresh</mat-icon>
+                      </button>
+                    </div>
+                    
+                    <div class="diagram-container">
+                      <!-- Diagram Loading -->
+                      <div class="diagram-loading" *ngIf="isDiagramLoading()">
+                        <mat-spinner diameter="40"></mat-spinner>
+                        <p>Loading process diagram...</p>
+                      </div>
+                      
+                      <!-- Process Diagram -->
+                      <div class="process-diagram" 
+                           *ngIf="sanitizedDiagram() && !isDiagramLoading()"
+                           [innerHTML]="sanitizedDiagram()">
+                      </div>
+                      
+                      <!-- No Diagram State -->
+                      <div class="no-diagram-state" *ngIf="!processDiagram() && !isDiagramLoading()">
+                        <mat-icon class="no-diagram-icon">schema</mat-icon>
+                        <h5>Process diagram not available</h5>
+                        <p>The visual process diagram could not be loaded for this incident.</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  
+                
+                </div>
+              </div>
+            </mat-tab>
+
+            <!-- Tasks Tab -->
+            <mat-tab>
+              <ng-template mat-tab-label>
+                <span matBadge="{{ activeTasks().length }}"
+                      matBadgeColor="warn"
+                      [matBadgeHidden]="activeTasks().length === 0">
+                  <mat-icon>assignment</mat-icon>
+                  Tasks
+                </span>
+              </ng-template>
+
+              <div class="tab-content">
+                <div class="tasks-section">
+                  <div class="tasks-header">
+                    <h3>Incident Tasks</h3>
+                    <div class="task-summary">
+                      <mat-chip-set>
+                        <mat-chip class="task-chip-active" *ngIf="activeTasks().length > 0">
+                          {{ activeTasks().length }} Active
+                        </mat-chip>
+                        <mat-chip class="task-chip-completed" *ngIf="completedTasks().length > 0">
+                          {{ completedTasks().length }} Completed
+                        </mat-chip>
+                      </mat-chip-set>
+                    </div>
+                  </div>
+
+                  <!-- Active Tasks -->
+                  <div class="active-tasks-section" *ngIf="activeTasks().length > 0">
+                    <h4>Active Tasks</h4>
+                    <div class="tasks-list">
+                      <mat-expansion-panel
+                        *ngFor="let task of activeTasks()"
+                        class="task-panel active-task">
+
+                        <mat-expansion-panel-header>
+                          <mat-panel-title>
+                            <div class="task-header">
+                              <div class="task-info">
+                                <span class="task-name">{{ task.taskName }}</span>
+                                <mat-chip [class]="getTaskStatusClass(task.status)">
+                                  {{ getTaskStatusLabel(task.status) }}
+                                </mat-chip>
+                                <mat-chip *ngIf="task.assignedUser === currentUser().username" class="my-task-chip">
+                                  Your Task
+                                </mat-chip>
+                              </div>
+                              <div class="task-meta">
+                                <span class="task-age">{{ calculateTaskAge(task) }}</span>
+                              </div>
+                            </div>
+                          </mat-panel-title>
+                        </mat-expansion-panel-header>
+
+                        <div class="task-details">
+                          <div class="task-detail-grid">
+                            <div class="detail-item">
+                              <span class="label">Task ID:</span>
+                              <span class="value">{{ task.taskInstanceId }}</span>
+                            </div>
+                            <div class="detail-item">
+                              <span class="label">Assigned Group:</span>
+                              <span class="value">{{ task.assignedGroup || 'N/A' }}</span>
+                            </div>
+                            <div class="detail-item">
+                              <span class="label">Assigned User:</span>
+                              <span class="value">{{ task.assignedUser || 'Unassigned' }}</span>
+                            </div>
+                            <div class="detail-item">
+                              <span class="label">Created:</span>
+                              <span class="value">{{ formatDateTime(task.createdAt) }}</span>
+                            </div>
+                            <div class="detail-item" *ngIf="task.dueDate">
+                              <span class="label">Due Date:</span>
+                              <span class="value">{{ formatDateTime(task.dueDate) }}</span>
+                            </div>
+                          </div>
+
+                          <div class="task-actions">
+                            <button mat-button
+                                    color="primary"
+                                    (click)="navigateToMyTasks()"
+                                    *ngIf="task.assignedUser === currentUser().username">
+                              <mat-icon>assignment_ind</mat-icon>
+                              Work on Task
+                            </button>
+                            <button mat-button
+                                    (click)="claimTask(task)"
+                                    *ngIf="!task.assignedUser && canClaimTask(task)">
+                              <mat-icon>how_to_reg</mat-icon>
+                              Claim Task
+                            </button>
+                            <button mat-button (click)="copyTaskId(task)">
+                              <mat-icon>content_copy</mat-icon>
+                              Copy ID
+                            </button>
+                          </div>
+                        </div>
+                      </mat-expansion-panel>
+                    </div>
+                  </div>
+
+                  <!-- Completed Tasks -->
+                  <div class="completed-tasks-section" *ngIf="completedTasks().length > 0">
+                    <h4>Completed Tasks</h4>
+                    <div class="tasks-list">
+                      <mat-expansion-panel
+                        *ngFor="let task of completedTasks()"
+                        class="task-panel completed-task">
+
+                        <mat-expansion-panel-header>
+                          <mat-panel-title>
+                            <div class="task-header">
+                              <div class="task-info">
+                                <span class="task-name">{{ task.taskName }}</span>
+                                <mat-chip class="status-completed">Completed</mat-chip>
+                              </div>
+                              <div class="task-meta">
+                                <span class="completion-info">{{ getRelativeTime(task.completedAt!) }}</span>
+                              </div>
+                            </div>
+                          </mat-panel-title>
+                        </mat-expansion-panel-header>
+
+                        <div class="task-details">
+                          <div class="task-detail-grid">
+                            <div class="detail-item">
+                              <span class="label">Completed:</span>
+                              <span class="value">{{ formatDateTime(task.completedAt!) }}</span>
+                            </div>
+                            <div class="detail-item">
+                              <span class="label">Completed by:</span>
+                              <span class="value">{{ task.assignedUser || 'Unknown' }}</span>
+                            </div>
+                            <div class="detail-item">
+                              <span class="label">Duration:</span>
+                              <span class="value">{{ calculateTaskDuration(task) }}</span>
+                            </div>
+                          </div>
+
+                          <div class="task-output" *ngIf="task.outputData">
+                            <h5>Task Output</h5>
+                            <div class="output-content">
+                              {{ getTaskOutputSummary(task) }}
+                            </div>
+                          </div>
+                        </div>
+                      </mat-expansion-panel>
+                    </div>
+                  </div>
+
+                  <!-- No Tasks State -->
+                  <div class="no-tasks-state" *ngIf="allTasks().length === 0">
+                    <mat-icon class="no-tasks-icon">assignment</mat-icon>
+                    <h4>No tasks found</h4>
+                    <p>This incident doesn't have any associated tasks yet.</p>
+                  </div>
+                </div>
+              </div>
+            </mat-tab>
+
+            <!-- History Tab -->
+            <mat-tab>
+              <ng-template mat-tab-label>
+                <mat-icon>history</mat-icon>
+                History
+              </ng-template>
+
+              <div class="tab-content">
+                <div class="history-section">
+                  <h3>Incident History</h3>
+
+                  <div class="history-timeline">
+                    <div class="history-item creation-item">
+                      <div class="history-marker">
+                        <mat-icon>add_circle</mat-icon>
+                      </div>
+                      <div class="history-content">
+                        <div class="history-header">
+                          <h4>Incident Created</h4>
+                          <span class="history-time">{{ formatDateTime(incident()!.createdAt) }}</span>
+                        </div>
+                        <div class="history-details">
+                          <p><strong>Created by:</strong> {{ incident()!.createdBy }}</p>
+                          <p><strong>ATM ID:</strong> {{ incident()!.atmId }}</p>
+                          <p><strong>Error Type:</strong> {{ incident()!.errorType }}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="history-item update-item" *ngIf="incident()!.updatedAt">
+                      <div class="history-marker">
+                        <mat-icon>update</mat-icon>
+                      </div>
+                      <div class="history-content">
+                        <div class="history-header">
+                          <h4>Last Updated</h4>
+                          <span class="history-time">{{ formatDateTime(incident()!.updatedAt!) }}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="history-item resolution-item" *ngIf="incident()!.resolvedAt">
+                      <div class="history-marker">
+                        <mat-icon>check_circle</mat-icon>
+                      </div>
+                      <div class="history-content">
+                        <div class="history-header">
+                          <h4>Incident Resolved</h4>
+                          <span class="history-time">{{ formatDateTime(incident()!.resolvedAt!) }}</span>
+                        </div>
+                        <div class="history-details" *ngIf="incident()!.resolutionDetails">
+                          <p>{{ incident()!.resolutionDetails }}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="history-item closure-item" *ngIf="incident()!.closedAt">
+                      <div class="history-marker">
+                        <mat-icon>lock</mat-icon>
+                      </div>
+                      <div class="history-content">
+                        <div class="history-header">
+                          <h4>Incident Closed</h4>
+                          <span class="history-time">{{ formatDateTime(incident()!.closedAt!) }}</span>
+                        </div>
+                        <div class="history-details" *ngIf="incident()!.closureDetails">
+                          <p>{{ incident()!.closureDetails }}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </mat-tab>
+          </mat-tab-group>
+        </mat-card>
+      </div>
+
+      <!-- Refresh Loading Overlay -->
+      <div class="refresh-overlay" *ngIf="isLoading() && incident()">
+        <mat-spinner diameter="30"></mat-spinner>
+      </div>
+    </div>

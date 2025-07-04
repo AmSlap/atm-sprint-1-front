@@ -284,9 +284,10 @@ export class AtmDashboardComponent implements OnInit, OnDestroy {
   }
 
   // View toggle methods
-  toggleViewMode(): void {
-    this.viewMode = this.viewMode === 'grid' ? 'table' : 'grid';
-  }
+  setViewMode(mode: 'grid' | 'table'): void {
+  this.viewMode = mode;
+  console.log('View mode set to:', mode, 'Filtered ATMs:', this.filteredAtms.length);
+}
 
   // Notification system (you can replace with a proper toast library)
   showRefreshNotification(message: string, type: 'success' | 'error' = 'success'): void {

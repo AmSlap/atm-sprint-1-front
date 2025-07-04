@@ -1,0 +1,311 @@
+<div class="create-incident-container">
+  <div class="page-header">
+    <button mat-icon-button (click)="goBack()" class="back-button">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <div class="header-content">
+      <h1>Create New Incident</h1>
+      <p>Report a new ATM incident for investigation and resolution</p>
+    </div>
+  </div>
+
+  <mat-card class="form-card">
+    <mat-card-header>
+      <mat-card-title>Incident Information</mat-card-title>
+      <mat-card-subtitle>Please provide detailed information about the incident</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <mat-stepper [linear]="true" #stepper>
+        <!-- Step 1: ATM Information -->
+        <mat-step [stepControl]="atmInfoForm" label="ATM Information">
+          <form [formGroup]="atmInfoForm" class="step-form">
+            <div class="form-section">
+              <h3>ATM Location Details</h3>
+
+              <div class="form-row">
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>ATM ID</mat-label>
+                  <input matInput
+                         formControlName="atmId"
+                         placeholder="Enter ATM ID (e.g., ATM101)"
+                         (blur)="onAtmIdChange($event)">
+                  <mat-icon matSuffix>location_on</mat-icon>
+                  <mat-error *ngIf="atmInfoForm.get('atmId')?.hasError('required')">
+                    ATM ID is required
+                  </mat-error>
+                  <mat-error *ngIf="atmInfoForm.get('atmId')?.hasError('pattern')">
+                    ATM ID must be in format ATM followed by numbers
+                  </mat-error>
+                </mat-form-field>
+              </div>
+
+              <!-- ATM Details Display -->
+              <div class="atm-details" *ngIf="selectedAtm()">
+                <div class="detail-card">
+                  <mat-icon class="detail-icon">info</mat-icon>
+                  <div class="detail-content">
+                    <h4>{{ selectedAtm()?.name }}</h4>
+                    <p><strong>Address:</strong> {{ selectedAtm()?.address }}</p>
+                    <p><strong>Region:</strong> {{ selectedAtm()?.region }}</p>
+                    <p><strong>Status:</strong>
+                      <span [class]="'status-' + selectedAtm()?.status">
+                        {{ selectedAtm()?.status | titlecase }}
+                      </span>
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Incident Date & Time</mat-label>
+                  <input matInput
+                         [value]="incidentDateTime"
+                         readonly>
+                  <mat-icon matSuffix>schedule</mat-icon>
+                  <mat-hint>Current UTC time will be used</mat-hint>
+                </mat-form-field>
+              </div>
+            </div>
+
+            <div class="step-actions">
+              <button mat-raised-button color="primary"
+                      matStepperNext
+                      [disabled]="!atmInfoForm.valid">
+                Next: Error Details
+                <mat-icon>arrow_forward</mat-icon>
+              </button>
+            </div>
+          </form>
+        </mat-step>
+
+        <!-- Step 2: Error Information -->
+        <mat-step [stepControl]="errorInfoForm" label="Error Details">
+          <form [formGroup]="errorInfoForm" class="step-form">
+            <div class="form-section">
+              <h3>Error Information</h3>
+
+              <div class="form-row">
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Error Category</mat-label>
+                  <mat-select formControlName="errorCategory"
+                              (selectionChange)="onErrorCategoryChange($event)">
+                    <mat-option *ngFor="let category of errorCategories" [value]="category">
+                      {{ category }}
+                    </mat-option>
+                  </mat-select>
+                  <mat-icon matSuffix>category</mat-icon>
+                  <mat-error *ngIf="errorInfoForm.get('errorCategory')?.hasError('required')">
+                    Error category is required
+                  </mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="form-row">
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Specific Error Type</mat-label>
+                  <mat-select formControlName="errorType"
+                              (selectionChange)="onErrorTypeChange($event)">
+                    <mat-option *ngFor="let errorType of filteredErrorTypes()" [value]="errorType.name">
+                      <div class="error-type-option">
+                        <span class="error-name">{{ errorType.name }}</span>
+                        <span [class]="'severity-' + errorType.severity" class="severity-badge">
+                          {{ errorType.severity | titlecase }}
+                        </span>
+                      </div>
+                    </mat-option>
+                  </mat-select>
+                  <mat-icon matSuffix>error</mat-icon>
+                  <mat-error *ngIf="errorInfoForm.get('errorType')?.hasError('required')">
+                    Error type is required
+                  </mat-error>
+                </mat-form-field>
+              </div>
+
+              <!-- Error Type Details -->
+              <div class="error-details" *ngIf="selectedErrorType()">
+                <div class="detail-card">
+                  <mat-icon class="detail-icon severity-icon"
+                            [class]="'severity-' + selectedErrorType()?.severity">
+                    warning
+                  </mat-icon>
+                  <div class="detail-content">
+                    <h4>{{ selectedErrorType()?.name }}</h4>
+                    <p><strong>Category:</strong> {{ selectedErrorType()?.category }}</p>
+                    <p><strong>Severity:</strong>
+                      <span [class]="'severity-' + selectedErrorType()?.severity">
+                        {{ selectedErrorType()?.severity | titlecase }}
+                      </span>
+                    </p>
+                    <p><strong>Description:</strong> {{ selectedErrorType()?.description }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="step-actions">
+              <button mat-button matStepperPrevious>
+                <mat-icon>arrow_back</mat-icon>
+                Back
+              </button>
+              <button mat-raised-button color="primary"
+                      matStepperNext
+                      [disabled]="!errorInfoForm.valid">
+                Next: Description
+                <mat-icon>arrow_forward</mat-icon>
+              </button>
+            </div>
+          </form>
+        </mat-step>
+
+        <!-- Step 3: Incident Description -->
+        <mat-step [stepControl]="descriptionForm" label="Description">
+          <form [formGroup]="descriptionForm" class="step-form">
+            <div class="form-section">
+              <h3>Incident Description</h3>
+
+              <div class="form-row">
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Detailed Description</mat-label>
+                  <textarea matInput
+                            formControlName="incidentDescription"
+                            rows="6"
+                            placeholder="Provide a detailed description of the incident including:
+- What happened?
+- When did it occur?
+- Any error messages displayed?
+- Customer impact?
+- Steps already taken?"></textarea>
+                  <mat-icon matSuffix>description</mat-icon>
+                  <mat-hint>{{ descriptionForm.get('incidentDescription')?.value?.length || 0 }}/1000 characters</mat-hint>
+                  <mat-error *ngIf="descriptionForm.get('incidentDescription')?.hasError('required')">
+                    Incident description is required
+                  </mat-error>
+                  <mat-error *ngIf="descriptionForm.get('incidentDescription')?.hasError('minlength')">
+                    Description must be at least 20 characters
+                  </mat-error>
+                  <mat-error *ngIf="descriptionForm.get('incidentDescription')?.hasError('maxlength')">
+                    Description cannot exceed 1000 characters
+                  </mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="form-row">
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Additional Notes</mat-label>
+                  <textarea matInput
+                            formControlName="additionalNotes"
+                            rows="3"
+                            placeholder="Any additional information, previous similar incidents, or relevant context"></textarea>
+                  <mat-icon matSuffix>note</mat-icon>
+                  <mat-hint>Optional - Additional context</mat-hint>
+                </mat-form-field>
+              </div>
+
+              <div class="form-row">
+                <mat-checkbox formControlName="urgentIncident" class="urgent-checkbox">
+                  <span class="urgent-label">
+                    <mat-icon class="urgent-icon">priority_high</mat-icon>
+                    Mark as Urgent Incident
+                  </span>
+                </mat-checkbox>
+                <p class="urgent-note">Check if this incident requires immediate attention</p>
+              </div>
+            </div>
+
+            <div class="step-actions">
+              <button mat-button matStepperPrevious>
+                <mat-icon>arrow_back</mat-icon>
+                Back
+              </button>
+              <button mat-raised-button color="primary"
+                      matStepperNext
+                      [disabled]="!descriptionForm.valid">
+                Review & Submit
+                <mat-icon>arrow_forward</mat-icon>
+              </button>
+            </div>
+          </form>
+        </mat-step>
+
+        <!-- Step 4: Review & Submit -->
+        <mat-step label="Review">
+          <div class="review-section">
+            <h3>Review Incident Information</h3>
+
+            <div class="review-cards">
+              <div class="review-card">
+                <h4><mat-icon>location_on</mat-icon> ATM Information</h4>
+                <div class="review-content">
+                  <p><strong>ATM ID:</strong> {{ atmInfoForm.get('atmId')?.value }}</p>
+                  <p><strong>Location:</strong> {{ selectedAtm()?.name }}</p>
+                  <p><strong>Address:</strong> {{ selectedAtm()?.address }}</p>
+                  <p><strong>Incident Time:</strong> {{ incidentDateTime }}</p>
+                </div>
+              </div>
+
+              <div class="review-card">
+                <h4><mat-icon>error</mat-icon> Error Information</h4>
+                <div class="review-content">
+                  <p><strong>Category:</strong> {{ errorInfoForm.get('errorCategory')?.value }}</p>
+                  <p><strong>Error Type:</strong> {{ errorInfoForm.get('errorType')?.value }}</p>
+                  <p><strong>Severity:</strong>
+                    <span [class]="'severity-' + selectedErrorType()?.severity">
+                      {{ selectedErrorType()?.severity | titlecase }}
+                    </span>
+                  </p>
+                </div>
+              </div>
+
+              <div class="review-card">
+                <h4><mat-icon>description</mat-icon> Description</h4>
+                <div class="review-content">
+                  <p><strong>Description:</strong></p>
+                  <div class="description-preview">{{ descriptionForm.get('incidentDescription')?.value }}</div>
+                  <p *ngIf="descriptionForm.get('additionalNotes')?.value"><strong>Additional Notes:</strong></p>
+                  <div *ngIf="descriptionForm.get('additionalNotes')?.value" class="notes-preview">
+                    {{ descriptionForm.get('additionalNotes')?.value }}
+                  </div>
+                  <p *ngIf="descriptionForm.get('urgentIncident')?.value" class="urgent-flag">
+                    <mat-icon class="urgent-icon">priority_high</mat-icon>
+                    <strong>URGENT INCIDENT</strong>
+                  </p>
+                </div>
+              </div>
+
+              <div class="review-card">
+                <h4><mat-icon>person</mat-icon> Reporter Information</h4>
+                <div class="review-content">
+                  <p><strong>Reported by:</strong> {{ currentUser().displayName }} ({{ currentUser().username }})</p>
+                  <p><strong>Groups:</strong> {{ currentUser().groups.join(', ') }}</p>
+                  <p><strong>Report Time:</strong> {{ incidentDateTime }}</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="step-actions">
+              <button mat-button matStepperPrevious>
+                <mat-icon>arrow_back</mat-icon>
+                Back
+              </button>
+              <button mat-raised-button
+                      color="primary"
+                      (click)="submitIncident()"
+                      [disabled]="isSubmitting()">
+                <mat-icon *ngIf="!isSubmitting()">send</mat-icon>
+                <mat-icon *ngIf="isSubmitting()" class="spinning">refresh</mat-icon>
+                {{ isSubmitting() ? 'Creating Incident...' : 'Create Incident' }}
+              </button>
+            </div>
+          </div>
+        </mat-step>
+      </mat-stepper>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" *ngIf="isSubmitting()">
+    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+  </div>
+</div>

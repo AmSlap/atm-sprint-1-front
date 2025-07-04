@@ -1,0 +1,214 @@
+<div class="dashboard-container">
+  <div class="dashboard-header">
+    <h1>Dashboard</h1>
+    <p>Welcome back, {{ currentUser().displayName }}!</p>
+    <p class="timestamp">{{ currentDateTime }}</p>
+  </div>
+
+  <!-- Statistics Cards -->
+  <div class="stats-grid">
+    <mat-card class="stat-card total-incidents">
+      <mat-card-content>
+        <div class="stat-content">
+          <div class="stat-icon">
+            <mat-icon>bug_report</mat-icon>
+          </div>
+          <div class="stat-details">
+            <h2>{{ dashboardStats().totalIncidents }}</h2>
+            <p>Total Incidents</p>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card active-incidents">
+      <mat-card-content>
+        <div class="stat-content">
+          <div class="stat-icon">
+            <mat-icon>trending_up</mat-icon>
+          </div>
+          <div class="stat-details">
+            <h2>{{ dashboardStats().activeIncidents }}</h2>
+            <p>Active Incidents</p>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card my-tasks">
+      <mat-card-content>
+        <div class="stat-content">
+          <div class="stat-icon">
+            <mat-icon>assignment_ind</mat-icon>
+          </div>
+          <div class="stat-details">
+            <h2>{{ dashboardStats().myTasks }}</h2>
+            <p>My Tasks</p>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card completed-today">
+      <mat-card-content>
+        <div class="stat-content">
+          <div class="stat-icon">
+            <mat-icon>check_circle</mat-icon>
+          </div>
+          <div class="stat-details">
+            <h2>{{ dashboardStats().completedToday }}</h2>
+            <p>Completed Today</p>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Main Content Grid -->
+  <div class="content-grid">
+    <!-- Recent Incidents -->
+    <mat-card class="recent-incidents-card">
+      <mat-card-header>
+        <mat-card-title>Recent Incidents</mat-card-title>
+        <mat-card-subtitle>Latest 5 incidents</mat-card-subtitle>
+        <div class="spacer"></div>
+        <button mat-button routerLink="/incidents" color="primary">
+          View All
+          <mat-icon>arrow_forward</mat-icon>
+        </button>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="incident-list" *ngIf="recentIncidents().length > 0; else noIncidents">
+          <div class="incident-item" *ngFor="let incident of recentIncidents()">
+            <div class="incident-info">
+              <div class="incident-header">
+                <span class="incident-number">{{ incident.incidentNumber }}</span>
+                <mat-chip [class]="getStatusClass(incident.status)">
+                  {{ incident.status }}
+                </mat-chip>
+              </div>
+              <div class="incident-details">
+                <p><strong>ATM:</strong> {{ incident.atmId }}</p>
+                <p><strong>Error:</strong> {{ incident.errorType }}</p>
+                <p><strong>Created:</strong> {{ formatDate(incident.createdAt) }}</p>
+              </div>
+            </div>
+            <div class="incident-actions">
+              <button mat-button [routerLink]="['/incidents', incident.id]" color="primary">
+                <mat-icon>visibility</mat-icon>
+              </button>
+            </div>
+          </div>
+        </div>
+        <ng-template #noIncidents>
+          <div class="no-data">
+            <mat-icon>info</mat-icon>
+            <p>No recent incidents found</p>
+          </div>
+        </ng-template>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- My Active Tasks -->
+    <mat-card class="my-tasks-card">
+      <mat-card-header>
+        <mat-card-title>My Active Tasks</mat-card-title>
+        <mat-card-subtitle>Tasks assigned to me</mat-card-subtitle>
+        <div class="spacer"></div>
+        <button mat-button routerLink="/my-tasks" color="primary">
+          View All
+          <mat-icon>arrow_forward</mat-icon>
+        </button>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="task-list" *ngIf="myActiveTasks().length > 0; else noTasks">
+          <div class="task-item" *ngFor="let task of myActiveTasks()">
+            <div class="task-info">
+              <div class="task-header">
+                <span class="task-name">{{ task.taskName }}</span>
+                <mat-chip [class]="getTaskStatusClass(task.status)">
+                  {{ task.status }}
+                </mat-chip>
+              </div>
+              <div class="task-details">
+                <p><strong>Task ID:</strong> {{ task.taskInstanceId }}</p>
+                <p><strong>Created:</strong> {{ formatDate(task.createdAt) }}</p>
+                <p *ngIf="task.dueDate"><strong>Due:</strong> {{ formatDate(task.dueDate) }}</p>
+              </div>
+            </div>
+            <div class="task-actions">
+              <button mat-button color="primary" (click)="handleTask(task)">
+                <mat-icon>play_arrow</mat-icon>
+              </button>
+            </div>
+          </div>
+        </div>
+        <ng-template #noTasks>
+          <div class="no-data">
+            <mat-icon>assignment_turned_in</mat-icon>
+            <p>No active tasks assigned</p>
+          </div>
+        </ng-template>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Status Distribution -->
+    <mat-card class="status-distribution-card">
+      <mat-card-header>
+        <mat-card-title>Incident Status Distribution</mat-card-title>
+        <mat-card-subtitle>Current status breakdown</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="status-chart">
+          <div class="status-item" *ngFor="let status of statusDistribution()">
+            <div class="status-info">
+              <span class="status-label">{{ status.label }}</span>
+              <span class="status-count">{{ status.count }}</span>
+            </div>
+            <div class="status-bar">
+              <mat-progress-bar
+                mode="determinate"
+                [value]="status.percentage"
+                [class]="getStatusClass(status.status)">
+              </mat-progress-bar>
+              <span class="percentage">{{ status.percentage }}%</span>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Quick Actions -->
+    <mat-card class="quick-actions-card">
+      <mat-card-header>
+        <mat-card-title>Quick Actions</mat-card-title>
+        <mat-card-subtitle>Common tasks</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="quick-actions">
+          <button mat-raised-button color="primary" routerLink="/create-incident" class="action-button">
+            <mat-icon>add_circle</mat-icon>
+            Create Incident
+          </button>
+          <button mat-raised-button color="accent" routerLink="/available-tasks" class="action-button">
+            <mat-icon>assignment</mat-icon>
+            Available Tasks
+          </button>
+          <button mat-raised-button routerLink="/incidents" class="action-button">
+            <mat-icon>list</mat-icon>
+            All Incidents
+          </button>
+          <button mat-raised-button (click)="refreshDashboard()" class="action-button">
+            <mat-icon>refresh</mat-icon>
+            Refresh
+          </button>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Loading Indicator -->
+  <div class="loading-overlay" *ngIf="isLoading()">
+    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+  </div>
+</div>

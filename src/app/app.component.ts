@@ -20,17 +20,24 @@ export class AppComponent implements OnInit {
   messageText = '';
   messageType: 'success' | 'error' | 'info' = 'info';
 
+  // Add module expansion state
+  atmModuleExpanded = false;
+  incidentModuleExpanded = false;
   constructor(private router: Router) {}
 
   ngOnInit() {
     // Set initial sidebar state based on screen size
     this.checkScreenSize();
-
+    
+    // Set initial module expansion based on current route
+    this.setInitialModuleState();
+    
     // Track route changes
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
     ).subscribe((event: NavigationEnd) => {
       this.currentRoute = event.url;
+      this.updateModuleExpansion();
     });
   }
 
@@ -44,6 +51,45 @@ export class AppComponent implements OnInit {
       this.sidebarOpen = false;
     } else {
       this.sidebarOpen = true;
+    }
+  }
+
+  private setInitialModuleState() {
+    this.currentRoute = this.router.url;
+    this.updateModuleExpansion();
+  }
+
+  private updateModuleExpansion() {
+    // Expand ATM module for ATM-related routes
+    this.atmModuleExpanded = this.isAtmRoute(this.currentRoute);
+    
+    // Expand Incident module for incident-related routes
+    this.incidentModuleExpanded = this.isIncidentRoute(this.currentRoute);
+  }
+
+  private isAtmRoute(route: string): boolean {
+    const atmRoutes = ['/', '/atm', '/admin/registry', '/agency-management'];
+    return atmRoutes.some(atmRoute => 
+      atmRoute === '/' ? route === '/' : route.startsWith(atmRoute)
+    );
+  }
+
+  private isIncidentRoute(route: string): boolean {
+    const incidentRoutes = ['/dashboard', '/incidents', '/create-incident', '/my-tasks', '/available-tasks'];
+    return incidentRoutes.some(incidentRoute => route.startsWith(incidentRoute));
+  }
+
+  toggleAtmModule() {
+    this.atmModuleExpanded = !this.atmModuleExpanded;
+    if (this.atmModuleExpanded) {
+      this.incidentModuleExpanded = false;
+    }
+  }
+
+  toggleIncidentModule() {
+    this.incidentModuleExpanded = !this.incidentModuleExpanded;
+    if (this.incidentModuleExpanded) {
+      this.atmModuleExpanded = false;
     }
   }
 
