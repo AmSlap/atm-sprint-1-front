@@ -1,7 +1,7 @@
 <div class="agency-container">
   <header class="agency-header">
     <div class="title-section">
-      <h1>Agency Management</h1>
+      <h1>Branch Management</h1>
       <div class="subtitle">
         Welcome back <span class="user-info">{{ getCurrentUser() }}</span> • {{ getCurrentDateTime() | date:'MMM d, y' }}
       </div>
@@ -42,8 +42,8 @@
             <div class="edit-info">
               <span class="edit-icon">✏️</span>
               <div>
-                <div class="edit-title">Editing Agency: {{ selectedAgencyCode }}</div>
-                <div class="edit-subtitle">Make your changes and click "Update Agency" to save</div>
+                <div class="edit-title">Editing Branch: {{ selectedAgencyCode }}</div>
+                <div class="edit-subtitle">Make your changes and click "Update Branch" to save</div>
               </div>
             </div>
             <button class="btn" (click)="resetForm()">Cancel Edit</button>
@@ -54,18 +54,18 @@
           <div class="form-section">
             <header class="section-header">
               <span class="section-icon">🏢</span>
-              <h3>Agency Information</h3>
+              <h3>Branch Information</h3>
             </header>
             <div class="form-grid">
               <div class="form-group">
-                <label for="agencyCode">Agency Code *</label>
+                <label for="agencyCode">Branch Code *</label>
                 <input type="text" id="agencyCode" formControlName="agencyCode" [class.error]="agencyForm.get('agencyCode')?.invalid && agencyForm.get('agencyCode')?.touched" [disabled]="editMode">
                 <div class="error-message" *ngIf="agencyForm.get('agencyCode')?.invalid && agencyForm.get('agencyCode')?.touched">
                   Agency Code is required and must contain only uppercase letters, numbers, underscores, or hyphens
                 </div>
               </div>
               <div class="form-group">
-                <label for="agencyName">Agency Name *</label>
+                <label for="agencyName">Branch Name *</label>
                 <input type="text" id="agencyName" formControlName="agencyName" [class.error]="agencyForm.get('agencyName')?.invalid && agencyForm.get('agencyName')?.touched">
                 <div class="error-message" *ngIf="agencyForm.get('agencyName')?.invalid && agencyForm.get('agencyName')?.touched">
                   Agency Name is required and must be at least 2 characters
@@ -113,7 +113,7 @@
         <header class="panel-header">
           <h2>Agency Directory</h2>
           <div class="panel-controls">
-            <span class="record-count">({{ agencies.length }} Agencies)</span>
+            <span class="record-count">({{ agencies.length }} Branches)</span>
             <button class="btn" (click)="refreshAgencies()">
               <span class="btn-icon">🔄</span>
               Refresh
@@ -135,7 +135,7 @@
         <div class="error-state" *ngIf="error && !loading">
           <div class="error-content">
             <span class="error-icon">❌</span>
-            <h3>Failed to Load Agencies</h3>
+            <h3>Failed to Load Branches</h3>
             <p>Unable to retrieve agency data. Please check your connection and try again.</p>
             <div class="error-actions">
               <button class="btn btn-primary" (click)="refreshAgencies()">Retry</button>
@@ -147,8 +147,8 @@
           <table class="data-table">
             <thead>
               <tr>
-                <th><span class="th-content"><span class="th-icon">🏢</span>Agency Code</span></th>
-                <th><span class="th-content"><span class="th-icon">🏷️</span>Agency Name</span></th>
+                <th><span class="th-content"><span class="th-icon">🏢</span>Branch Code</span></th>
+                <th><span class="th-content"><span class="th-icon">🏷️</span>Branch Name</span></th>
                 <th><span class="th-content"><span class="th-icon">📞</span>Contact</span></th>
                 <th><span class="th-content"><span class="th-icon">🏧</span>ATMs</span></th>
                 <th><span class="th-content"><span class="th-icon">⚙️</span>Actions</span></th>
@@ -187,7 +187,7 @@
               <tr *ngIf="agencies.length === 0">
                 <td colspan="5" class="no-data">
                   <span class="no-data-icon">📭</span>
-                  <div class="no-data-text">No agencies registered yet</div>
+                  <div class="no-data-text">No Branches registered yet</div>
                   <div class="no-data-subtitle">Add your first agency using the form on the left</div>
                 </td>
               </tr>

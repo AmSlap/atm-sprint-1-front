@@ -99,17 +99,18 @@
                             {{ formatDateTime(task.dueDate) }}
                           </span>
                         </div>
-                      </div>
-                    </div>
-
-                    <!-- Input Data -->
-                    <div class="input-data-section" *ngIf="getTaskInputDataItems(task).length > 0">
-                      <h4><mat-icon>input</mat-icon> Task Input Data</h4>
-                      <div class="input-data-grid">
-                        <div class="input-item" *ngFor="let item of getTaskInputDataItems(task)">
-                          <span class="input-label">{{ formatInputLabel(item.key) }}:</span>
-                          <span class="input-value">{{ item.value }}</span>
-                        </div>
+                        
+                        <!-- Input Data within Task Information -->
+                        <ng-container *ngIf="getTaskInputDataItems(task).length > 0">
+                          <div class="info-item info-divider">
+                            <span class="label"><strong>Input Data:</strong></span>
+                            <span class="value"></span>
+                          </div>
+                          <div class="info-item" *ngFor="let item of getTaskInputDataItems(task)">
+                            <span class="label">{{ formatInputLabel(item.key) }}:</span>
+                            <span class="value">{{ item.value }}</span>
+                          </div>
+                        </ng-container>
                       </div>
                     </div>
 
@@ -216,6 +217,47 @@
                   </mat-expansion-panel-header>
 
                   <div class="task-details">
+                    <!-- Task Information for Completed Tasks -->
+                    <div class="task-info-section">
+                      <h4><mat-icon>info</mat-icon> Task Information</h4>
+                      <div class="info-grid">
+                        <div class="info-item">
+                          <span class="label">Task ID:</span>
+                          <span class="value">{{ task.taskInstanceId }}</span>
+                        </div>
+                        <div class="info-item">
+                          <span class="label">Status:</span>
+                          <span class="value">
+                            <mat-chip class="status-completed">Completed</mat-chip>
+                          </span>
+                        </div>
+                        <div class="info-item">
+                          <span class="label">Assigned Group:</span>
+                          <span class="value">{{ task.assignedGroup || 'N/A' }}</span>
+                        </div>
+                        <div class="info-item">
+                          <span class="label">Priority:</span>
+                          <span class="value">{{ task.priority || 'Normal' }}</span>
+                        </div>
+                        <div class="info-item">
+                          <span class="label">Created:</span>
+                          <span class="value">{{ formatDateTime(task.createdAt) }}</span>
+                        </div>
+                        
+                        <!-- Input Data within Task Information -->
+                        <ng-container *ngIf="getTaskInputDataItems(task).length > 0">
+                          <div class="info-item info-divider">
+                            <span class="label"><strong>Input Data:</strong></span>
+                            <span class="value"></span>
+                          </div>
+                          <div class="info-item" *ngFor="let item of getTaskInputDataItems(task)">
+                            <span class="label">{{ formatInputLabel(item.key) }}:</span>
+                            <span class="value">{{ item.value }}</span>
+                          </div>
+                        </ng-container>
+                      </div>
+                    </div>
+
                     <!-- Completion Summary -->
                     <div class="completion-section">
                       <h4><mat-icon>check_circle</mat-icon> Completion Summary</h4>

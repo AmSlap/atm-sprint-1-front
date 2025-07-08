@@ -98,7 +98,7 @@
       <div class="stat-card stat-info">
         <div class="stat-icon">🏢</div>
         <div class="stat-value">{{ agencies.length }}</div>
-        <div class="stat-label" i18n>Agencies</div>
+        <div class="stat-label" i18n>Branches</div>
       </div>
     </div>
 
@@ -191,7 +191,7 @@
         <div class="form-group" *ngIf="agencies.length > 0">
           <label for="agency" i18n>Agency</label>
           <select id="agency" [(ngModel)]="selectedAgency" (change)="applyFilters()" class="filter-select">
-            <option value="all" i18n>All Agencies</option>
+            <option value="all" i18n>All Branches</option>
             <option *ngFor="let agency of agencies" [value]="agency.agencyCode">
               {{ agency.agencyName }}
             </option>

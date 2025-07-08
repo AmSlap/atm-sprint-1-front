@@ -177,6 +177,7 @@ export class MyTasksComponent implements OnInit {
             const inputDataMap = this.taskInputDataMap();
             inputDataMap.set(task.taskInstanceId, response.data);
             this.taskInputDataMap.set(new Map(inputDataMap));
+            console.log(`Input data loaded for task: ${task.taskInstanceId}`, response.data);
           }
         },
         error: (error) => {
@@ -426,22 +427,28 @@ export class MyTasksComponent implements OnInit {
   }
 
   getTaskInputDataItems(task: IncidentTask): TaskInputItem[] {
-    const inputData = this.taskInputDataMap().get(task.taskInstanceId);
-    if (!inputData) return [];
+  const inputData = this.taskInputDataMap().get(task.taskInstanceId);
+  if (!inputData) return [];
 
-    // Filter out system fields and convert to array of key-value pairs
-    const filtered: TaskInputItem[] = [];
-    Object.entries(inputData).forEach(([key, value]) => {
-      if (key.startsWith('task') || ['TaskName', 'NodeName', 'Skippable', 'GroupId'].includes(key)) {
-        return;
-      }
-      if (value !== null && value !== undefined && value !== '') {
-        filtered.push({ key, value: String(value) });
-      }
-    });
+  // Filter out system fields and convert to array of key-value pairs
+  const filtered: TaskInputItem[] = [];
+  const excludedFields = ['TaskName', 'NodeName', 'Skippable', 'GroupId'];
+  
+  Object.entries(inputData).forEach(([key, value]) => {
+    // Skip excluded system fields
+    if (excludedFields.includes(key)) {
+      return;
+    }
+    
+    // Include all other fields that have valid values
+    if (value !== null && value !== undefined && value !== '') {
+      filtered.push({ key, value: String(value) });
+    }
+  });
 
-    return filtered;
-  }
+  return filtered;
+}
+
 
   formatInputLabel(key: string): string {
     return key.replace(/([A-Z])/g, ' $1')
