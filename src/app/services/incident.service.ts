@@ -26,7 +26,7 @@ import {
 })
 export class IncidentService {
   private http = inject(HttpClient);
-  private readonly baseUrl = 'http://localhost:8081/api/incidents';
+  private readonly baseUrl = 'http://localhost:8082/api/incidents';
 
   // ==================== INCIDENT OPERATIONS ====================
 
@@ -147,4 +147,18 @@ export class IncidentService {
   completeCloseIncident(taskInstanceId: number, request: CloseIncidentRequest): Observable<ApiResponse<void>> {
     return this.http.post<ApiResponse<void>>(`${this.baseUrl}/tasks/${taskInstanceId}/complete/close-incident`, request);
   }
+
+  // Add new methods for endpoints with incident context
+getAvailableTasksWithContext(group?: string): Observable<ApiResponse<IncidentTask[]>> {
+  const params = group ? new HttpParams().set('group', group) : new HttpParams();
+  return this.http.get<ApiResponse<IncidentTask[]>>(`${this.baseUrl}/tasks/group-tasks`, { params });
+}
+
+getGroupTasksWithContext(group: string): Observable<ApiResponse<IncidentTask[]>> {
+  return this.http.get<ApiResponse<IncidentTask[]>>(`${this.baseUrl}/tasks/group/${group}/with-context`);
+}
+
+getUserTasksWithContext(user: string): Observable<ApiResponse<IncidentTask[]>> {
+  return this.http.get<ApiResponse<IncidentTask[]>>(`${this.baseUrl}/tasks/user/${user}/with-context`);
+}
 }

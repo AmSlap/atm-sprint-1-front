@@ -23,39 +23,83 @@
             <div class="form-section">
               <h3>ATM Location Details</h3>
 
-              <div class="form-row">
-                <mat-form-field appearance="outline" class="full-width">
-                  <mat-label>ATM ID</mat-label>
-                  <input matInput
-                         formControlName="atmId"
-                         placeholder="Enter ATM ID (e.g., ATM101)"
-                         (blur)="onAtmIdChange($event)">
-                  <mat-icon matSuffix>location_on</mat-icon>
-                  <mat-error *ngIf="atmInfoForm.get('atmId')?.hasError('required')">
-                    ATM ID is required
-                  </mat-error>
-                  <mat-error *ngIf="atmInfoForm.get('atmId')?.hasError('pattern')">
-                    ATM ID must be in format ATM followed by numbers
-                  </mat-error>
-                </mat-form-field>
-              </div>
+          <div class="form-row">
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>ATM ID</mat-label>
+    <input matInput
+       formControlName="atmId"
+       placeholder="Enter ATM ID (e.g., ATM101)"
+       (input)="onAtmIdChange($any($event.target).value)"
+       (focus)="onInputFocus()"
+       (blur)="onInputBlur()"
+       [matAutocomplete]="atmAutocomplete"
+       [readonly]="isLoadingAtms()">
+    <mat-icon matSuffix>location_on</mat-icon>
+    
+    <!-- Autocomplete panel -->
+    <mat-autocomplete #atmAutocomplete="matAutocomplete" 
+                      [displayWith]="displayAtm"
+                      (optionSelected)="onAtmIdChange($event.option.value)">
+      <mat-option *ngFor="let atm of filteredAtms()" [value]="atm">
+        <div class="autocomplete-option">
+          <div class="atm-id">{{ atm.atmId }}</div>
+          <div class="atm-details">
+            <span class="atm-label">{{ atm.label }}</span>
+            <span class="atm-location">{{ atm.locationAddress }}</span>
+          </div>
+          <div class="atm-status">
+            <span [class]="'status-' + atm.operationalState.toLowerCase()">
+              {{ atm.operationalState }}
+            </span>
+          </div>
+        </div>
+      </mat-option>
+      
+      <!-- Show "No ATMs found" when no matches -->
+      <mat-option *ngIf="filteredAtms().length === 0 && atmInfoForm.get('atmId')?.value" disabled>
+        <div class="no-results">
+          <mat-icon>search_off</mat-icon>
+          No ATMs found matching "{{ atmInfoForm.get('atmId')?.value || '' }}"
+        </div>
+      </mat-option>
+    </mat-autocomplete>
+    
+    <!-- Show loading spinner while loading ATMs -->
+    <mat-spinner *ngIf="isLoadingAtms()" 
+                 diameter="20" 
+                 matSuffix>
+    </mat-spinner>
+    
+    <mat-error *ngIf="atmInfoForm.get('atmId')?.hasError('required')">
+      ATM ID is required
+    </mat-error>
+    <mat-error *ngIf="atmInfoForm.get('atmId')?.hasError('atmNotExists')">
+      ATM ID does not exist in the system
+    </mat-error>
+    
+    <mat-hint *ngIf="isLoadingAtms()">Loading ATM locations...</mat-hint>
+    <mat-hint *ngIf="!isLoadingAtms()">{{ atmLocations().length }} ATMs available</mat-hint>
+  </mat-form-field>
+</div>
 
-              <!-- ATM Details Display -->
-              <div class="atm-details" *ngIf="selectedAtm()">
-                <div class="detail-card">
-                  <mat-icon class="detail-icon">info</mat-icon>
-                  <div class="detail-content">
-                    <h4>{{ selectedAtm()?.name }}</h4>
-                    <p><strong>Address:</strong> {{ selectedAtm()?.address }}</p>
-                    <p><strong>Region:</strong> {{ selectedAtm()?.region }}</p>
-                    <p><strong>Status:</strong>
-                      <span [class]="'status-' + selectedAtm()?.status">
-                        {{ selectedAtm()?.status | titlecase }}
-                      </span>
-                    </p>
-                  </div>
-                </div>
-              </div>
+<!-- ATM Details Display -->
+<div class="atm-details" *ngIf="selectedAtm()">
+  <div class="detail-card">
+    <mat-icon class="detail-icon">info</mat-icon>
+    <div class="detail-content">
+      <h4>{{ selectedAtm()?.label }}</h4>
+      <p><strong>Address:</strong> {{ selectedAtm()?.locationAddress }}</p>
+      <p><strong>Region:</strong> {{ selectedAtm()?.region }}</p>
+      <p><strong>Agency:</strong> {{ selectedAtm()?.agencyName || 'N/A' }}</p>
+      <p><strong>Brand/Model:</strong> {{ selectedAtm()?.brand }} {{ selectedAtm()?.model }}</p>
+      <p><strong>Operational State:</strong>
+        <span [class]="'status-' + selectedAtm()?.operationalState?.toLowerCase()">
+          {{ selectedAtm()?.operationalState }}
+        </span>
+      </p>
+    </div>
+  </div>
+</div>
 
               <div class="form-row">
                 <mat-form-field appearance="outline" class="full-width">
@@ -239,8 +283,8 @@
                 <h4><mat-icon>location_on</mat-icon> ATM Information</h4>
                 <div class="review-content">
                   <p><strong>ATM ID:</strong> {{ atmInfoForm.get('atmId')?.value }}</p>
-                  <p><strong>Location:</strong> {{ selectedAtm()?.name }}</p>
-                  <p><strong>Address:</strong> {{ selectedAtm()?.address }}</p>
+                  <p><strong>Location:</strong> {{ selectedAtm()?.label }}</p>
+                  <p><strong>Address:</strong> {{ selectedAtm()?.locationAddress }}</p>
                   <p><strong>Incident Time:</strong> {{ incidentDateTime }}</p>
                 </div>
               </div>
@@ -309,3 +353,11 @@
     <mat-progress-bar mode="indeterminate"></mat-progress-bar>
   </div>
 </div>
+
+
+
+
+
+
+
+

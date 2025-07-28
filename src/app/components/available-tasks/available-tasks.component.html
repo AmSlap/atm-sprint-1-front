@@ -1,336 +1,434 @@
 <div class="available-tasks-container">
-      <!-- Header -->
-      <div class="page-header">
-        <div class="header-content">
-          <h1>Available Tasks</h1>
-          <p>Tasks available for {{ currentUser().displayName }} to claim and work on</p>
-          <div class="header-stats">
-            <span class="stat-item">
-              <strong>{{ totalAvailableTasks() }}</strong> Available Tasks
-            </span>
-            <span class="stat-item">
-              <strong>{{ userGroupTasks() }}</strong> For My Groups
-            </span>
-            <span class="stat-item">
-              Last updated: {{ currentDateTime }}
-            </span>
-          </div>
-        </div>
-        <div class="header-actions">
-          <button mat-raised-button color="primary" (click)="viewMyTasks()">
-            <mat-icon>assignment_ind</mat-icon>
-            My Tasks
-          </button>
-          <button mat-icon-button (click)="refreshTasks()" matTooltip="Refresh">
-            <mat-icon [class.spinning]="isLoading()">refresh</mat-icon>
-          </button>
-        </div>
-      </div>
-
-      <!-- User Groups Info -->
-      <mat-card class="groups-info-card">
-        <mat-card-content>
-          <div class="groups-section">
-            <div class="groups-info">
-              <h4><mat-icon>group</mat-icon> Your Groups</h4>
-              <div class="groups-list">
-                <mat-chip-set>
-                  <mat-chip *ngFor="let group of currentUser().groups" class="group-chip">
-                    <mat-icon>group</mat-icon>
-                    {{ group }}
-                  </mat-chip>
-                </mat-chip-set>
-              </div>
-              <p class="groups-note">
-                You can claim tasks assigned to any of these groups
-              </p>
-            </div>
-
-            <!-- Filters -->
-            <div class="filters-section">
-              <mat-form-field appearance="outline" class="search-field">
-                <mat-label>Search tasks</mat-label>
-                <input matInput
-                       [formControl]="searchControl"
-                       placeholder="Search by task name or description...">
-                <mat-icon matSuffix>search</mat-icon>
-              </mat-form-field>
-
-              <mat-form-field appearance="outline" class="filter-field">
-                <mat-label>Task Type</mat-label>
-                <mat-select [formControl]="taskTypeFilterControl" multiple>
-                  <mat-option *ngFor="let taskType of uniqueTaskTypes()" [value]="taskType">
-                    {{ taskType }}
-                  </mat-option>
-                </mat-select>
-              </mat-form-field>
-
-              <mat-form-field appearance="outline" class="filter-field">
-                <mat-label>Group</mat-label>
-                <mat-select [formControl]="groupFilterControl" multiple>
-                  <mat-option *ngFor="let group of uniqueGroups()" [value]="group">
-                    {{ group }}
-                  </mat-option>
-                </mat-select>
-              </mat-form-field>
-
-              <button mat-button (click)="clearFilters()">
-                <mat-icon>clear</mat-icon>
-                Clear Filters
-              </button>
-            </div>
-          </div>
-
-          <!-- Active Filters -->
-<div class="active-filters" *ngIf="hasActiveFilters()">
-  <span class="filter-label">Active Filters:</span>
-  <mat-chip-set>
-    <mat-chip *ngIf="searchTerm()" removable (removed)="clearSearch()">
-      Search: "{{ searchTerm() }}"
-      <mat-icon matChipRemove>cancel</mat-icon>
-    </mat-chip>
-    <mat-chip *ngFor="let taskType of selectedTaskTypes()"
-              removable
-              (removed)="removeTaskTypeFilter(taskType)">
-      Type: {{ taskType }}
-      <mat-icon matChipRemove>cancel</mat-icon>
-    </mat-chip>
-    <mat-chip *ngFor="let group of selectedGroups()"
-              removable
-              (removed)="removeGroupFilter(group)">
-      Group: {{ group }}
-      <mat-icon matChipRemove>cancel</mat-icon>
-    </mat-chip>
-  </mat-chip-set>
-</div>
-        </mat-card-content>
-      </mat-card>
-
-      <!-- Tasks Tabs -->
-      <mat-card class="tasks-card">
-        <mat-tab-group mat-stretch-tabs="false" class="task-tabs">
-          <!-- All Available Tasks Tab -->
-          <mat-tab>
-            <ng-template mat-tab-label>
-              <span matBadge="{{ filteredTasks().length }}" matBadgeColor="primary" [matBadgeHidden]="filteredTasks().length === 0">
-                All Available
-              </span>
-            </ng-template>
-
-            <div class="tab-content">
-              <div class="tasks-list" *ngIf="filteredTasks().length > 0; else noAvailableTasks">
-                <mat-expansion-panel
-                  *ngFor="let task of filteredTasks(); trackBy: trackByTaskId"
-                  class="task-panel"
-                  [class]="getTaskPriorityClass(task)">
-
-                  <mat-expansion-panel-header>
-                    <mat-panel-title>
-                      <div class="task-header">
-                        <div class="task-info">
-                          <span class="task-name">{{ task.taskName }}</span>
-                          <mat-chip class="group-chip">{{ task.assignedGroup }}</mat-chip>
-                          <mat-chip *ngIf="canClaimTask(task)" class="claimable-chip">Claimable</mat-chip>
-                          <mat-chip *ngIf="!canClaimTask(task)" class="not-claimable-chip">Not for Your Groups</mat-chip>
-                        </div>
-                        <div class="task-meta">
-                          <span class="task-id">Task #{{ task.taskInstanceId }}</span>
-                          <span class="task-age" [class]="getTaskAgeClass(task)">
-                            {{ calculateTaskAge(task) }}
-                          </span>
-                        </div>
-                      </div>
-                    </mat-panel-title>
-                  </mat-expansion-panel-header>
-
-                  <div class="task-details">
-                    <!-- Task Information -->
-                    <div class="task-info-section">
-                      <h4><mat-icon>info</mat-icon> Task Information</h4>
-                      <div class="info-grid">
-                        <div class="info-item">
-                          <span class="label">Task ID:</span>
-                          <span class="value">{{ task.taskInstanceId }}</span>
-                        </div>
-                        <div class="info-item">
-                          <span class="label">Task Name:</span>
-                          <span class="value">{{ task.taskName }}</span>
-                        </div>
-                        <div class="info-item">
-                          <span class="label">Assigned Group:</span>
-                          <span class="value">{{ task.assignedGroup || 'N/A' }}</span>
-                        </div>
-                        <div class="info-item">
-                          <span class="label">Priority:</span>
-                          <span class="value">{{ task.priority || 'Normal' }}</span>
-                        </div>
-                        <div class="info-item">
-                          <span class="label">Created:</span>
-                          <span class="value">{{ formatDateTime(task.createdAt) }}</span>
-                        </div>
-                        <div class="info-item" *ngIf="task.dueDate">
-                          <span class="label">Due Date:</span>
-                          <span class="value" [class]="getTaskDueDateClass(task)">
-                            {{ formatDateTime(task.dueDate) }}
-                          </span>
-                        </div>
-                        <div class="info-item" *ngIf="task.taskDescription">
-                          <span class="label">Description:</span>
-                          <span class="value">{{ task.taskDescription }}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <!-- Context Data -->
-                    <div class="input-data-section" *ngIf="getTaskInputDataItems(task).length > 0">
-                      <h4><mat-icon>input</mat-icon> Task Context</h4>
-                      <div class="input-data-grid">
-                        <div class="input-item" *ngFor="let item of getTaskInputDataItems(task)">
-                          <span class="input-label">{{ formatInputLabel(item.key) }}:</span>
-                          <span class="input-value">{{ item.value }}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <!-- Task Actions -->
-                    <div class="task-actions-section">
-                      <h4><mat-icon>play_arrow</mat-icon> Actions</h4>
-                      <div class="action-buttons">
-
-                        <!-- Claim Task Button -->
-                        <button mat-raised-button
-                                color="primary"
-                                (click)="claimTask(task)"
-                                *ngIf="canClaimTask(task)"
-                                [disabled]="isProcessing()">
-                          <mat-icon>how_to_reg</mat-icon>
-                          Claim Task
-                        </button>
-
-                        <!-- Cannot Claim Info -->
-                        <div class="cannot-claim-info" *ngIf="!canClaimTask(task)">
-                          <mat-icon>info</mat-icon>
-                          <span>This task is assigned to group "{{ task.assignedGroup }}" which is not in your groups.</span>
-                        </div>
-
-                        <!-- View Related Incident -->
-                        <button mat-button
-                                (click)="viewRelatedIncident(task)"
-                                color="primary">
-                          <mat-icon>visibility</mat-icon>
-                          View Incident
-                        </button>
-
-                        <!-- More Actions Menu -->
-                        <button mat-icon-button
-                                [matMenuTriggerFor]="taskActionMenu"
-                                matTooltip="More Actions">
-                          <mat-icon>more_vert</mat-icon>
-                        </button>
-
-                        <mat-menu #taskActionMenu="matMenu">
-                          <button mat-menu-item (click)="copyTaskId(task)">
-                            <mat-icon>content_copy</mat-icon>
-                            <span>Copy Task ID</span>
-                          </button>
-                          <button mat-menu-item (click)="getTaskDetails(task)">
-                            <mat-icon>info</mat-icon>
-                            <span>Get Full Details</span>
-                          </button>
-                        </mat-menu>
-                      </div>
-                    </div>
-                  </div>
-                </mat-expansion-panel>
-              </div>
-
-              <ng-template #noAvailableTasks>
-                <div class="empty-state">
-                  <mat-icon class="empty-icon">assignment</mat-icon>
-                  <h3>No available tasks</h3>
-                  <p *ngIf="hasActiveFilters()">Try adjusting your filters to see more tasks</p>
-                  <p *ngIf="!hasActiveFilters()">There are currently no tasks available for your groups</p>
-                  <button mat-raised-button color="primary" (click)="viewMyTasks()" *ngIf="!hasActiveFilters()">
-                    <mat-icon>assignment_ind</mat-icon>
-                    View My Tasks
-                  </button>
-                </div>
-              </ng-template>
-            </div>
-          </mat-tab>
-
-          <!-- Grouped by Assignment Tab -->
-          <mat-tab>
-            <ng-template mat-tab-label>
-              <span matBadge="{{ groupedTasks().length }}" matBadgeColor="accent" [matBadgeHidden]="groupedTasks().length === 0">
-                By Group
-              </span>
-            </ng-template>
-
-            <div class="tab-content">
-              <div class="grouped-tasks" *ngIf="groupedTasks().length > 0; else noGroupedTasks">
-                <mat-expansion-panel
-                  *ngFor="let groupData of groupedTasks(); trackBy: trackByGroup"
-                  class="group-panel"
-                  [class.my-group]="isMyGroup(groupData.group)">
-
-                  <mat-expansion-panel-header>
-                    <mat-panel-title>
-                      <div class="group-header">
-                        <div class="group-info">
-                          <mat-icon>group</mat-icon>
-                          <span class="group-name">{{ groupData.group }}</span>
-                          <mat-chip class="task-count-chip">{{ groupData.count }} task{{ groupData.count > 1 ? 's' : '' }}</mat-chip>
-                          <mat-chip *ngIf="isMyGroup(groupData.group)" class="my-group-chip">Your Group</mat-chip>
-                        </div>
-                      </div>
-                    </mat-panel-title>
-                  </mat-expansion-panel-header>
-
-                  <div class="group-tasks">
-                    <div class="task-card" *ngFor="let task of groupData.tasks">
-                      <div class="task-card-header">
-                        <span class="task-name">{{ task.taskName }}</span>
-                        <span class="task-id">Task #{{ task.taskInstanceId }}</span>
-                      </div>
-                      <div class="task-card-meta">
-                        <span class="task-age">{{ calculateTaskAge(task) }}</span>
-                        <span class="task-priority" *ngIf="task.priority">Priority: {{ task.priority }}</span>
-                      </div>
-                      <div class="task-card-actions">
-                        <button mat-button
-                                color="primary"
-                                (click)="claimTask(task)"
-                                *ngIf="canClaimTask(task)"
-                                [disabled]="isProcessing()">
-                          <mat-icon>how_to_reg</mat-icon>
-                          Claim
-                        </button>
-                        <button mat-button (click)="viewRelatedIncident(task)">
-                          <mat-icon>visibility</mat-icon>
-                          View
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </mat-expansion-panel>
-              </div>
-
-              <ng-template #noGroupedTasks>
-                <div class="empty-state">
-                  <mat-icon class="empty-icon">group_work</mat-icon>
-                  <h3>No grouped tasks</h3>
-                  <p>Tasks will be grouped by their assigned groups here</p>
-                </div>
-              </ng-template>
-            </div>
-          </mat-tab>
-        </mat-tab-group>
-      </mat-card>
-
-      <!-- Loading Overlay -->
-      <div class="loading-overlay" *ngIf="isLoading()">
-        <mat-spinner diameter="40"></mat-spinner>
-        <p>Loading available tasks...</p>
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1>Available Tasks</h1>
+      <p>Tasks available for {{ currentUser().displayName }} to claim and work on</p>
+      <div class="header-stats">
+        <span class="stat-item">
+          <strong>{{ totalAvailableTasks() }}</strong> Available Tasks
+        </span>
+        <span class="stat-item">
+          <strong>{{ userGroupTasks() }}</strong> For My Groups
+        </span>
+        <span class="stat-item">
+          Last updated: {{ currentDateTime }}
+        </span>
       </div>
     </div>
+    <div class="header-actions">
+      <button mat-raised-button color="primary" (click)="viewMyTasks()">
+        <mat-icon>assignment_ind</mat-icon>
+        My Tasks
+      </button>
+      <button mat-icon-button (click)="refreshTasks()" matTooltip="Refresh">
+        <mat-icon [class.spinning]="isLoading()">refresh</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- User Groups Info -->
+  <mat-card class="groups-info-card">
+    <mat-card-content>
+      <div class="groups-section">
+        <div class="groups-info">
+          <h4><mat-icon>group</mat-icon> Your Groups</h4>
+          <div class="groups-list">
+            <mat-chip-set>
+              <mat-chip *ngFor="let group of currentUser().groups" class="group-chip">
+                <mat-icon>group</mat-icon>
+                {{ group }}
+              </mat-chip>
+            </mat-chip-set>
+          </div>
+          <p class="groups-note">
+            You can claim tasks assigned to any of these groups
+          </p>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters-section">
+          <mat-form-field appearance="outline" class="search-field">
+            <mat-label>Search tasks</mat-label>
+            <input matInput
+                   [formControl]="searchControl"
+                   placeholder="Search by task name, ATM ID, or incident...">
+            <mat-icon matSuffix>search</mat-icon>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="filter-field">
+            <mat-label>Task Type</mat-label>
+            <mat-select [formControl]="taskTypeFilterControl" multiple>
+              <mat-option *ngFor="let taskType of uniqueTaskTypes()" [value]="taskType">
+                {{ taskType }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="filter-field">
+            <mat-label>Group</mat-label>
+            <mat-select [formControl]="groupFilterControl" multiple>
+              <mat-option *ngFor="let group of uniqueGroups()" [value]="group">
+                {{ group }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <button mat-button (click)="clearFilters()">
+            <mat-icon>clear</mat-icon>
+            Clear Filters
+          </button>
+        </div>
+      </div>
+
+      <!-- Active Filters -->
+      <div class="active-filters" *ngIf="hasActiveFilters()">
+        <span class="filter-label">Active Filters:</span>
+        <mat-chip-set>
+          <mat-chip *ngIf="searchTerm()" removable (removed)="clearSearch()">
+            Search: "{{ searchTerm() }}"
+            <mat-icon matChipRemove>cancel</mat-icon>
+          </mat-chip>
+          <mat-chip *ngFor="let taskType of selectedTaskTypes()"
+                    removable
+                    (removed)="removeTaskTypeFilter(taskType)">
+            Type: {{ taskType }}
+            <mat-icon matChipRemove>cancel</mat-icon>
+          </mat-chip>
+          <mat-chip *ngFor="let group of selectedGroups()"
+                    removable
+                    (removed)="removeGroupFilter(group)">
+            Group: {{ group }}
+            <mat-icon matChipRemove>cancel</mat-icon>
+          </mat-chip>
+        </mat-chip-set>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Tasks Tabs -->
+  <mat-card class="tasks-card">
+    <mat-tab-group mat-stretch-tabs="false" class="task-tabs">
+      <!-- All Available Tasks Tab -->
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <span matBadge="{{ filteredTasks().length }}" matBadgeColor="primary" [matBadgeHidden]="filteredTasks().length === 0">
+            All Available
+          </span>
+        </ng-template>
+
+        <div class="tab-content">
+          <div class="tasks-list" *ngIf="filteredTasks().length > 0; else noAvailableTasks">
+            <mat-expansion-panel
+              *ngFor="let task of filteredTasks(); trackBy: trackByTaskId"
+              class="task-panel"
+              [class]="getTaskPriorityClass(task)">
+
+              <mat-expansion-panel-header>
+                <mat-panel-title>
+                  <div class="task-header">
+                    <div class="task-info">
+                      <span class="task-name">{{ task.taskName }}</span>
+                      <mat-chip class="group-chip">{{ task.assignedGroup }}</mat-chip>
+                      <mat-chip *ngIf="canClaimTask(task)" class="claimable-chip">Claimable</mat-chip>
+                      <mat-chip *ngIf="!canClaimTask(task)" class="not-claimable-chip">Not for Your Groups</mat-chip>
+                      
+                      <!-- Show incident context in header -->
+                      <mat-chip *ngIf="task.atmId" class="atm-chip">
+                        <mat-icon>location_on</mat-icon>
+                        {{ task.atmId }}
+                      </mat-chip>
+                      
+                      <mat-chip *ngIf="task.incidentId" class="incident-chip">
+                        <mat-icon>report_problem</mat-icon>
+                        Incident #{{ task.incidentId }}
+                      </mat-chip>
+                    </div>
+                    <div class="task-meta">
+                      <span class="task-id">Task #{{ task.taskInstanceId }}</span>
+                      <span class="task-age" [class]="getTaskAgeClass(task)">
+                        {{ calculateTaskAge(task) }}
+                      </span>
+                    </div>
+                  </div>
+                </mat-panel-title>
+              </mat-expansion-panel-header>
+
+              <div class="task-details">
+                <!-- Incident Information Section -->
+                <div class="incident-info-section" *ngIf="hasIncidentContext(task)">
+                  <h4><mat-icon>report_problem</mat-icon> Related Incident</h4>
+                  <div class="info-grid">
+                    <div class="info-item" *ngIf="task.incidentId">
+                      <span class="label">Incident ID:</span>
+                      <span class="value">#{{ task.incidentId }}</span>
+                    </div>
+                    <div class="info-item" *ngIf="task.incidentNumber">
+                      <span class="label">Incident Number:</span>
+                      <span class="value">{{ task.incidentNumber }}</span>
+                    </div>
+                    <div class="info-item" *ngIf="task.atmId">
+                      <span class="label">ATM ID:</span>
+                      <span class="value">{{ task.atmId }}</span>
+                    </div>
+                    <div class="info-item" *ngIf="task.incidentType">
+                      <span class="label">Incident Type:</span>
+                      <span class="value">{{ task.incidentType | titlecase }}</span>
+                    </div>
+                    <div class="info-item" *ngIf="task.incidentStatus">
+                      <span class="label">Incident Status:</span>
+                      <span class="value">
+                        <span [class]="'status-' + task.incidentStatus.toLowerCase()">
+                          {{ task.incidentStatus }}
+                        </span>
+                      </span>
+                    </div>
+                    <div class="info-item" *ngIf="task.incidentCreatedAt">
+                      <span class="label">Incident Created:</span>
+                      <span class="value">{{ formatDateTime(task.incidentCreatedAt) }}</span>
+                    </div>
+                    <div class="info-item full-width" *ngIf="task.incidentDescription">
+                      <span class="label">Incident Description:</span>
+                      <span class="value">{{ task.incidentDescription }}</span>
+                    </div>
+                    <div class="info-item" *ngIf="task.errorType">
+                      <span class="label">Error Type:</span>
+                      <span class="value">{{ task.errorType }}</span>
+                    </div>
+                    <div class="info-item" *ngIf="task.severity">
+                      <span class="label">Severity:</span>
+                      <span class="value">
+                        <span [class]="'severity-' + task.severity.toLowerCase()">
+                          {{ task.severity | titlecase }}
+                        </span>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Task Information -->
+                <div class="task-info-section">
+                  <h4><mat-icon>info</mat-icon> Task Information</h4>
+                  <div class="info-grid">
+                    <div class="info-item">
+                      <span class="label">Task ID:</span>
+                      <span class="value">{{ task.taskInstanceId }}</span>
+                    </div>
+                    <div class="info-item">
+                      <span class="label">Task Name:</span>
+                      <span class="value">{{ task.taskName }}</span>
+                    </div>
+                    <div class="info-item">
+                      <span class="label">Assigned Group:</span>
+                      <span class="value">{{ task.assignedGroup || 'N/A' }}</span>
+                    </div>
+                    <div class="info-item">
+                      <span class="label">Priority:</span>
+                      <span class="value">{{ task.priority || 'Normal' }}</span>
+                    </div>
+                    <div class="info-item">
+                      <span class="label">Created:</span>
+                      <span class="value">{{ formatDateTime(task.createdAt) }}</span>
+                    </div>
+                    <div class="info-item" *ngIf="task.dueDate">
+                      <span class="label">Due Date:</span>
+                      <span class="value" [class]="getTaskDueDateClass(task)">
+                        {{ formatDateTime(task.dueDate) }}
+                      </span>
+                    </div>
+                    <div class="info-item" *ngIf="task.taskDescription">
+                      <span class="label">Description:</span>
+                      <span class="value">{{ task.taskDescription }}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Context Data -->
+                <div class="input-data-section" *ngIf="getTaskInputDataItems(task).length > 0">
+                  <h4><mat-icon>input</mat-icon> Task Context</h4>
+                  <div class="input-data-grid">
+                    <div class="input-item" *ngFor="let item of getTaskInputDataItems(task)">
+                      <span class="input-label">{{ formatInputLabel(item.key) }}:</span>
+                      <span class="input-value">{{ item.value }}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Task Actions -->
+                <div class="task-actions-section">
+                  <h4><mat-icon>play_arrow</mat-icon> Actions</h4>
+                  <div class="action-buttons">
+
+                    <!-- Claim Task Button -->
+                    <button mat-raised-button
+                            color="primary"
+                            (click)="claimTask(task)"
+                            *ngIf="canClaimTask(task)"
+                            [disabled]="isProcessing()">
+                      <mat-icon>how_to_reg</mat-icon>
+                      Claim Task
+                    </button>
+
+                    <!-- Cannot Claim Info -->
+                    <div class="cannot-claim-info" *ngIf="!canClaimTask(task)">
+                      <mat-icon>info</mat-icon>
+                      <span>This task is assigned to group "{{ task.assignedGroup }}" which is not in your groups.</span>
+                    </div>
+
+                    <!-- View Related Incident -->
+                    <button mat-button
+                            (click)="viewRelatedIncident(task)"
+                            *ngIf="task.incidentId"
+                            color="primary">
+                      <mat-icon>visibility</mat-icon>
+                      View Incident #{{ task.incidentId }}
+                    </button>
+
+                    <!-- View Incident (fallback) -->
+                    <button mat-button
+                            (click)="viewRelatedIncident(task)"
+                            *ngIf="!task.incidentId"
+                            color="primary">
+                      <mat-icon>visibility</mat-icon>
+                      View Incident
+                    </button>
+
+                    <!-- More Actions Menu -->
+                    <button mat-icon-button
+                            [matMenuTriggerFor]="taskActionMenu"
+                            matTooltip="More Actions">
+                      <mat-icon>more_vert</mat-icon>
+                    </button>
+
+                    <mat-menu #taskActionMenu="matMenu">
+                      <button mat-menu-item (click)="copyTaskId(task)">
+                        <mat-icon>content_copy</mat-icon>
+                        <span>Copy Task ID</span>
+                      </button>
+                      <button mat-menu-item (click)="getTaskDetails(task)">
+                        <mat-icon>info</mat-icon>
+                        <span>Get Full Details</span>
+                      </button>
+                      <button mat-menu-item 
+                              (click)="copyIncidentId(task)" 
+                              *ngIf="task.incidentId">
+                        <mat-icon>content_copy</mat-icon>
+                        <span>Copy Incident ID</span>
+                      </button>
+                      <button mat-menu-item 
+                              (click)="copyAtmId(task)" 
+                              *ngIf="task.atmId">
+                        <mat-icon>content_copy</mat-icon>
+                        <span>Copy ATM ID</span>
+                      </button>
+                    </mat-menu>
+                  </div>
+                </div>
+              </div>
+            </mat-expansion-panel>
+          </div>
+
+          <ng-template #noAvailableTasks>
+            <div class="empty-state">
+              <mat-icon class="empty-icon">assignment</mat-icon>
+              <h3>No available tasks</h3>
+              <p *ngIf="hasActiveFilters()">Try adjusting your filters to see more tasks</p>
+              <p *ngIf="!hasActiveFilters()">There are currently no tasks available for your groups</p>
+              <button mat-raised-button color="primary" (click)="viewMyTasks()" *ngIf="!hasActiveFilters()">
+                <mat-icon>assignment_ind</mat-icon>
+                View My Tasks
+              </button>
+            </div>
+          </ng-template>
+        </div>
+      </mat-tab>
+
+      <!-- Grouped by Assignment Tab -->
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <span matBadge="{{ groupedTasks().length }}" matBadgeColor="accent" [matBadgeHidden]="groupedTasks().length === 0">
+            By Group
+          </span>
+        </ng-template>
+
+        <div class="tab-content">
+          <div class="grouped-tasks" *ngIf="groupedTasks().length > 0; else noGroupedTasks">
+            <mat-expansion-panel
+              *ngFor="let groupData of groupedTasks(); trackBy: trackByGroup"
+              class="group-panel"
+              [class.my-group]="isMyGroup(groupData.group)">
+
+              <mat-expansion-panel-header>
+                <mat-panel-title>
+                  <div class="group-header">
+                    <div class="group-info">
+                      <mat-icon>group</mat-icon>
+                      <span class="group-name">{{ groupData.group }}</span>
+                      <mat-chip class="task-count-chip">{{ groupData.count }} task{{ groupData.count > 1 ? 's' : '' }}</mat-chip>
+                      <mat-chip *ngIf="isMyGroup(groupData.group)" class="my-group-chip">Your Group</mat-chip>
+                    </div>
+                  </div>
+                </mat-panel-title>
+              </mat-expansion-panel-header>
+
+              <div class="group-tasks">
+                <div class="task-card" *ngFor="let task of groupData.tasks">
+                  <div class="task-card-header">
+                    <span class="task-name">{{ task.taskName }}</span>
+                    <span class="task-id">Task #{{ task.taskInstanceId }}</span>
+                  </div>
+                  
+                  <!-- Add incident context to grouped view -->
+                  <div class="task-card-incident" *ngIf="task.incidentId || task.atmId">
+                    <div class="incident-info">
+                      <mat-icon>report_problem</mat-icon>
+                      <span *ngIf="task.atmId">{{ task.atmId }}</span>
+                      <span *ngIf="task.incidentId">- Incident #{{ task.incidentId }}</span>
+                    </div>
+                    <div class="incident-type" *ngIf="task.incidentType">
+                      <mat-chip class="type-chip">{{ task.incidentType | titlecase }}</mat-chip>
+                    </div>
+                  </div>
+                  
+                  <div class="task-card-meta">
+                    <span class="task-age">{{ calculateTaskAge(task) }}</span>
+                    <span class="task-priority" *ngIf="task.priority">Priority: {{ task.priority }}</span>
+                  </div>
+                  
+                  <div class="task-card-actions">
+                    <button mat-button
+                            color="primary"
+                            (click)="claimTask(task)"
+                            *ngIf="canClaimTask(task)"
+                            [disabled]="isProcessing()">
+                      <mat-icon>how_to_reg</mat-icon>
+                      Claim
+                    </button>
+                    <button mat-button (click)="viewRelatedIncident(task)">
+                      <mat-icon>visibility</mat-icon>
+                      View Incident
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </mat-expansion-panel>
+          </div>
+
+          <ng-template #noGroupedTasks>
+            <div class="empty-state">
+              <mat-icon class="empty-icon">group_work</mat-icon>
+              <h3>No grouped tasks</h3>
+              <p>Tasks will be grouped by their assigned groups here</p>
+            </div>
+          </ng-template>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  </mat-card>
+
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" *ngIf="isLoading()">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Loading available tasks...</p>
+  </div>
+</div>

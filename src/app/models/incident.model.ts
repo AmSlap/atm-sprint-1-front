@@ -59,6 +59,20 @@ export interface IncidentTask {
   inputData?: string;
   outputData?: string;
   comments?: string;
+  
+  // Add incident context fields
+  processInstanceId?: number;
+  incidentId?: number;
+  incidentNumber?: string;
+  atmId?: string;
+  incidentType?: string;
+  incidentDescription?: string;
+  incidentStatus?: string;
+  incidentCreatedAt?: string;
+  incidentCreatedBy?: string;
+  errorType?: string;
+  errorCode?: string;
+  severity?: string;
 }
 
 export enum TaskStatus {

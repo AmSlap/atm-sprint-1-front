@@ -13,7 +13,7 @@ export class UserService {
   // Simulate current user - In real app, this would come from authentication
   private _currentUser = signal<User>({
     username: 'wbadmin',
-    groups: ['helpdesk', 'atm_monitoring','supplier', 'purchasing', 'insurance','unknown'],
+    groups: ['helpdesk', 'atm_monitoring','supplier', 'purchasing', 'insurance'],
     displayName: 'wbadmin'
   });
 

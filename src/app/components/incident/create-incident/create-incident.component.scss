@@ -239,3 +239,68 @@
     font-size: 1.5rem;
   }
 }
+.autocomplete-option {
+  display: flex;
+  flex-direction: column;
+  padding: 8px 0;
+  
+  .atm-id {
+    font-weight: 500;
+    color: #1976d2;
+    margin-bottom: 4px;
+  }
+  
+  .atm-details {
+    display: flex;
+    gap: 8px;
+    font-size: 0.9em;
+    color: #666;
+    
+    .atm-label {
+      font-weight: 400;
+    }
+    
+    .atm-location {
+      color: #999;
+    }
+  }
+  
+  .atm-status {
+    margin-top: 4px;
+    
+    span {
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 0.8em;
+      font-weight: 500;
+      
+      &.status-operational {
+        background-color: #e8f5e8;
+        color: #2e7d32;
+      }
+      
+      &.status-maintenance {
+        background-color: #fff3e0;
+        color: #f57c00;
+      }
+      
+      &.status-offline {
+        background-color: #ffebee;
+        color: #d32f2f;
+      }
+    }
+  }
+}
+
+.no-results {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #999;
+  padding: 16px;
+  justify-content: center;
+  
+  mat-icon {
+    font-size: 20px;
+  }
+}

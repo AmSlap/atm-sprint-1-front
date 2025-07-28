@@ -460,3 +460,92 @@
         gap: 8px;
       }
     }
+
+
+    .incident-info-section {
+  margin-bottom: 24px;
+  padding: 16px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border-left: 4px solid #ff9800;
+  
+  h4 {
+    color: #ff9800;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .info-grid {
+    .full-width {
+      grid-column: 1 / -1;
+    }
+  }
+}
+
+.atm-chip {
+  background-color: #e3f2fd !important;
+  color: #1976d2 !important;
+  
+  mat-icon {
+    font-size: 16px;
+  }
+}
+
+.incident-chip {
+  background-color: #fff3e0 !important;
+  color: #f57c00 !important;
+  
+  mat-icon {
+    font-size: 16px;
+  }
+}
+
+.task-card-incident {
+  margin: 8px 0;
+  padding: 8px;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+  
+  .incident-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+    
+    mat-icon {
+      font-size: 18px;
+      color: #f57c00;
+    }
+  }
+  
+  .incident-type {
+    .type-chip {
+      font-size: 0.8em;
+      height: 20px;
+      background-color: #e8f5e8;
+      color: #2e7d32;
+    }
+  }
+}
+
+.severity-critical {
+  color: #d32f2f;
+  font-weight: 500;
+}
+
+.severity-high {
+  color: #f57c00;
+  font-weight: 500;
+}
+
+.severity-medium {
+  color: #1976d2;
+  font-weight: 500;
+}
+
+.severity-low {
+  color: #2e7d32;
+  font-weight: 500;
+}

@@ -1,0 +1,150 @@
+<div class="setup-container">
+  <h2>Complete Your Account Setup</h2>
+
+  <div class="info-message">
+    <i class="info-icon">ℹ️</i> Your account requires setup before you can log in.
+  </div>
+
+  <div *ngIf="errorMessage" class="error-message">
+    <i class="error-icon">❌</i> {{ errorMessage }}
+  </div>
+
+  <div *ngIf="successMessage" class="success-message">
+    <i class="success-icon">✅</i> {{ successMessage }}
+  </div>
+
+  <div *ngIf="isCheckingProfile" class="loading-profile">
+    Checking account status...
+  </div>
+
+  <form [formGroup]="setupForm" (ngSubmit)="onSubmit()">
+    <div class="form-group username-display">
+      <label>Username</label>
+      <div class="username-value">{{ username }}</div>
+    </div>
+
+    <!-- Profile Information Section -->
+    <div class="form-section" *ngIf="profileStatus">
+      <h3>Profile Information</h3>
+
+      <div class="form-group" *ngIf="!profileStatus.hasEmail">
+        <label for="email">Email Address*</label>
+        <input
+          type="email"
+          id="email"
+          formControlName="email"
+          placeholder="Enter your email address"
+          [class.invalid]="setupForm.get('email')?.invalid && setupForm.get('email')?.touched"
+        >
+        <div class="validation-error" *ngIf="setupForm.get('email')?.invalid && setupForm.get('email')?.touched">
+          <span *ngIf="setupForm.get('email')?.errors?.['required']">Email is required</span>
+          <span *ngIf="setupForm.get('email')?.errors?.['email']">Please enter a valid email address</span>
+        </div>
+      </div>
+
+      <div class="form-group" *ngIf="!profileStatus.hasFirstName">
+        <label for="firstName">First Name*</label>
+        <input
+          type="text"
+          id="firstName"
+          formControlName="firstName"
+          placeholder="Enter your first name"
+          [class.invalid]="setupForm.get('firstName')?.invalid && setupForm.get('firstName')?.touched"
+        >
+        <div class="validation-error" *ngIf="setupForm.get('firstName')?.invalid && setupForm.get('firstName')?.touched">
+          <span *ngIf="setupForm.get('firstName')?.errors?.['required']">First name is required</span>
+        </div>
+      </div>
+
+      <div class="form-group" *ngIf="!profileStatus.hasLastName">
+        <label for="lastName">Last Name*</label>
+        <input
+          type="text"
+          id="lastName"
+          formControlName="lastName"
+          placeholder="Enter your last name"
+          [class.invalid]="setupForm.get('lastName')?.invalid && setupForm.get('lastName')?.touched"
+        >
+        <div class="validation-error" *ngIf="setupForm.get('lastName')?.invalid && setupForm.get('lastName')?.touched">
+          <span *ngIf="setupForm.get('lastName')?.errors?.['required']">Last name is required</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Password Section -->
+    <div class="form-section">
+      <h3>Set New Password</h3>
+
+      <div class="form-group">
+        <label for="currentPassword">Temporary Password*</label>
+        <input
+          type="password"
+          id="currentPassword"
+          formControlName="currentPassword"
+          placeholder="Enter your temporary password"
+          [class.invalid]="setupForm.get('currentPassword')?.invalid && setupForm.get('currentPassword')?.touched"
+        >
+        <div class="validation-error" *ngIf="setupForm.get('currentPassword')?.invalid && setupForm.get('currentPassword')?.touched">
+          <span *ngIf="setupForm.get('currentPassword')?.errors?.['required']">Temporary password is required</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="newPassword">New Password*</label>
+        <input
+          type="password"
+          id="newPassword"
+          formControlName="newPassword"
+          placeholder="Enter your new password"
+          [class.invalid]="setupForm.get('newPassword')?.invalid && setupForm.get('newPassword')?.touched"
+        >
+        <div class="validation-error" *ngIf="setupForm.get('newPassword')?.invalid && setupForm.get('newPassword')?.touched">
+          <span *ngIf="setupForm.get('newPassword')?.errors?.['required']">New password is required</span>
+          <span *ngIf="setupForm.get('newPassword')?.errors?.['pattern'] && !setupForm.get('newPassword')?.errors?.['required']">
+            Password must meet all requirements below
+          </span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="confirmPassword">Confirm New Password*</label>
+        <input
+          type="password"
+          id="confirmPassword"
+          formControlName="confirmPassword"
+          placeholder="Confirm your new password"
+          [class.invalid]="
+            (setupForm.get('confirmPassword')?.invalid && setupForm.get('confirmPassword')?.touched) ||
+            (setupForm.errors?.['passwordMismatch'] && setupForm.get('confirmPassword')?.touched)
+          "
+        >
+        <div class="validation-error" *ngIf="
+          (setupForm.get('confirmPassword')?.invalid && setupForm.get('confirmPassword')?.touched) ||
+          (setupForm.errors?.['passwordMismatch'] && setupForm.get('confirmPassword')?.touched)
+        ">
+          <span *ngIf="setupForm.get('confirmPassword')?.errors?.['required']">Confirm password is required</span>
+          <span *ngIf="setupForm.errors?.['passwordMismatch']">Passwords do not match</span>
+        </div>
+      </div>
+
+      <div class="password-requirements">
+        <h4>Password Requirements:</h4>
+        <ul>
+          <li [class.met]="hasMinLength">At least 8 characters long</li>
+          <li [class.met]="hasUpperCase">At least one uppercase letter</li>
+          <li [class.met]="hasLowerCase">At least one lowercase letter</li>
+          <li [class.met]="hasNumber">At least one number</li>
+          <li [class.met]="hasSpecialChar">At least one special character ($!%*?&)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" [disabled]="isLoading || setupForm.invalid" class="btn-setup">
+        <span *ngIf="!isLoading">Complete Setup</span>
+        <span *ngIf="isLoading">Processing...</span>
+      </button>
+      <button type="button" class="btn-back" (click)="backToLogin()">Back to Login</button>
+    </div>
+  </form>
+</div>

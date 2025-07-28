@@ -3,8 +3,14 @@ import {AtmDashboardComponent} from './components/atm-dashboard/atm-dashboard.co
 import {AtmDetailComponent} from './components/atm-detail/atm-detail.component';
 import {AtmRegistryComponent} from './components/admin/atm-registry/atm-registry.component';
 import {AgencyManagementComponent} from './components/agency-management/agency-management.component';
+import { LoginComponent } from './components/auth/login/login.component';
 
 export const routes: Routes = [
+  {
+    path: 'login',
+    component: LoginComponent,
+    title: 'Login'
+  },
   // ATM Monitoring routes
   {
     path: '',

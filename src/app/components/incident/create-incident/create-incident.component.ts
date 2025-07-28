@@ -19,12 +19,21 @@ import { IncidentService } from '../../../services/incident.service';
 import { UserService } from '../../../services/user.service';
 import { CreateIncidentRequest } from '../../../models/api.model';
 
+import { AtmService } from '../../../services/atm.service'; // Add this import
+import { AtmCombinedDto } from '../../../models/atm.models'; // Add this import
+
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
+
+
 interface AtmLocation {
-  id: string;
-  name: string;
-  address: string;
-  region: string;
-  status: 'active' | 'maintenance' | 'offline';
+  atmId: string;
+  label?: string;
+  locationAddress?: string;
+  region?: string;
+  operationalState: string;
+  brand?: string;
+  model?: string;
+  agencyName?: string;
 }
 
 interface ErrorType {
@@ -52,7 +61,8 @@ interface ErrorType {
     MatStepperModule,
     MatCheckboxModule,
     MatDatepickerModule,
-    MatNativeDateModule
+    MatNativeDateModule,
+    MatAutocompleteModule
   ],
   templateUrl: './create-incident.component.html',
   styleUrl : './create-incident.component.scss'
@@ -62,6 +72,7 @@ export class CreateIncidentComponent implements OnInit {
   private router = inject(Router);
   private incidentService = inject(IncidentService);
   private userService = inject(UserService);
+  private atmService = inject(AtmService); // Add this injection
   private snackBar = inject(MatSnackBar);
 
   currentUser = this.userService.currentUser;
@@ -69,9 +80,12 @@ export class CreateIncidentComponent implements OnInit {
 
   // Signals
   isSubmitting = signal(false);
+  isLoadingAtms = signal(false); // Add loading state for ATMs
   selectedAtm = signal<AtmLocation | null>(null);
   selectedErrorType = signal<ErrorType | null>(null);
   filteredErrorTypes = signal<ErrorType[]>([]);
+  atmLocations = signal<AtmLocation[]>([]); // Change to signal and make it dynamic
+  filteredAtms = signal<AtmLocation[]>([]);
 
   // Form Groups
   atmInfoForm: FormGroup;
@@ -119,18 +133,12 @@ export class CreateIncidentComponent implements OnInit {
     { code: 'DISP003', name: 'Touch Screen Issues', category: 'Display Problems', severity: 'high', description: 'Touch screen not responding to user input' }
   ];
 
-  // Mock ATM data - in real app, this would come from an API
-  private atmLocations: AtmLocation[] = [
-    { id: 'ATM101', name: 'Downtown Branch ATM', address: '123 Main St, Downtown', region: 'Central', status: 'active' },
-    { id: 'ATM102', name: 'Shopping Mall ATM', address: '456 Mall Blvd, Shopping District', region: 'North', status: 'active' },
-    { id: 'ATM103', name: 'Airport Terminal ATM', address: '789 Airport Rd, Terminal 1', region: 'East', status: 'maintenance' },
-    { id: 'ATM104', name: 'University Campus ATM', address: '321 University Ave, Campus', region: 'West', status: 'active' },
-    { id: 'ATM105', name: 'Hospital ATM', address: '654 Medical Center Dr', region: 'South', status: 'offline' }
-  ];
+  // Mock ATM data 
+
 
   constructor() {
     this.atmInfoForm = this.fb.group({
-      atmId: ['', [Validators.required, Validators.pattern(/^ATM\d+$/)]],
+      atmId: ['', [Validators.required, this.atmExistsValidator.bind(this)]],
     });
 
     this.errorInfoForm = this.fb.group({
@@ -149,6 +157,8 @@ export class CreateIncidentComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.loadAtmLocations(); // Load ATM data on init
+
     // Update current time every minute
     setInterval(() => {
       const now = new Date();
@@ -156,11 +166,74 @@ export class CreateIncidentComponent implements OnInit {
     }, 60000);
   }
 
-  onAtmIdChange(event: any) {
-    const atmId = event.target.value;
-    const atm = this.atmLocations.find(a => a.id === atmId);
-    this.selectedAtm.set(atm || null);
+  filterAtms(value: string): void {
+  if (!value) {
+    this.filteredAtms.set([]);
+    return;
   }
+  
+  const filterValue = value.toLowerCase();
+  const filtered = this.atmLocations().filter(atm => 
+    atm.atmId.toLowerCase().includes(filterValue) ||
+    atm.label?.toLowerCase().includes(filterValue) ||
+    atm.locationAddress?.toLowerCase().includes(filterValue)
+  );
+  this.filteredAtms.set(filtered);
+}
+
+  private loadAtmLocations() {
+    this.isLoadingAtms.set(true);
+    
+    this.atmService.getAllAtmsWithRegistryInfo().subscribe({
+      next: (atms: AtmCombinedDto[]) => {
+        // Transform the backend data to match your interface
+        const transformedAtms: AtmLocation[] = atms.map(atm => ({
+          atmId: atm.atmId,
+          label: atm.label || atm.atmId,
+          locationAddress: atm.locationAddress || 'Address not available',
+          region: atm.region || 'Unknown Region',
+          operationalState: atm.operationalState,
+          brand: atm.brand,
+          model: atm.model,
+          agencyName: atm.agencyName
+        }));
+        
+        this.atmLocations.set(transformedAtms);
+        this.isLoadingAtms.set(false);
+      },
+      error: (error) => {
+        console.error('Error loading ATM locations:', error);
+        this.snackBar.open('Error loading ATM locations', 'Close', { duration: 3000 });
+        this.isLoadingAtms.set(false);
+        // Fallback to empty array or keep mock data
+        this.atmLocations.set([]);
+      }
+    });
+  }
+
+  private atmExistsValidator(control: any) {
+    const atmId = control.value;
+    if (!atmId) return null;
+    
+    const exists = this.atmLocations().some(atm => atm.atmId === atmId);
+    return exists ? null : { atmNotExists: true };
+  }
+
+  onAtmIdChange(value: string | AtmLocation) {
+  if (typeof value === 'string') {
+    // User is typing
+    this.filterAtms(value);
+    const atm = this.atmLocations().find(a => a.atmId === value);
+    this.selectedAtm.set(atm || null);
+  } else if (value && typeof value === 'object' && 'atmId' in value) {
+    // User selected an option from autocomplete
+    this.selectedAtm.set(value);
+    // This is key - we need to update the form control value
+    this.atmInfoForm.get('atmId')?.setValue(value.atmId);
+    // Clear the filtered results since selection is made
+    this.filteredAtms.set([]);
+  }
+}
 
   onErrorCategoryChange(event: any) {
     const category = event.value;
@@ -216,7 +289,7 @@ export class CreateIncidentComponent implements OnInit {
 
     // Add system information
     description += '\n\n=== SYSTEM INFORMATION ===\n';
-    description += `ATM Location: ${this.selectedAtm()?.name || 'Unknown'}\n`;
+    description += `ATM Location: ${this.selectedAtm()?.label || 'Unknown'}\n`;
     description += `Error Category: ${this.errorInfoForm.value.errorCategory}\n`;
     description += `Error Code: ${this.selectedErrorType()?.code || 'N/A'}\n`;
     description += `Severity: ${this.selectedErrorType()?.severity || 'Unknown'}\n`;
@@ -248,4 +321,40 @@ export class CreateIncidentComponent implements OnInit {
   goBack() {
     this.router.navigate(['/dashboard']);
   }
+  // Add retry method
+retryLoadAtms() {
+  this.loadAtmLocations();
+}
+
+  displayAtm(atm: AtmLocation | null): string {
+  return atm ? atm.atmId : '';
+}
+
+// Add this getter to your component class
+get atmIdValue(): string {
+  return this.atmInfoForm.get('atmId')?.value || '';
+}
+
+// Add refresh method
+refreshAtmData() {
+  this.loadAtmLocations();
+  this.snackBar.open('ATM data refreshed', 'Close', { duration: 2000 });
+}
+
+  onInputFocus() {
+  // Show filtered results when input gets focus
+  const currentValue = this.atmInfoForm.get('atmId')?.value || '';
+  if (currentValue) {
+    this.filterAtms(currentValue);
+  }
+}
+
+onInputBlur() {
+  // Clear filtered results when input loses focus (optional)
+  setTimeout(() => {
+    this.filteredAtms.set([]);
+  }, 200); // Small delay to allow for option selection
+}
+
+  
 }

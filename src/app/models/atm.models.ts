@@ -95,7 +95,6 @@ export interface AtmEnhancedDetailDto {
   registryInfo: AtmRegistryInfo | null;
 }
 
-// If you don't have AtmStatusDto, add it:
 export interface AtmStatusDto {
   atmId: string;
   operationalState: string;

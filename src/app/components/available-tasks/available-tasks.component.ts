@@ -119,22 +119,23 @@ export class AvailableTasksComponent implements OnInit {
 
   // Update the computed to use signals instead
 filteredTasks = computed(() => {
-    console.log('=== FILTERING DEBUG ===');
-    let tasks = [...this.allAvailableTasks()];
-    console.log('Initial tasks count:', tasks.length);
+  let tasks = [...this.allAvailableTasks()];
 
-    // Search filter using signal
-    const searchValue = this.searchTerm().toLowerCase().trim();
-    console.log('Search term:', searchValue);
-    if (searchValue) {
-      const beforeSearch = tasks.length;
-      tasks = tasks.filter(task =>
-        task.taskName.toLowerCase().includes(searchValue) ||
-        (task.taskDescription && task.taskDescription.toLowerCase().includes(searchValue)) ||
-        task.taskInstanceId.toString().includes(searchValue)
-      );
-      console.log(`Search filter: ${beforeSearch} -> ${tasks.length} tasks`);
-    }
+  // Search filter - now includes incident information
+  const searchValue = this.searchTerm().toLowerCase().trim();
+  if (searchValue) {
+    tasks = tasks.filter(task =>
+      task.taskName.toLowerCase().includes(searchValue) ||
+      (task.taskDescription && task.taskDescription.toLowerCase().includes(searchValue)) ||
+      task.taskInstanceId.toString().includes(searchValue) ||
+      (task.atmId && task.atmId.toLowerCase().includes(searchValue)) ||
+      (task.incidentId && task.incidentId.toString().includes(searchValue)) ||
+      (task.incidentNumber && task.incidentNumber.toLowerCase().includes(searchValue)) ||
+      (task.incidentDescription && task.incidentDescription.toLowerCase().includes(searchValue)) ||
+      (task.incidentType && task.incidentType.toLowerCase().includes(searchValue))
+    );
+  }
+
 
     // Task type filter using signal
     const taskTypeFilters = this.selectedTaskTypes();
@@ -210,48 +211,94 @@ filteredTasks = computed(() => {
     this.updateCurrentTime();
   }
 
-  private loadAvailableTasks() {
-    this.isLoading.set(true);
+  // Update the loadAvailableTasks method in available-tasks.component.ts
 
-    // Load tasks for all groups that the user belongs to
-    const userGroups = this.currentUser().groups;
-    const taskObservables = userGroups.map(group =>
-      this.incidentService.getGroupTasks(group)
-    );
-
-    // Also load general available tasks
-    taskObservables.push(this.incidentService.getAvailableTasks());
-
-    forkJoin(taskObservables).subscribe({
-      next: (responses) => {
-        const allTasks: IncidentTask[] = [];
-        const taskIds = new Set<number>();
-
-        responses.forEach(response => {
-          if (response.success && response.data) {
-            response.data.forEach((task: IncidentTask) => {
-              // Avoid duplicates
-              if (!taskIds.has(task.taskInstanceId)) {
-                taskIds.add(task.taskInstanceId);
-                allTasks.push(task);
-              }
-            });
-          }
-        });
-
-        // Filter to only show READY tasks
-        const readyTasks = allTasks.filter(task => task.status === TaskStatus.READY);
-        this.allAvailableTasks.set(readyTasks);
-        this.loadTaskInputData(readyTasks);
-        this.isLoading.set(false);
-      },
-      error: (error) => {
-        console.error('Error loading available tasks:', error);
-        this.snackBar.open('Error loading available tasks', 'Close', { duration: 3000 });
-        this.isLoading.set(false);
-      }
-    });
+private loadAvailableTasks() {
+  this.isLoading.set(true);
+  
+  const userGroups = this.currentUser().groups;
+  console.log('Loading tasks for user groups:', userGroups);
+  
+  // If user has no groups, show empty state
+  if (!userGroups || userGroups.length === 0) {
+    this.allAvailableTasks.set([]);
+    this.isLoading.set(false);
+    return;
   }
+
+  // Create observables for each group
+  const groupTaskObservables = userGroups.map(group => 
+    this.incidentService.getGroupTasks(group)
+  );
+
+  // Execute all requests in parallel using forkJoin
+  forkJoin(groupTaskObservables).subscribe({
+    next: (responses) => {
+      console.log('Group task responses:', responses);
+      
+      // Combine all tasks from all groups
+      const allTasks: IncidentTask[] = [];
+      
+      responses.forEach((response, index) => {
+        if (response.success && response.data) {
+          console.log(`Tasks for group ${userGroups[index]}:`, response.data.length);
+          // Filter to only show READY tasks
+          const readyTasks = response.data.filter(task => task.status === TaskStatus.READY);
+          allTasks.push(...readyTasks);
+        } else {
+          console.warn(`Failed to load tasks for group ${userGroups[index]}:`, response.message);
+        }
+      });
+
+      // Remove duplicates if any (based on taskInstanceId)
+      const uniqueTasks = allTasks.filter((task, index, array) => 
+        array.findIndex(t => t.taskInstanceId === task.taskInstanceId) === index
+      );
+
+      console.log('Total available tasks loaded:', uniqueTasks.length);
+      this.allAvailableTasks.set(uniqueTasks);
+      
+      // Load input data for tasks
+      this.loadTaskInputData(uniqueTasks);
+      
+      this.isLoading.set(false);
+    },
+    error: (error) => {
+      console.error('Error loading available tasks:', error);
+      this.snackBar.open('Error loading available tasks', 'Close', { duration: 3000 });
+      this.isLoading.set(false);
+    }
+  });
+}
+
+  // Add helper methods for incident context
+getTaskIncidentId(task: IncidentTask): string {
+  return task.incidentId ? `#${task.incidentId}` : 'N/A';
+}
+
+getTaskIncidentNumber(task: IncidentTask): string {
+  return task.incidentNumber || 'N/A';
+}
+
+getTaskAtmId(task: IncidentTask): string {
+  return task.atmId || 'Unknown';
+}
+
+getTaskIncidentType(task: IncidentTask): string {
+  return task.incidentType || 'Unknown';
+}
+
+getTaskIncidentDescription(task: IncidentTask): string {
+  return task.incidentDescription || 'No description available';
+}
+
+getTaskIncidentStatus(task: IncidentTask): string {
+  return task.incidentStatus || 'Unknown';
+}
+
+hasIncidentContext(task: IncidentTask): boolean {
+  return !!(task.incidentId || task.atmId || task.incidentType);
+}
 
   private loadTaskInputData(tasks: IncidentTask[]) {
     // Load input data for each task
@@ -336,9 +383,17 @@ filteredTasks = computed(() => {
   }
 
   viewRelatedIncident(task: IncidentTask) {
-    // Navigate to incidents - we could extract incident ID from task data if available
-    this.router.navigate(['/incidents']);
+  if (task.incidentId) {
+    this.router.navigate(['/incidents', task.incidentId]);
+  } else if (task.processInstanceId) {
+    // Fallback to process instance view
+    this.router.navigate(['/incidents'], { 
+      queryParams: { processId: task.processInstanceId } 
+    });
+  } else {
+    this.snackBar.open('No incident information available', 'Close', { duration: 3000 });
   }
+}
 
   getTaskDetails(task: IncidentTask) {
     this.incidentService.getTaskDetails(task.taskInstanceId).subscribe({
@@ -360,9 +415,26 @@ filteredTasks = computed(() => {
     });
   }
 
+  copyIncidentId(task: IncidentTask): void {
+    if (task.incidentId) {
+      navigator.clipboard.writeText(task.incidentId.toString());
+      this.snackBar.open(`Incident ID ${task.incidentId} copied to clipboard`, 'Close', {
+        duration: 3000,
+      });
+    }
+  }
+
   viewMyTasks() {
     this.router.navigate(['/my-tasks']);
   }
+  copyAtmId(task: IncidentTask): void {
+  if (task.atmId) {
+    navigator.clipboard.writeText(task.atmId);
+    this.snackBar.open(`ATM ID ${task.atmId} copied to clipboard`, 'Close', {
+      duration: 3000,
+    });
+  }
+}
 
   // Filter methods
   hasActiveFilters(): boolean {
@@ -500,4 +572,6 @@ filteredTasks = computed(() => {
     if (diffHours < 24) return 'due-date-warning';
     return '';
   }
+
+  
 }
